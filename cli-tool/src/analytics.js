@@ -444,26 +444,30 @@ class ClaudeAnalytics {
     if (runningProcess && runningProcess.hasActiveCommand) {
       const fileTimeDiff = (now - lastModified) / 1000; // seconds
       
-      // Very recent file activity = Claude working
-      if (fileTimeDiff < 10) {
-        return 'Claude Code working...';
-      }
-      
-      // Check conversation flow if we have messages
+      // Check conversation flow first for immediate response
       if (messages.length > 0) {
         const sortedMessages = messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         const lastMessage = sortedMessages[sortedMessages.length - 1];
         
-        if (lastMessage.role === 'assistant') {
-          // Claude responded, user should be typing or thinking
-          return 'User typing...';
-        } else if (lastMessage.role === 'user') {
-          // User sent message, Claude should be working
+        if (lastMessage.role === 'user') {
+          // User sent message, Claude should be working (prioritize this)
           return 'Claude Code working...';
+        } else if (lastMessage.role === 'assistant') {
+          // Claude responded, check if file activity indicates continued work
+          if (fileTimeDiff < 15) {
+            return 'Claude Code working...';
+          }
+          // Otherwise user should be typing or thinking
+          return 'User typing...';
         }
       }
       
-      // Fallback for active process
+      // Very recent file activity = Claude working (fallback)
+      if (fileTimeDiff < 15) {
+        return 'Claude Code working...';
+      }
+      
+      // Default for active process
       return 'Awaiting user input...';
     }
 
@@ -2793,10 +2797,22 @@ async function createWebDashboard() {
                     console.log('Chart.js loaded successfully');
                     loadData();
                     
-                    // Automatic refresh for conversation data every 1 second for real-time updates
+                    // Automatic refresh for conversation data every 500ms for near real-time updates
                     setInterval(() => {
                         loadConversationData();
-                    }, 1000);
+                    }, 500);
+                    
+                    // Additional fast refresh for critical state changes
+                    let fastRefreshCount = 0;
+                    const fastRefreshInterval = setInterval(() => {
+                        loadConversationData();
+                        fastRefreshCount++;
+                        
+                        // Stop fast refresh after 30 seconds (60 * 250ms)
+                        if (fastRefreshCount > 120) {
+                            clearInterval(fastRefreshInterval);
+                        }
+                    }, 250);
                 } else {
                     console.log('Waiting for Chart.js to load...');
                     setTimeout(initWhenReady, 100);

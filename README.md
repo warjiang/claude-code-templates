@@ -80,7 +80,9 @@ claude
 ### 📊 Real-time Analytics Dashboard
 Monitor and optimize your Claude Code agents with our comprehensive analytics dashboard:
 - **Live Session Tracking**: See active conversations and their status in real-time
-- **Usage Statistics**: Total sessions, tokens, and project activity with trends
+- **Real-time State Detection**: "Claude Code working...", "User typing...", "Awaiting user input..."
+- **Browser Notifications**: Get notified when Claude is waiting for your input
+- **Usage Statistics**: Total sessions, tokens, and project activity with interactive charts
 - **Conversation History**: Complete session logs with export capabilities (CSV/JSON)
 - **Status Indicators**: PM2-style visual indicators for conversation health
 - **File Watching**: Automatic updates as you work with Claude Code

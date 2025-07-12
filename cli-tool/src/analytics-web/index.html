@@ -967,7 +967,6 @@
                 const response = await fetch('/api/data');
                 const data = await response.json();
                 
-                console.log('Conversation data refreshed:', data.timestamp);
                 
                 // Update timestamp
                 document.getElementById('lastUpdate').textContent = `last update: ${data.lastUpdate}`;
@@ -1044,16 +1043,13 @@
                 
                 // Check if conversation state changed to "Awaiting user input..."
                 if (prevState && prevState !== currentState) {
-                    console.log(`State change detected: ${conv.project} from "${prevState}" to "${currentState}"`);
-                    
                     if (currentState === 'Awaiting user input...' || 
                         currentState === 'User may be typing...' ||
                         currentState === 'Awaiting response...') {
                         
-                        const title = '🤖 Claude is waiting for you!';
+                        const title = 'Claude is waiting for you!';
                         const body = `Project: ${conv.project} - Claude needs your input`;
                         
-                        console.log('Sending notification for state:', currentState);
                         sendNotification(title, body, conv.id);
                     }
                 }
@@ -1165,7 +1161,7 @@
                 console.error('Error refreshing charts:', error);
             } finally {
                 refreshBtn.classList.remove('loading');
-                refreshBtn.textContent = '🔄 refresh charts';
+                refreshBtn.textContent = 'refresh charts';
             }
         }
         
@@ -1838,10 +1834,22 @@
                     console.log('Chart.js loaded successfully');
                     loadData();
                     
-                    // Automatic refresh for conversation data every 1 second for real-time updates
+                    // Automatic refresh for conversation data every 500ms for near real-time updates
                     setInterval(() => {
                         loadConversationData();
-                    }, 1000);
+                    }, 500);
+                    
+                    // Additional fast refresh for critical state changes
+                    let fastRefreshCount = 0;
+                    const fastRefreshInterval = setInterval(() => {
+                        loadConversationData();
+                        fastRefreshCount++;
+                        
+                        // Stop fast refresh after 30 seconds (60 * 250ms)
+                        if (fastRefreshCount > 120) {
+                            clearInterval(fastRefreshInterval);
+                        }
+                    }, 250);
                 } else {
                     console.log('Waiting for Chart.js to load...');
                     setTimeout(initWhenReady, 100);
