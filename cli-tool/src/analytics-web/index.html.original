@@ -1,812 +1,4 @@
-const chalk = require('chalk');
-const fs = require('fs-extra');
-const path = require('path');
-const express = require('express');
-const open = require('open');
-const os = require('os');
-const StateCalculator = require('./analytics/core/StateCalculator');
-const ProcessDetector = require('./analytics/core/ProcessDetector');
-const ConversationAnalyzer = require('./analytics/core/ConversationAnalyzer');
-const FileWatcher = require('./analytics/core/FileWatcher');
-const DataCache = require('./analytics/data/DataCache');
-const WebSocketServer = require('./analytics/notifications/WebSocketServer');
-const NotificationManager = require('./analytics/notifications/NotificationManager');
-
-class ClaudeAnalytics {
-  constructor() {
-    this.app = express();
-    this.port = 3333;
-    this.stateCalculator = new StateCalculator();
-    this.processDetector = new ProcessDetector();
-    this.fileWatcher = new FileWatcher();
-    this.dataCache = new DataCache();
-    this.webSocketServer = null;
-    this.notificationManager = null;
-    this.httpServer = null;
-    this.data = {
-      conversations: [],
-      summary: {},
-      activeProjects: [],
-      realtimeStats: {
-        totalConversations: 0,
-        totalTokens: 0,
-        activeProjects: 0,
-        lastActivity: null,
-      },
-    };
-  }
-
-  async initialize() {
-    const homeDir = os.homedir();
-    this.claudeDir = path.join(homeDir, '.claude');
-    this.claudeDesktopDir = path.join(homeDir, 'Library', 'Application Support', 'Claude');
-
-    // Check if Claude directories exist
-    if (!(await fs.pathExists(this.claudeDir))) {
-      throw new Error(`Claude Code directory not found at ${this.claudeDir}`);
-    }
-
-    // Initialize conversation analyzer with Claude directory and cache
-    this.conversationAnalyzer = new ConversationAnalyzer(this.claudeDir, this.dataCache);
-
-    await this.loadInitialData();
-    this.setupFileWatchers();
-    this.setupWebServer();
-  }
-
-  async loadInitialData() {
-    try {
-      // Store previous data for comparison
-      const previousData = this.data;
-      
-      // Use ConversationAnalyzer to load and analyze all data
-      const analyzedData = await this.conversationAnalyzer.loadInitialData(
-        this.stateCalculator,
-        this.processDetector
-      );
-      
-      // Update our data structure with analyzed data
-      this.data = analyzedData;
-      
-      // Send real-time notifications if WebSocket is available
-      if (this.notificationManager) {
-        this.notificationManager.notifyDataRefresh(this.data, 'data_refresh');
-        
-        // Check for conversation state changes
-        this.detectAndNotifyStateChanges(previousData, this.data);
-      }
-
-    } catch (error) {
-      console.error(chalk.red('Error loading Claude data:'), error.message);
-      throw error;
-    }
-  }
-
-
-  async loadActiveProjects() {
-    const projects = [];
-
-    try {
-      const files = await fs.readdir(this.claudeDir);
-
-      for (const file of files) {
-        const filePath = path.join(this.claudeDir, file);
-        const stats = await fs.stat(filePath);
-
-        if (stats.isDirectory() && !file.startsWith('.')) {
-          const projectPath = filePath;
-          const todoFiles = await this.findTodoFiles(projectPath);
-
-          const project = {
-            name: file,
-            path: projectPath,
-            lastActivity: stats.mtime,
-            todoFiles: todoFiles.length,
-            status: this.determineProjectStatus(stats.mtime),
-          };
-
-          projects.push(project);
-        }
-      }
-
-      return projects.sort((a, b) => b.lastActivity - a.lastActivity);
-    } catch (error) {
-      console.error(chalk.red('Error loading projects:'), error.message);
-      return [];
-    }
-  }
-
-  async findTodoFiles(projectPath) {
-    try {
-      const files = await fs.readdir(projectPath);
-      return files.filter(file => file.includes('todo') || file.includes('TODO'));
-    } catch {
-      return [];
-    }
-  }
-
-  estimateTokens(text) {
-    // Simple token estimation (roughly 4 characters per token)
-    return Math.ceil(text.length / 4);
-  }
-
-  calculateRealTokenUsage(parsedMessages) {
-    let totalInputTokens = 0;
-    let totalOutputTokens = 0;
-    let totalCacheCreationTokens = 0;
-    let totalCacheReadTokens = 0;
-    let messagesWithUsage = 0;
-
-    parsedMessages.forEach(message => {
-      if (message.usage) {
-        totalInputTokens += message.usage.input_tokens || 0;
-        totalOutputTokens += message.usage.output_tokens || 0;
-        totalCacheCreationTokens += message.usage.cache_creation_input_tokens || 0;
-        totalCacheReadTokens += message.usage.cache_read_input_tokens || 0;
-        messagesWithUsage++;
-      }
-    });
-
-    return {
-      total: totalInputTokens + totalOutputTokens,
-      inputTokens: totalInputTokens,
-      outputTokens: totalOutputTokens,
-      cacheCreationTokens: totalCacheCreationTokens,
-      cacheReadTokens: totalCacheReadTokens,
-      messagesWithUsage: messagesWithUsage,
-      totalMessages: parsedMessages.length,
-    };
-  }
-
-  extractModelInfo(parsedMessages) {
-    const models = new Set();
-    const serviceTiers = new Set();
-    let lastModel = null;
-    let lastServiceTier = null;
-
-    parsedMessages.forEach(message => {
-      if (message.model) {
-        models.add(message.model);
-        lastModel = message.model;
-      }
-      if (message.usage && message.usage.service_tier) {
-        serviceTiers.add(message.usage.service_tier);
-        lastServiceTier = message.usage.service_tier;
-      }
-    });
-
-    return {
-      models: Array.from(models),
-      primaryModel: lastModel || models.values().next().value || 'Unknown',
-      serviceTiers: Array.from(serviceTiers),
-      currentServiceTier: lastServiceTier || serviceTiers.values().next().value || 'Unknown',
-      hasMultipleModels: models.size > 1,
-    };
-  }
-
-  extractProjectFromPath(filePath) {
-    // Extract project name from file path like:
-    // /Users/user/.claude/projects/-Users-user-Projects-MyProject/conversation.jsonl
-    const pathParts = filePath.split('/');
-    const projectIndex = pathParts.findIndex(part => part === 'projects');
-
-    if (projectIndex !== -1 && projectIndex + 1 < pathParts.length) {
-      const projectDir = pathParts[projectIndex + 1];
-      // Clean up the project directory name
-      const cleanName = projectDir
-        .replace(/^-/, '')
-        .replace(/-/g, '/')
-        .split('/')
-        .pop() || 'Unknown';
-
-      return cleanName;
-    }
-
-    return null;
-  }
-
-
-
-
-  extractProjectFromConversation(messages) {
-    // Try to extract project information from conversation
-    for (const message of messages.slice(0, 5)) {
-      if (message.content && typeof message.content === 'string') {
-        const pathMatch = message.content.match(/\/([^\/\s]+)$/);
-        if (pathMatch) {
-          return pathMatch[1];
-        }
-      }
-    }
-    return 'Unknown';
-  }
-
-
-
-  generateStatusSquares(messages) {
-    if (!messages || messages.length === 0) {
-      return [];
-    }
-
-    // Sort messages by timestamp and take last 10 for status squares
-    const sortedMessages = messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    const recentMessages = sortedMessages.slice(-10);
-
-    return recentMessages.map((message, index) => {
-      const messageNum = sortedMessages.length - recentMessages.length + index + 1;
-
-      // Determine status based on message content and role
-      if (message.role === 'user') {
-        return {
-          type: 'pending',
-          tooltip: `Message #${messageNum}: User input`,
-        };
-      } else if (message.role === 'assistant') {
-        // Check if the message contains tool usage or errors
-        const content = message.content || '';
-
-        if (typeof content === 'string') {
-          if (content.includes('[Tool:') || content.includes('tool_use')) {
-            return {
-              type: 'tool',
-              tooltip: `Message #${messageNum}: Tool execution`,
-            };
-          } else if (content.includes('error') || content.includes('Error') || content.includes('failed')) {
-            return {
-              type: 'error',
-              tooltip: `Message #${messageNum}: Error in response`,
-            };
-          } else {
-            return {
-              type: 'success',
-              tooltip: `Message #${messageNum}: Successful response`,
-            };
-          }
-        } else if (Array.isArray(content)) {
-          // Check for tool_use blocks in array content
-          const hasToolUse = content.some(block => block.type === 'tool_use');
-          const hasError = content.some(block =>
-            block.type === 'text' && (block.text ?.includes('error') || block.text ?.includes('Error'))
-          );
-
-          if (hasError) {
-            return {
-              type: 'error',
-              tooltip: `Message #${messageNum}: Error in response`,
-            };
-          } else if (hasToolUse) {
-            return {
-              type: 'tool',
-              tooltip: `Message #${messageNum}: Tool execution`,
-            };
-          } else {
-            return {
-              type: 'success',
-              tooltip: `Message #${messageNum}: Successful response`,
-            };
-          }
-        }
-      }
-
-      return {
-        type: 'pending',
-        tooltip: `Message #${messageNum}: Unknown status`,
-      };
-    });
-  }
-
-  determineProjectStatus(lastActivity) {
-    const now = new Date();
-    const timeDiff = now - lastActivity;
-    const hoursAgo = timeDiff / (1000 * 60 * 60);
-
-    if (hoursAgo < 1) return 'active';
-    if (hoursAgo < 24) return 'recent';
-    return 'inactive';
-  }
-
-  calculateSummary(conversations, projects) {
-    const totalTokens = conversations.reduce((sum, conv) => sum + conv.tokens, 0);
-    const totalConversations = conversations.length;
-    const activeConversations = conversations.filter(c => c.status === 'active').length;
-    const activeProjects = projects.filter(p => p.status === 'active').length;
-
-    const avgTokensPerConversation = totalConversations > 0 ? Math.round(totalTokens / totalConversations) : 0;
-    const totalFileSize = conversations.reduce((sum, conv) => sum + conv.fileSize, 0);
-
-    // Calculate real Claude sessions (5-hour periods)
-    const claudeSessions = this.calculateClaudeSessions(conversations);
-
-    return {
-      totalConversations,
-      totalTokens,
-      activeConversations,
-      activeProjects,
-      avgTokensPerConversation,
-      totalFileSize: this.formatBytes(totalFileSize),
-      lastActivity: conversations.length > 0 ? conversations[0].lastModified : null,
-      claudeSessions,
-    };
-  }
-
-  calculateClaudeSessions(conversations) {
-    // Collect all message timestamps across all conversations
-    const allMessages = [];
-
-    conversations.forEach(conv => {
-      // Parse the conversation file to get message timestamps
-      try {
-        const fs = require('fs-extra');
-        const content = fs.readFileSync(conv.filePath, 'utf8');
-        const lines = content.trim().split('\n').filter(line => line.trim());
-
-        lines.forEach(line => {
-          try {
-            const item = JSON.parse(line);
-            if (item.timestamp && item.message && item.message.role === 'user') {
-              // Only count user messages as session starters
-              allMessages.push({
-                timestamp: new Date(item.timestamp),
-                conversationId: conv.id,
-              });
-            }
-          } catch {}
-        });
-      } catch {}
-    });
-
-    if (allMessages.length === 0) return {
-      total: 0,
-      currentMonth: 0,
-      thisWeek: 0
-    };
-
-    // Sort messages by timestamp
-    allMessages.sort((a, b) => a.timestamp - b.timestamp);
-
-    // Calculate sessions (5-hour periods)
-    const sessions = [];
-    let currentSession = null;
-
-    allMessages.forEach(message => {
-      if (!currentSession) {
-        // Start first session
-        currentSession = {
-          start: message.timestamp,
-          end: new Date(message.timestamp.getTime() + 5 * 60 * 60 * 1000), // +5 hours
-          messageCount: 1,
-          conversations: new Set([message.conversationId]),
-        };
-      } else if (message.timestamp <= currentSession.end) {
-        // Message is within current session
-        currentSession.messageCount++;
-        currentSession.conversations.add(message.conversationId);
-        // Update session end if this message extends beyond current session
-        const potentialEnd = new Date(message.timestamp.getTime() + 5 * 60 * 60 * 1000);
-        if (potentialEnd > currentSession.end) {
-          currentSession.end = potentialEnd;
-        }
-      } else {
-        // Message is outside current session, start new session
-        sessions.push(currentSession);
-        currentSession = {
-          start: message.timestamp,
-          end: new Date(message.timestamp.getTime() + 5 * 60 * 60 * 1000),
-          messageCount: 1,
-          conversations: new Set([message.conversationId]),
-        };
-      }
-    });
-
-    // Add the last session
-    if (currentSession) {
-      sessions.push(currentSession);
-    }
-
-    // Calculate statistics
-    const now = new Date();
-    const currentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    const currentMonthSessions = sessions.filter(s => s.start >= currentMonth).length;
-    const thisWeekSessions = sessions.filter(s => s.start >= thisWeek).length;
-
-    return {
-      total: sessions.length,
-      currentMonth: currentMonthSessions,
-      thisWeek: thisWeekSessions,
-      sessions: sessions.map(s => ({
-        start: s.start,
-        end: s.end,
-        messageCount: s.messageCount,
-        conversationCount: s.conversations.size,
-        duration: Math.round((s.end - s.start) / (1000 * 60 * 60) * 10) / 10, // hours with 1 decimal
-      })),
-    };
-  }
-
-  updateRealtimeStats() {
-    this.data.realtimeStats = {
-      totalConversations: this.data.conversations.length,
-      totalTokens: this.data.conversations.reduce((sum, conv) => sum + conv.tokens, 0),
-      activeProjects: this.data.activeProjects.filter(p => p.status === 'active').length,
-      lastActivity: this.data.summary.lastActivity,
-    };
-  }
-
-  formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  setupFileWatchers() {
-    // Setup file watchers using the FileWatcher module
-    this.fileWatcher.setupFileWatchers(
-      this.claudeDir,
-      // Data refresh callback
-      async () => {
-        await this.loadInitialData();
-      },
-      // Process refresh callback
-      async () => {
-        const enrichmentResult = await this.processDetector.enrichWithRunningProcesses(
-          this.data.conversations, 
-          this.claudeDir, 
-          this.stateCalculator
-        );
-        this.data.conversations = enrichmentResult.conversations;
-        this.data.orphanProcesses = enrichmentResult.orphanProcesses;
-      },
-      // DataCache for cache invalidation
-      this.dataCache
-    );
-  }
-
-  setupWebServer() {
-    // Serve static files (we'll create the dashboard HTML)
-    this.app.use(express.static(path.join(__dirname, 'analytics-web')));
-
-    // API endpoints
-    this.app.get('/api/data', async (req, res) => {
-      // Add timestamp to verify data freshness
-      const dataWithTimestamp = {
-        ...this.data,
-        timestamp: new Date().toISOString(),
-        lastUpdate: new Date().toLocaleString(),
-      };
-      res.json(dataWithTimestamp);
-    });
-
-    this.app.get('/api/realtime', async (req, res) => {
-      const realtimeWithTimestamp = {
-        ...this.data.realtimeStats,
-        timestamp: new Date().toISOString(),
-        lastUpdate: new Date().toLocaleString(),
-      };
-      res.json(realtimeWithTimestamp);
-    });
-
-    // Force refresh endpoint
-    this.app.get('/api/refresh', async (req, res) => {
-      console.log(chalk.blue('🔄 Manual refresh requested...'));
-      await this.loadInitialData();
-      res.json({
-        success: true,
-        message: 'Data refreshed',
-        timestamp: new Date().toISOString(),
-      });
-    });
-
-    // NEW: Ultra-fast endpoint ONLY for conversation states
-    this.app.get('/api/conversation-state', async (req, res) => {
-      try {
-        // Only detect processes and calculate states - no file reading
-        const runningProcesses = await this.processDetector.detectRunningClaudeProcesses();
-        const activeStates = [];
-        
-        // Quick state calculation for active conversations only
-        for (const conversation of this.data.conversations) {
-          if (conversation.runningProcess) {
-            // Use existing state calculation but faster
-            const state = this.stateCalculator.quickStateCalculation(conversation, runningProcesses);
-            if (state) {
-              activeStates.push({
-                id: conversation.id,
-                project: conversation.project,
-                state: state,
-                timestamp: Date.now()
-              });
-            }
-          }
-        }
-        
-        res.json({ activeStates, timestamp: Date.now() });
-      } catch (error) {
-        res.status(500).json({ error: 'Failed to get conversation states' });
-      }
-    });
-
-    // Fast state update endpoint - only updates conversation states without full reload
-    this.app.get('/api/fast-update', async (req, res) => {
-      try {
-        // Update process information and conversation states
-        const enrichmentResult = await this.processDetector.enrichWithRunningProcesses(
-          this.data.conversations, 
-          this.claudeDir, 
-          this.stateCalculator
-        );
-        this.data.conversations = enrichmentResult.conversations;
-        this.data.orphanProcesses = enrichmentResult.orphanProcesses;
-        
-        // For active conversations, re-read the files to get latest messages
-        const activeConversations = this.data.conversations.filter(c => c.runningProcess);
-        
-        for (const conv of activeConversations) {
-          try {
-            const conversationFile = path.join(this.claudeDir, conv.fileName);
-            const content = await fs.readFile(conversationFile, 'utf8');
-            const parsedMessages = content.split('\n')
-              .filter(line => line.trim())
-              .map(line => JSON.parse(line));
-            
-            const stats = await fs.stat(conversationFile);
-            conv.conversationState = this.stateCalculator.determineConversationState(
-              parsedMessages, 
-              stats.mtime, 
-              conv.runningProcess
-            );
-            
-          } catch (error) {
-            // If we can't read the file, keep the existing state
-          }
-        }
-        
-        // Only log when there are actually active conversations (reduce noise)
-        const activeConvs = this.data.conversations.filter(c => c.runningProcess);
-        if (activeConvs.length > 0) {
-          // Only log every 10th update to reduce spam, or when states change
-          if (!this.lastLoggedStates) this.lastLoggedStates = new Map();
-          
-          let hasChanges = false;
-          activeConvs.forEach(conv => {
-            const lastState = this.lastLoggedStates.get(conv.id);
-            if (lastState !== conv.conversationState) {
-              hasChanges = true;
-              this.lastLoggedStates.set(conv.id, conv.conversationState);
-            }
-          });
-          
-          if (hasChanges) {
-            console.log(chalk.gray(`⚡ State update: ${activeConvs.length} active conversations`));
-            activeConvs.forEach(conv => {
-              console.log(chalk.gray(`  📊 ${conv.project}: ${conv.conversationState}`));
-            });
-          }
-        }
-        
-        const dataWithTimestamp = {
-          conversations: this.data.conversations,
-          summary: this.data.summary,
-          timestamp: new Date().toISOString(),
-          lastUpdate: new Date().toLocaleString(),
-        };
-        res.json(dataWithTimestamp);
-      } catch (error) {
-        console.error('Fast update error:', error);
-        res.status(500).json({ error: 'Failed to update states' });
-      }
-    });
-
-    // Session detail endpoint
-    this.app.get('/api/session/:sessionId', async (req, res) => {
-      const sessionId = req.params.sessionId;
-
-      try {
-        const session = this.data.conversations.find(conv => conv.id === sessionId);
-        if (!session) {
-          return res.status(404).json({
-            error: 'Session not found'
-          });
-        }
-
-        // Read the actual conversation file
-        const content = await fs.readFile(session.filePath, 'utf8');
-        const lines = content.trim().split('\n').filter(line => line.trim());
-        const rawMessages = lines.map(line => {
-          try {
-            return JSON.parse(line);
-          } catch {
-            return null;
-          }
-        }).filter(Boolean);
-
-        // Extract actual messages from Claude Code format
-        const messages = rawMessages.map(item => {
-          if (item.message && item.message.role) {
-            let content = '';
-
-            if (typeof item.message.content === 'string') {
-              content = item.message.content;
-            } else if (Array.isArray(item.message.content)) {
-              content = item.message.content
-                .map(block => {
-                  if (block.type === 'text') return block.text;
-                  if (block.type === 'tool_use') return `[Tool: ${block.name}]`;
-                  if (block.type === 'tool_result') return '[Tool Result]';
-                  return block.content || '';
-                })
-                .join('\n');
-            } else if (item.message.content && item.message.content.length) {
-              content = item.message.content[0].text || '';
-            }
-
-            return {
-              role: item.message.role,
-              content: content || 'No content',
-              timestamp: item.timestamp,
-              type: item.type,
-            };
-          }
-          return null;
-        }).filter(Boolean);
-
-        res.json({
-          session: session,
-          messages: messages,
-          timestamp: new Date().toISOString(),
-        });
-
-      } catch (error) {
-        console.error(chalk.red('Error loading session details:'), error.message);
-        res.status(500).json({
-          error: 'Failed to load session details'
-        });
-      }
-    });
-
-    // Main dashboard route
-    this.app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, 'analytics-web', 'index.html'));
-    });
-  }
-
-  async startServer() {
-    return new Promise(async (resolve) => {
-      this.httpServer = this.app.listen(this.port, async () => {
-        console.log(chalk.green(`🚀 Analytics dashboard started at http://localhost:${this.port}`));
-        
-        // Initialize WebSocket server
-        await this.initializeWebSocket();
-        
-        resolve();
-      });
-      // Keep reference for compatibility
-      this.server = this.httpServer;
-    });
-  }
-
-  async openBrowser() {
-    try {
-      await open(`http://localhost:${this.port}`);
-      console.log(chalk.blue('🌐 Opening browser...'));
-    } catch (error) {
-      console.log(chalk.yellow('Could not open browser automatically. Please visit:'));
-      console.log(chalk.cyan(`http://localhost:${this.port}`));
-    }
-  }
-
-  /**
-   * Initialize WebSocket server and notification manager
-   */
-  async initializeWebSocket() {
-    try {
-      // Initialize WebSocket server
-      this.webSocketServer = new WebSocketServer(this.httpServer, {
-        path: '/ws',
-        heartbeatInterval: 30000
-      });
-      await this.webSocketServer.initialize();
-      
-      // Initialize notification manager
-      this.notificationManager = new NotificationManager(this.webSocketServer);
-      await this.notificationManager.initialize();
-      
-      // Setup notification subscriptions
-      this.setupNotificationSubscriptions();
-      
-      console.log(chalk.green('✅ WebSocket and notifications initialized'));
-    } catch (error) {
-      console.error(chalk.red('❌ Failed to initialize WebSocket:'), error);
-    }
-  }
-  
-  /**
-   * Setup notification subscriptions
-   */
-  setupNotificationSubscriptions() {
-    // Subscribe to refresh requests from WebSocket clients
-    this.notificationManager.subscribe('refresh_requested', async (notification) => {
-      console.log(chalk.blue('🔄 Refresh requested via WebSocket'));
-      await this.loadInitialData();
-      
-      // Notify clients of the refreshed data
-      this.notificationManager.notifyDataRefresh(this.data, 'websocket_request');
-    });
-  }
-
-  /**\n   * Detect and notify conversation state changes\n   * @param {Object} previousData - Previous data state\n   * @param {Object} currentData - Current data state\n   */\n  detectAndNotifyStateChanges(previousData, currentData) {\n    if (!previousData || !previousData.conversations || !currentData || !currentData.conversations) {\n      return;\n    }\n    \n    // Create maps for easier lookup\n    const previousConversations = new Map();\n    previousData.conversations.forEach(conv => {\n      previousConversations.set(conv.id, conv);\n    });\n    \n    // Check for state changes\n    currentData.conversations.forEach(currentConv => {\n      const previousConv = previousConversations.get(currentConv.id);\n      \n      if (previousConv && previousConv.status !== currentConv.status) {\n        // State changed - notify clients\n        this.notificationManager.notifyConversationStateChange(\n          currentConv.id,\n          previousConv.status,\n          currentConv.status,\n          {\n            project: currentConv.project,\n            tokens: currentConv.tokens,\n            lastModified: currentConv.lastModified\n          }\n        );\n      }\n    });\n  }\n\n  stop() {
-    // Stop file watchers
-    this.fileWatcher.stop();
-
-    // Stop server
-    // Close WebSocket server
-    if (this.webSocketServer) {
-      this.webSocketServer.close();
-    }
-    
-    // Shutdown notification manager
-    if (this.notificationManager) {
-      this.notificationManager.shutdown();
-    }
-    
-    if (this.httpServer) {
-      this.httpServer.close();
-    }
-    
-    // Keep compatibility
-    if (this.server) {
-      this.server.close();
-    }
-
-    // Log cache statistics before stopping
-    this.dataCache.logStats();
-
-    console.log(chalk.yellow('Analytics dashboard stopped'));
-  }
-}
-
-async function runAnalytics(options = {}) {
-  console.log(chalk.blue('📊 Starting Claude Code Analytics Dashboard...'));
-
-  const analytics = new ClaudeAnalytics();
-
-  try {
-    await analytics.initialize();
-
-    // Create web dashboard files
-    await createWebDashboard();
-
-    await analytics.startServer();
-    await analytics.openBrowser();
-
-    console.log(chalk.green('✅ Analytics dashboard is running!'));
-    console.log(chalk.gray('Press Ctrl+C to stop the server'));
-
-    // Handle graceful shutdown
-    process.on('SIGINT', () => {
-      console.log(chalk.yellow('\n🛑 Shutting down analytics dashboard...'));
-      analytics.stop();
-      process.exit(0);
-    });
-
-    // Keep the process running
-    await new Promise(() => {});
-
-  } catch (error) {
-    console.error(chalk.red('❌ Failed to start analytics dashboard:'), error.message);
-    process.exit(1);
-  }
-}
-
-async function createWebDashboard() {
-  const webDir = path.join(__dirname, 'analytics-web');
-  await fs.ensureDir(webDir);
-
-  // Create the HTML dashboard
-  const htmlContent = `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1744,7 +936,7 @@ async function createWebDashboard() {
                 document.getElementById('dashboard').style.display = 'block';
                 
                 // Update timestamp
-                document.getElementById('lastUpdate').textContent = \`last update: \${data.lastUpdate}\`;
+                document.getElementById('lastUpdate').textContent = `last update: ${data.lastUpdate}`;
                 
                 updateStats(data.summary);
                 allConversations = data.conversations;
@@ -1795,7 +987,7 @@ async function createWebDashboard() {
                 }
                 
                 // Update timestamp
-                document.getElementById('lastUpdate').textContent = \`last update: \${data.lastUpdate}\`;
+                document.getElementById('lastUpdate').textContent = `last update: ${data.lastUpdate}`;
                 
                 updateStats(data.summary);
                 allConversations = data.conversations;
@@ -1908,7 +1100,7 @@ async function createWebDashboard() {
                         currentState === 'Awaiting response...') {
                         
                         const title = 'Claude is waiting for you!';
-                        const body = \`Project: \${conv.project} - Claude needs your input\`;
+                        const body = `Project: ${conv.project} - Claude needs your input`;
                         
                         sendNotification(title, body, conv.id);
                     }
@@ -1959,7 +1151,7 @@ async function createWebDashboard() {
             if (summary.claudeSessions) {
                 document.getElementById('claudeSessions').textContent = summary.claudeSessions.total.toLocaleString();
                 document.getElementById('claudeSessionsDetail').textContent = 
-                    \`this month: \${summary.claudeSessions.currentMonth} • this week: \${summary.claudeSessions.thisWeek}\`;
+                    `this month: ${summary.claudeSessions.currentMonth} • this week: ${summary.claudeSessions.thisWeek}`;
             }
         }
         
@@ -2105,7 +1297,7 @@ async function createWebDashboard() {
                                     return context[0].label;
                                 },
                                 label: function(context) {
-                                    return \`Tokens: \${context.parsed.y.toLocaleString()}\`;
+                                    return `Tokens: ${context.parsed.y.toLocaleString()}`;
                                 }
                             }
                         }
@@ -2243,7 +1435,7 @@ async function createWebDashboard() {
                                 label: function(context) {
                                     const total = context.dataset.data.reduce((sum, value) => sum + value, 0);
                                     const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                    return \`\${context.label}: \${context.parsed.toLocaleString()} tokens (\${percentage}%)\`;
+                                    return `${context.label}: ${context.parsed.toLocaleString()} tokens (${percentage}%)`;
                                 }
                             }
                         }
@@ -2271,42 +1463,42 @@ async function createWebDashboard() {
             
             noSessionsDiv.style.display = 'none';
             
-            tableBody.innerHTML = filteredConversations.map(conv => \`
-                <tr onclick="showSessionDetail('\${conv.id}')" style="cursor: pointer;">
+            tableBody.innerHTML = filteredConversations.map(conv => `
+                <tr onclick="showSessionDetail('${conv.id}')" style="cursor: pointer;">
                     <td>
                         <div class="session-id-container">
                             <div class="session-id">
-                                \${conv.id.substring(0, 8)}...
-                                \${conv.runningProcess ? \`<span class="process-indicator" title="Active claude process (PID: \${conv.runningProcess.pid})"></span>\` : ''}
+                                ${conv.id.substring(0, 8)}...
+                                ${conv.runningProcess ? `<span class="process-indicator" title="Active claude process (PID: ${conv.runningProcess.pid})"></span>` : ''}
                             </div>
                             <div class="status-squares">
-                                \${generateStatusSquaresHTML(conv.statusSquares || [])}
+                                ${generateStatusSquaresHTML(conv.statusSquares || [])}
                             </div>
                         </div>
                     </td>
-                    <td class="session-project">\${conv.project}</td>
-                    <td class="session-model" title="\${conv.modelInfo ? conv.modelInfo.primaryModel + ' (' + conv.modelInfo.currentServiceTier + ')' : 'N/A'}">\${conv.modelInfo ? conv.modelInfo.primaryModel : 'N/A'}</td>
-                    <td class="session-messages">\${conv.messageCount}</td>
-                    <td class="session-tokens">\${conv.tokens.toLocaleString()}</td>
-                    <td class="session-time">\${formatTime(conv.lastModified)}</td>
-                    <td class="conversation-state \${getStateClass(conv.conversationState)}">\${conv.conversationState}</td>
-                    <td class="status-\${conv.status}">\${conv.status}</td>
+                    <td class="session-project">${conv.project}</td>
+                    <td class="session-model" title="${conv.modelInfo ? conv.modelInfo.primaryModel + ' (' + conv.modelInfo.currentServiceTier + ')' : 'N/A'}">${conv.modelInfo ? conv.modelInfo.primaryModel : 'N/A'}</td>
+                    <td class="session-messages">${conv.messageCount}</td>
+                    <td class="session-tokens">${conv.tokens.toLocaleString()}</td>
+                    <td class="session-time">${formatTime(conv.lastModified)}</td>
+                    <td class="conversation-state ${getStateClass(conv.conversationState)}">${conv.conversationState}</td>
+                    <td class="status-${conv.status}">${conv.status}</td>
                 </tr>
-            \`).join('');
+            `).join('');
             
             // NEW: Add orphan processes (active claude commands without conversation)
             if (window.allData && window.allData.orphanProcesses && window.allData.orphanProcesses.length > 0) {
-                const orphanRows = window.allData.orphanProcesses.map(process => \`
+                const orphanRows = window.allData.orphanProcesses.map(process => `
                     <tr style="background: rgba(248, 81, 73, 0.1); cursor: default;">
                         <td>
                             <div class="session-id-container">
                                 <div class="session-id">
-                                    orphan-\${process.pid}
-                                    <span class="process-indicator orphan" title="Orphan claude process (PID: \${process.pid})"></span>
+                                    orphan-${process.pid}
+                                    <span class="process-indicator orphan" title="Orphan claude process (PID: ${process.pid})"></span>
                                 </div>
                             </div>
                         </td>
-                        <td class="session-project">\${process.workingDir}</td>
+                        <td class="session-project">${process.workingDir}</td>
                         <td class="session-model">Unknown</td>
                         <td class="session-messages">-</td>
                         <td class="session-tokens">-</td>
@@ -2314,7 +1506,7 @@ async function createWebDashboard() {
                         <td class="conversation-state">Active process</td>
                         <td class="status-active">orphan</td>
                     </tr>
-                \`).join('');
+                `).join('');
                 
                 if (currentFilter === 'active' || currentFilter === 'all') {
                     tableBody.innerHTML += orphanRows;
@@ -2330,9 +1522,9 @@ async function createWebDashboard() {
             const days = Math.floor(hours / 24);
             
             if (minutes < 1) return 'now';
-            if (minutes < 60) return \`\${minutes}m ago\`;
-            if (hours < 24) return \`\${hours}h ago\`;
-            return \`\${days}d ago\`;
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return `${days}d ago`;
         }
         
         function formatMessageTime(timestamp) {
@@ -2361,7 +1553,7 @@ async function createWebDashboard() {
             }
             
             return statusSquares.map(square => 
-                \`<div class="status-square \${square.type}" data-tooltip="\${square.tooltip}"></div>\`
+                `<div class="status-square ${square.type}" data-tooltip="${square.tooltip}"></div>`
             ).join('');
         }
         
@@ -2433,7 +1625,7 @@ async function createWebDashboard() {
             document.getElementById('sessionDetail').classList.add('active');
             
             // Update title
-            document.getElementById('detailTitle').textContent = \`conversation: \${sessionId.substring(0, 8)}...\`;
+            document.getElementById('detailTitle').textContent = `conversation: ${sessionId.substring(0, 8)}...`;
             
             // Load session info
             updateSessionInfo(currentSession);
@@ -2453,67 +1645,67 @@ async function createWebDashboard() {
         function updateSessionInfo(session) {
             const container = document.getElementById('sessionInfo');
             
-            container.innerHTML = \`
+            container.innerHTML = `
                 <div class="info-item">
                     <div class="info-label">conversation id</div>
-                    <div class="info-value">\${session.id}</div>
+                    <div class="info-value">${session.id}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">project</div>
-                    <div class="info-value">\${session.project}</div>
+                    <div class="info-value">${session.project}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">messages</div>
-                    <div class="info-value">\${session.messageCount}</div>
+                    <div class="info-value">${session.messageCount}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">total tokens</div>
-                    <div class="info-value">\${session.tokens.toLocaleString()}</div>
+                    <div class="info-value">${session.tokens.toLocaleString()}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">model</div>
-                    <div class="info-value model">\${session.modelInfo ? session.modelInfo.primaryModel : 'N/A'}</div>
+                    <div class="info-value model">${session.modelInfo ? session.modelInfo.primaryModel : 'N/A'}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">service tier</div>
-                    <div class="info-value">\${session.modelInfo ? session.modelInfo.currentServiceTier : 'N/A'}</div>
+                    <div class="info-value">${session.modelInfo ? session.modelInfo.currentServiceTier : 'N/A'}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">token details</div>
-                    <div class="info-value">\${session.tokenUsage ? session.tokenUsage.inputTokens.toLocaleString() + ' in / ' + session.tokenUsage.outputTokens.toLocaleString() + ' out' : 'N/A'}</div>
+                    <div class="info-value">${session.tokenUsage ? session.tokenUsage.inputTokens.toLocaleString() + ' in / ' + session.tokenUsage.outputTokens.toLocaleString() + ' out' : 'N/A'}</div>
                 </div>
-                \${session.tokenUsage && (session.tokenUsage.cacheCreationTokens > 0 || session.tokenUsage.cacheReadTokens > 0) ? 
-                    \`<div class="info-item">
+                ${session.tokenUsage && (session.tokenUsage.cacheCreationTokens > 0 || session.tokenUsage.cacheReadTokens > 0) ? 
+                    `<div class="info-item">
                         <div class="info-label">cache tokens</div>
-                        <div class="info-value">\${session.tokenUsage.cacheCreationTokens.toLocaleString()} created / \${session.tokenUsage.cacheReadTokens.toLocaleString()} read</div>
-                    </div>\` : ''
+                        <div class="info-value">${session.tokenUsage.cacheCreationTokens.toLocaleString()} created / ${session.tokenUsage.cacheReadTokens.toLocaleString()} read</div>
+                    </div>` : ''
                 }
                 <div class="info-item">
                     <div class="info-label">file size</div>
-                    <div class="info-value">\${formatBytes(session.fileSize)}</div>
+                    <div class="info-value">${formatBytes(session.fileSize)}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">created</div>
-                    <div class="info-value">\${new Date(session.created).toLocaleString()}</div>
+                    <div class="info-value">${new Date(session.created).toLocaleString()}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">last modified</div>
-                    <div class="info-value">\${new Date(session.lastModified).toLocaleString()}</div>
+                    <div class="info-value">${new Date(session.lastModified).toLocaleString()}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">conversation state</div>
-                    <div class="info-value conversation-state \${getStateClass(session.conversationState)}">\${session.conversationState}</div>
+                    <div class="info-value conversation-state ${getStateClass(session.conversationState)}">${session.conversationState}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">status</div>
-                    <div class="info-value status-\${session.status}">\${session.status}</div>
+                    <div class="info-value status-${session.status}">${session.status}</div>
                 </div>
-            \`;
+            `;
         }
         
         async function loadConversationHistory(session) {
             try {
-                const response = await fetch(\`/api/session/\${session.id}\`);
+                const response = await fetch(`/api/session/${session.id}`);
                 const sessionData = await response.json();
                 
                 const container = document.getElementById('conversationHistory');
@@ -2542,18 +1734,18 @@ async function createWebDashboard() {
                     container.innerHTML = reversedMessages.map((message, index) => {
                         const messageType = getMessageType(message);
                         const messageNum = filteredMessages.length - index;
-                        return \`
+                        return `
                             <div class="message">
-                                <div class="message-type-indicator \${messageType.type}" data-tooltip="\${messageType.tooltip}"></div>
+                                <div class="message-type-indicator ${messageType.type}" data-tooltip="${messageType.tooltip}"></div>
                                 <div class="message-header">
-                                    <div class="message-role \${message.role}">\${message.role}</div>
+                                    <div class="message-role ${message.role}">${message.role}</div>
                                     <div class="message-time">
-                                        #\${messageNum} • \${message.timestamp ? formatMessageTime(message.timestamp) : 'unknown time'}
+                                        #${messageNum} • ${message.timestamp ? formatMessageTime(message.timestamp) : 'unknown time'}
                                     </div>
                                 </div>
-                                <div class="message-content">\${truncateContent(message.content || 'no content')}</div>
+                                <div class="message-content">${truncateContent(message.content || 'no content')}</div>
                             </div>
-                        \`;
+                        `;
                     }).join('');
                 }
 
@@ -2574,7 +1766,7 @@ async function createWebDashboard() {
             if (typeof content !== 'string') return 'no content';
             if (!content.trim()) return 'empty message';
             if (content.length <= maxLength) return content;
-            return content.substring(0, maxLength) + '\\n\\n[... message truncated ...]';
+            return content.substring(0, maxLength) + '\n\n[... message truncated ...]';
         }
         
         function formatBytes(bytes) {
@@ -2591,7 +1783,7 @@ async function createWebDashboard() {
             const format = document.getElementById('exportFormat').value;
             
             // Fetch conversation history and export
-            fetch(\`/api/session/\${currentSession.id}\`)
+            fetch(`/api/session/${currentSession.id}`)
                 .then(response => response.json())
                 .then(sessionData => {
                     if (format === 'csv') {
@@ -2601,30 +1793,30 @@ async function createWebDashboard() {
                     }
                 })
                 .catch(error => {
-                    console.error(\`Failed to export \${format.toUpperCase()}:\`, error);
-                    alert(\`Failed to export \${format.toUpperCase()}. Please try again.\`);
+                    console.error(`Failed to export ${format.toUpperCase()}:`, error);
+                    alert(`Failed to export ${format.toUpperCase()}. Please try again.`);
                 });
         }
         
         function exportSessionAsCSV(sessionData) {
             // Create CSV content
-            let csvContent = 'Conversation ID,Project,Message Count,Tokens,File Size,Created,Last Modified,Conversation State,Status\\n';
-            csvContent += \`"\${currentSession.id}","\${currentSession.project}",\${currentSession.messageCount},\${currentSession.tokens},\${currentSession.fileSize},"\${new Date(currentSession.created).toISOString()}","\${new Date(currentSession.lastModified).toISOString()}","\${currentSession.conversationState}","\${currentSession.status}"\\n\\n\`;
+            let csvContent = 'Conversation ID,Project,Message Count,Tokens,File Size,Created,Last Modified,Conversation State,Status\n';
+            csvContent += `"${currentSession.id}","${currentSession.project}",${currentSession.messageCount},${currentSession.tokens},${currentSession.fileSize},"${new Date(currentSession.created).toISOString()}","${new Date(currentSession.lastModified).toISOString()}","${currentSession.conversationState}","${currentSession.status}"\n\n`;
             
-            csvContent += 'Message #,Role,Timestamp,Content\\n';
+            csvContent += 'Message #,Role,Timestamp,Content\n';
             
             // Add conversation history
             if (sessionData.messages) {
                 sessionData.messages.forEach((message, index) => {
                     const content = (message.content || 'no content').replace(/"/g, '""');
                     const timestamp = message.timestamp ? new Date(message.timestamp).toISOString() : 'unknown';
-                    csvContent += \`\${index + 1},"\${message.role}","\${timestamp}","\${content}"\\n\`;
+                    csvContent += `${index + 1},"${message.role}","${timestamp}","${content}"\n`;
                 });
             }
             
             // Download CSV
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            downloadFile(blob, \`claude-conversation-\${currentSession.id.substring(0, 8)}.csv\`);
+            downloadFile(blob, `claude-conversation-${currentSession.id.substring(0, 8)}.csv`);
         }
         
         function exportSessionAsJSON(sessionData) {
@@ -2653,7 +1845,7 @@ async function createWebDashboard() {
             // Download JSON
             const jsonString = JSON.stringify(exportData, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
-            downloadFile(blob, \`claude-conversation-\${currentSession.id.substring(0, 8)}.json\`);
+            downloadFile(blob, `claude-conversation-${currentSession.id.substring(0, 8)}.json`);
         }
         
         function downloadFile(blob, filename) {
@@ -2744,11 +1936,4 @@ async function createWebDashboard() {
         });
     </script>
 </body>
-</html>`;
-
-  await fs.writeFile(path.join(webDir, 'index.html'), htmlContent);
-}
-
-module.exports = {
-  runAnalytics
-};
+</html>
