@@ -115,6 +115,12 @@ class SessionTimer {
     const loadingState = this.container.querySelector('.session-loading-state');
     const sessionDisplay = this.container.querySelector('.session-display');
     const warningsContainer = this.container.querySelector('.session-warnings');
+    
+    // Update title with plan name
+    const titleElement = this.container.querySelector('.session-timer-title');
+    if (titleElement && this.sessionData.limits) {
+      titleElement.textContent = `Current Session - ${this.sessionData.limits.name}`;
+    }
 
     if (loadingState) loadingState.style.display = 'none';
     if (sessionDisplay) sessionDisplay.style.display = 'block';
@@ -127,13 +133,30 @@ class SessionTimer {
   }
 
   /**
+   * Load Claude session information
+   */
+  async loadClaudeSessionInfo() {
+    try {
+      const response = await fetch('/api/claude/session');
+      if (!response.ok) throw new Error('Failed to fetch session info');
+      return await response.json();
+    } catch (error) {
+      console.error('Error loading Claude session info:', error);
+      return null;
+    }
+  }
+
+  /**
    * Render session information
    */
-  renderSessionInfo(container) {
+  async renderSessionInfo(container) {
     const { timer, userPlan, monthlyUsage, limits } = this.sessionData;
     
+    // Load Claude session info
+    const claudeSessionInfo = await this.loadClaudeSessionInfo();
+    
     // Update header status
-    this.updateHeaderStatus(timer);
+    this.updateHeaderStatus(timer, claudeSessionInfo);
     
     if (!timer.hasActiveSession) {
       container.innerHTML = `
@@ -175,9 +198,13 @@ class SessionTimer {
 
     container.innerHTML = `
       <div class="session-timer-compact">
+        
         <div class="session-timer-row">
           <div class="session-timer-time-compact">
-            <div class="session-timer-time-value">${formatTimeRemaining(timer.timeRemaining)}</div>
+            <div class="session-timer-time-value">${claudeSessionInfo && claudeSessionInfo.hasSession ? 
+              (claudeSessionInfo.estimatedTimeRemaining.isExpired ? 'Expired' : claudeSessionInfo.estimatedTimeRemaining.formatted) : 
+              formatTimeRemaining(timer.timeRemaining)
+            }</div>
             <div class="session-timer-time-label">remaining</div>
           </div>
           
@@ -206,37 +233,26 @@ class SessionTimer {
             <div class="session-timer-progress-item">
               <div class="session-timer-progress-header">
                 <span class="session-timer-progress-label">Session Time</span>
-                <span class="session-timer-progress-value">${formatTimeRemaining(this.SESSION_DURATION - timer.timeRemaining)}/5h</span>
+                <span class="session-timer-progress-value">${claudeSessionInfo && claudeSessionInfo.hasSession ? 
+                  `${claudeSessionInfo.sessionDuration.formatted}/${claudeSessionInfo.sessionLimit.formatted}` : 
+                  `${formatTimeRemaining(this.SESSION_DURATION - timer.timeRemaining)}/5h`
+                }</span>
               </div>
               <div class="session-timer-progress-bar">
                 <div class="session-timer-progress-fill" 
-                     style="width: ${timeProgressPercentage}%; background-color: ${timeProgressColor};"></div>
+                     style="width: ${claudeSessionInfo && claudeSessionInfo.hasSession ? 
+                       Math.min(100, (claudeSessionInfo.sessionDuration.ms / claudeSessionInfo.sessionLimit.ms) * 100) : 
+                       timeProgressPercentage
+                     }%; background-color: ${claudeSessionInfo && claudeSessionInfo.hasSession ? 
+                       (claudeSessionInfo.estimatedTimeRemaining.isExpired ? '#f85149' : 
+                        claudeSessionInfo.estimatedTimeRemaining.ms < 600000 ? '#f97316' : '#3fb950') : 
+                       timeProgressColor
+                     };"></div>
               </div>
             </div>
           </div>
         </div>
         
-        <div class="session-timer-stats-row">
-          <div class="session-timer-stat-compact">
-            <span class="session-timer-stat-label">Tokens:</span>
-            <span class="session-timer-stat-value">${timer.tokensUsed.toLocaleString()}</span>
-          </div>
-          
-          <div class="session-timer-stat-compact">
-            <span class="session-timer-stat-label">Plan:</span>
-            <span class="session-timer-stat-value">${limits.name}</span>
-          </div>
-          
-          <div class="session-timer-stat-compact">
-            <span class="session-timer-stat-label">Monthly:</span>
-            <span class="session-timer-stat-value">${timer.monthlySessionsUsed}/${timer.monthlySessionsLimit}</span>
-          </div>
-          
-          <div class="session-timer-stat-compact">
-            <span class="session-timer-stat-label">Resets:</span>
-            <span class="session-timer-stat-value">${new Date(timer.willResetAt).toLocaleTimeString()}</span>
-          </div>
-        </div>
       </div>
     `;
     
@@ -529,11 +545,23 @@ class SessionTimer {
   /**
    * Update header status display
    */
-  updateHeaderStatus(timer) {
+  updateHeaderStatus(timer, claudeSessionInfo) {
     const statusDot = this.container.querySelector('.session-timer-status-dot');
     const statusText = this.container.querySelector('.session-timer-status-text');
     
-    if (!timer.hasActiveSession) {
+    // If we have Claude session info, prioritize that
+    if (claudeSessionInfo && claudeSessionInfo.hasSession) {
+      if (claudeSessionInfo.estimatedTimeRemaining.isExpired) {
+        statusDot.className = 'session-timer-status-dot expired';
+        statusText.textContent = 'Session Expired';
+      } else if (claudeSessionInfo.estimatedTimeRemaining.ms < 600000) { // < 10 minutes
+        statusDot.className = 'session-timer-status-dot warning';
+        statusText.textContent = 'Ending Soon';
+      } else {
+        statusDot.className = 'session-timer-status-dot active';
+        statusText.textContent = 'Active';
+      }
+    } else if (!timer.hasActiveSession) {
       statusDot.className = 'session-timer-status-dot inactive';
       statusText.textContent = 'Inactive';
     } else if (timer.timeRemaining < 600000) {

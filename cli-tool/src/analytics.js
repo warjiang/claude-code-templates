@@ -27,7 +27,7 @@ class ClaudeAnalytics {
     this.performanceMonitor = new PerformanceMonitor({
       enabled: true,
       logInterval: 60000,
-      memoryThreshold: 150 * 1024 * 1024 // 150MB
+      memoryThreshold: 300 * 1024 * 1024 // 300MB - more realistic for analytics dashboard
     });
     this.webSocketServer = null;
     this.notificationManager = null;
@@ -49,6 +49,7 @@ class ClaudeAnalytics {
     const homeDir = os.homedir();
     this.claudeDir = path.join(homeDir, '.claude');
     this.claudeDesktopDir = path.join(homeDir, 'Library', 'Application Support', 'Claude');
+    this.claudeStatsigDir = path.join(this.claudeDir, 'statsig');
 
     // Check if Claude directories exist
     if (!(await fs.pathExists(this.claudeDir))) {
@@ -77,8 +78,11 @@ class ClaudeAnalytics {
       // Update our data structure with analyzed data
       this.data = analyzedData;
       
-      // Analyze session data for Max plan usage tracking
-      this.data.sessionData = this.sessionAnalyzer.analyzeSessionData(this.data.conversations);
+      // Get Claude session information
+      const claudeSessionInfo = await this.getClaudeSessionInfo();
+      
+      // Analyze session data for Max plan usage tracking with real Claude session info
+      this.data.sessionData = this.sessionAnalyzer.analyzeSessionData(this.data.conversations, claudeSessionInfo);
       
       // Send real-time notifications if WebSocket is available
       if (this.notificationManager) {
@@ -595,11 +599,14 @@ class ClaudeAnalytics {
     });
 
     // Session data endpoint for Max plan usage tracking
-    this.app.get('/api/session/data', (req, res) => {
+    this.app.get('/api/session/data', async (req, res) => {
       try {
+        // Get real-time Claude session information
+        const claudeSessionInfo = await this.getClaudeSessionInfo();
+        
         if (!this.data.sessionData) {
           // Generate session data if not available
-          this.data.sessionData = this.sessionAnalyzer.analyzeSessionData(this.data.conversations);
+          this.data.sessionData = this.sessionAnalyzer.analyzeSessionData(this.data.conversations, claudeSessionInfo);
         }
 
         const timerData = this.sessionAnalyzer.getSessionTimerData(this.data.sessionData);
@@ -607,6 +614,7 @@ class ClaudeAnalytics {
         res.json({
           ...this.data.sessionData,
           timer: timerData,
+          claudeSessionInfo: claudeSessionInfo,
           timestamp: Date.now()
         });
       } catch (error) {
@@ -851,6 +859,23 @@ class ClaudeAnalytics {
       });
     });
 
+    // Claude session information endpoint
+    this.app.get('/api/claude/session', async (req, res) => {
+      try {
+        const sessionInfo = await this.getClaudeSessionInfo();
+        res.json({
+          ...sessionInfo,
+          timestamp: Date.now()
+        });
+      } catch (error) {
+        console.error('Error getting Claude session info:', error);
+        res.status(500).json({ 
+          error: 'Failed to get Claude session info',
+          timestamp: Date.now()
+        });
+      }
+    });
+
     // Performance metrics endpoint
     this.app.get('/api/system/metrics', (req, res) => {
       try {
@@ -973,6 +998,93 @@ class ClaudeAnalytics {
         );
       }
     });
+  }
+
+  /**
+   * Get Claude session information from statsig files
+   */
+  async getClaudeSessionInfo() {
+    try {
+      if (!await fs.pathExists(this.claudeStatsigDir)) {
+        return {
+          hasSession: false,
+          error: 'Claude statsig directory not found'
+        };
+      }
+
+      const files = await fs.readdir(this.claudeStatsigDir);
+      const sessionFile = files.find(file => file.startsWith('statsig.session_id.'));
+      
+      if (!sessionFile) {
+        return {
+          hasSession: false,
+          error: 'No session file found'
+        };
+      }
+
+      const sessionFilePath = path.join(this.claudeStatsigDir, sessionFile);
+      const sessionData = await fs.readFile(sessionFilePath, 'utf8');
+      const sessionInfo = JSON.parse(sessionData);
+
+      const now = Date.now();
+      const startTime = sessionInfo.startTime;
+      const lastUpdate = sessionInfo.lastUpdate;
+      
+      // Calculate session duration
+      const sessionDuration = now - startTime;
+      const sessionDurationMinutes = Math.floor(sessionDuration / (1000 * 60));
+      const sessionDurationHours = Math.floor(sessionDurationMinutes / 60);
+      const remainingMinutes = sessionDurationMinutes % 60;
+      
+      // Calculate time since last update
+      const timeSinceLastUpdate = now - lastUpdate;
+      const timeSinceLastUpdateMinutes = Math.floor(timeSinceLastUpdate / (1000 * 60));
+      
+      // Based on observed pattern: ~2 hours and 21 minutes session limit
+      const sessionLimitMs = 2 * 60 * 60 * 1000 + 21 * 60 * 1000; // 2h 21m
+      const timeRemaining = sessionLimitMs - sessionDuration;
+      const timeRemainingMinutes = Math.floor(timeRemaining / (1000 * 60));
+      const timeRemainingHours = Math.floor(timeRemainingMinutes / 60);
+      const remainingMinutesDisplay = timeRemainingMinutes % 60;
+      
+      return {
+        hasSession: true,
+        sessionId: sessionInfo.sessionID,
+        startTime: startTime,
+        lastUpdate: lastUpdate,
+        sessionDuration: {
+          ms: sessionDuration,
+          minutes: sessionDurationMinutes,
+          hours: sessionDurationHours,
+          remainingMinutes: remainingMinutes,
+          formatted: `${sessionDurationHours}h ${remainingMinutes}m`
+        },
+        timeSinceLastUpdate: {
+          ms: timeSinceLastUpdate,
+          minutes: timeSinceLastUpdateMinutes,
+          formatted: `${timeSinceLastUpdateMinutes}m`
+        },
+        estimatedTimeRemaining: {
+          ms: timeRemaining,
+          minutes: timeRemainingMinutes,
+          hours: timeRemainingHours,
+          remainingMinutes: remainingMinutesDisplay,
+          formatted: timeRemaining > 0 ? `${timeRemainingHours}h ${remainingMinutesDisplay}m` : 'Session expired',
+          isExpired: timeRemaining <= 0
+        },
+        sessionLimit: {
+          ms: sessionLimitMs,
+          hours: 2,
+          minutes: 21,
+          formatted: '2h 21m'
+        }
+      };
+    } catch (error) {
+      return {
+        hasSession: false,
+        error: `Failed to read session info: ${error.message}`
+      };
+    }
   }
 
   stop() {

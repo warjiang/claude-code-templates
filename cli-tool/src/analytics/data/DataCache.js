@@ -39,7 +39,7 @@ class DataCache {
       computationTTL: 20000, // 20 seconds for expensive computations
       metadataTTL: 10000, // 10 seconds for metadata
       processTTL: 500, // 500ms for process data
-      maxCacheSize: 1000, // Maximum cached items per type
+      maxCacheSize: 100, // Reduced from 1000 to 100 to prevent memory buildup
     };
     
     // Dependency tracking for smart invalidation
@@ -51,8 +51,15 @@ class DataCache {
       misses: 0,
       invalidations: 0,
       filesInvalidated: 0,
-      computationsInvalidated: 0
+      computationsInvalidated: 0,
+      evictions: 0
     };
+    
+    // Start automatic cleanup interval
+    this.cleanupInterval = setInterval(() => {
+      this.evictOldEntries();
+      this.enforceSizeLimits();
+    }, 30000); // Every 30 seconds
   }
 
   /**
@@ -424,8 +431,62 @@ class DataCache {
     }
     
     if (evicted > 0) {
+      this.metrics.evictions += evicted;
       console.log(chalk.gray(`🗑️  Evicted ${evicted} old cache entries`));
     }
+  }
+
+  /**
+   * Enforce cache size limits to prevent memory buildup
+   */
+  enforceSizeLimits() {
+    const maxSize = this.config.maxCacheSize;
+    let totalEvicted = 0;
+
+    // Enforce size limits on each cache
+    const caches = [
+      ['fileContent', this.caches.fileContent],
+      ['parsedConversations', this.caches.parsedConversations],
+      ['tokenUsage', this.caches.tokenUsage],
+      ['modelInfo', this.caches.modelInfo],
+      ['statusSquares', this.caches.statusSquares],
+      ['fileStats', this.caches.fileStats],
+      ['projectStats', this.caches.projectStats]
+    ];
+
+    for (const [, cache] of caches) {
+      if (cache.size > maxSize) {
+        // Convert to array and sort by timestamp (oldest first)
+        const entries = Array.from(cache.entries()).sort((a, b) => {
+          const timestampA = a[1].timestamp || 0;
+          const timestampB = b[1].timestamp || 0;
+          return timestampA - timestampB;
+        });
+
+        // Remove oldest entries until we're under the limit
+        const toRemove = cache.size - maxSize;
+        for (let i = 0; i < toRemove && i < entries.length; i++) {
+          cache.delete(entries[i][0]);
+          totalEvicted++;
+        }
+      }
+    }
+
+    if (totalEvicted > 0) {
+      this.metrics.evictions += totalEvicted;
+      console.log(chalk.gray(`🗑️  Enforced size limits, evicted ${totalEvicted} entries`));
+    }
+  }
+
+  /**
+   * Clean up resources and stop timers
+   */
+  cleanup() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+    this.clearAll();
   }
 
   /**

@@ -22,30 +22,40 @@ class StateCalculator {
     const timeDiff = now - lastModified;
     const minutesAgo = timeDiff / (1000 * 60);
 
-    // If there's an active process, use simpler and more responsive logic
+    // If there's an active process, use simpler and more stable logic
     if (runningProcess && runningProcess.hasActiveCommand) {
       // Check conversation flow first for immediate response
       if (messages.length > 0) {
         const sortedMessages = messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         const lastMessage = sortedMessages[sortedMessages.length - 1];
+        const lastMessageTime = new Date(lastMessage.timestamp);
+        const lastMessageMinutesAgo = (now - lastMessageTime) / (1000 * 60);
         
         if (lastMessage.role === 'user') {
-          // User sent message, Claude should be working (prioritize this)
-          return 'Claude Code working...';
+          // User sent message - be more conservative about "working" state
+          if (lastMessageMinutesAgo < 1) {
+            return 'Claude Code working...';
+          } else {
+            return 'Awaiting response...';
+          }
         } else if (lastMessage.role === 'assistant') {
-          // Claude responded, check if file activity indicates continued work
+          // Claude responded - check if file activity indicates continued work
           const fileTimeDiff = (now - lastModified) / 1000; // seconds
-          if (fileTimeDiff < 15) {
+          if (fileTimeDiff < 30) {
             return 'Claude Code working...';
           }
-          // Otherwise user should be typing or thinking
-          return 'User typing...';
+          // Use broader time ranges for more stability
+          if (lastMessageMinutesAgo < 5) {
+            return 'Awaiting user input...';
+          } else {
+            return 'User typing...';
+          }
         }
       }
       
       // Very recent file activity = Claude working (fallback)
       const fileTimeDiff = (now - lastModified) / 1000; // seconds
-      if (fileTimeDiff < 15) {
+      if (fileTimeDiff < 30) {
         return 'Claude Code working...';
       }
       
@@ -63,22 +73,22 @@ class StateCalculator {
     const lastMessageTime = new Date(lastMessage.timestamp);
     const lastMessageMinutesAgo = (now - lastMessageTime) / (1000 * 60);
 
-    // Detailed conversation state logic
+    // Simplified and more stable state logic
     if (lastMessage.role === 'user') {
       // User sent last message
-      if (lastMessageMinutesAgo < 0.5) {
+      if (lastMessageMinutesAgo < 1) {
         return 'Claude Code working...';
-      } else if (lastMessageMinutesAgo < 3) {
+      } else if (lastMessageMinutesAgo < 5) {
         return 'Awaiting response...';
       } else {
         return 'User typing...';
       }
     } else if (lastMessage.role === 'assistant') {
-      // Assistant sent last message
-      if (lastMessageMinutesAgo < 2) {
+      // Assistant sent last message - consolidate similar states
+      if (lastMessageMinutesAgo < 5) {
         return 'Awaiting user input...';
-      } else if (lastMessageMinutesAgo < 5) {
-        return 'User may be typing...';
+      } else {
+        return 'User typing...';
       }
     }
 
@@ -106,14 +116,14 @@ class StateCalculator {
       return null; // Not active, skip
     }
     
-    // Simple heuristic based on file modification time
+    // Simple heuristic based on file modification time - use broader ranges for stability
     const now = new Date();
     const timeDiff = (now - new Date(conversation.lastModified)) / 1000; // seconds
     
-    // Ultra-simple state logic - no file reading needed
-    if (timeDiff < 5) {
+    // More stable state logic - fewer transitions
+    if (timeDiff < 30) {
       return 'Claude Code working...';
-    } else if (timeDiff < 30) {
+    } else if (timeDiff < 300) { // 5 minutes
       return 'Awaiting user input...';
     } else {
       return 'User typing...';

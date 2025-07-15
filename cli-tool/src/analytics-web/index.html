@@ -122,7 +122,7 @@
             margin-top: 2px;
         }
         
-        .token-popover {
+        .token-popover, .claude-sessions-popover {
             position: absolute;
             top: 100%;
             left: 50%;
@@ -140,7 +140,7 @@
             pointer-events: auto;
         }
         
-        .token-popover::before {
+        .token-popover::before, .claude-sessions-popover::before {
             content: '';
             position: absolute;
             bottom: 100%;
@@ -150,7 +150,7 @@
             border-bottom-color: #30363d;
         }
         
-        .token-popover::after {
+        .token-popover::after, .claude-sessions-popover::after {
             content: '';
             position: absolute;
             bottom: 100%;
@@ -161,22 +161,22 @@
             margin-top: 1px;
         }
         
-        .token-breakdown-item {
+        .token-breakdown-item, .session-breakdown-item {
             display: flex;
             justify-content: space-between;
             margin-bottom: 6px;
             font-size: 0.85rem;
         }
         
-        .token-breakdown-item:last-child {
+        .token-breakdown-item:last-child, .session-breakdown-item:last-child {
             margin-bottom: 0;
         }
         
-        .token-type {
+        .token-type, .session-type {
             color: #7d8590;
         }
         
-        .token-value {
+        .token-value, .session-value {
             color: #c9d1d9;
             font-weight: 500;
         }
@@ -642,6 +642,72 @@
             font-size: 0.65rem;
         }
         
+        /* Claude Session Info Styles */
+        .claude-session-info {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 12px 0;
+        }
+        
+        .claude-session-info-row {
+            margin-bottom: 12px;
+        }
+        
+        .claude-session-info-compact {
+            padding: 8px 12px;
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 4px;
+        }
+        
+        .claude-session-header {
+            color: #d57455;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .claude-session-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .claude-session-stats {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .claude-session-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .claude-session-label {
+            color: #7d8590;
+            font-size: 0.75rem;
+        }
+        
+        .claude-session-value {
+            color: #c9d1d9;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .claude-session-value.expired {
+            color: #f85149;
+        }
+        
+        .session-timer-status-dot.expired {
+            background: #f85149;
+            animation: pulse 2s infinite;
+        }
+        
         .charts-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -730,6 +796,7 @@
         .sessions-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
         
         .sessions-table th {
@@ -741,10 +808,34 @@
             border-bottom: 1px solid #30363d;
         }
         
+        .sessions-table th:nth-child(1) { width: 20%; } /* conversation id */
+        .sessions-table th:nth-child(2) { width: 15%; } /* project */
+        .sessions-table th:nth-child(3) { width: 10%; } /* model */
+        .sessions-table th:nth-child(4) { width: 8%; }  /* messages */
+        .sessions-table th:nth-child(5) { width: 10%; } /* tokens */
+        .sessions-table th:nth-child(6) { width: 12%; } /* last activity */
+        .sessions-table th:nth-child(7) { width: 15%; } /* conversation state - FIXED WIDTH */
+        .sessions-table th:nth-child(8) { width: 10%; } /* status */
+        
         .sessions-table td {
             padding: 8px 12px;
             font-size: 0.875rem;
             border-bottom: 1px solid #21262d;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Allow status squares to wrap and flex */
+        .sessions-table td:nth-child(8) {
+            white-space: normal;
+            overflow: visible;
+        }
+        
+        /* Allow conversation id to wrap for long IDs */
+        .sessions-table td:nth-child(1) {
+            white-space: normal;
+            overflow: visible;
         }
         
         .sessions-table tr:hover {
@@ -1269,10 +1360,23 @@
                     <span class="stat-label">conversations:</span>
                     <span class="stat-value" id="totalConversations">0</span>
                 </div>
-                <div class="stat">
-                    <span class="stat-label">claude sessions:</span>
-                    <span class="stat-value" id="claudeSessions">0</span>
-                    <span class="stat-sublabel" id="claudeSessionsDetail"></span>
+                <div class="stat" style="position: relative;">
+                    <span class="stat-label">sessions:</span>
+                    <span class="stat-value" id="claudeSessions"
+                          onmouseenter="showClaudeSessionsPopover(event)" 
+                          onmouseleave="hideClaudeSessionsPopover()"
+                          onclick="showClaudeSessionsPopover(event)"
+                          style="cursor: help;">0</span>
+                    <div class="claude-sessions-popover" id="claudeSessionsPopover">
+                        <div class="session-breakdown-item">
+                            <span class="session-type">This Month:</span>
+                            <span class="session-value" id="claudeSessionsMonth">0</span>
+                        </div>
+                        <div class="session-breakdown-item">
+                            <span class="session-type">This Week:</span>
+                            <span class="session-value" id="claudeSessionsWeek">0</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="stat" style="position: relative;">
                     <span class="stat-label">tokens:</span>
@@ -1459,7 +1563,7 @@
                 // Update timestamp
                 document.getElementById('lastUpdate').textContent = `last update: ${data.lastUpdate}`;
                 
-                updateStats(data.summary, data.detailedTokenUsage);
+                updateStats(data.summary, data.detailedTokenUsage, data);
                 allConversations = data.conversations;
                 allData = data; // Store data globally for access
                 window.allData = data; // Keep for backward compatibility
@@ -1513,7 +1617,7 @@
                 // Update timestamp
                 document.getElementById('lastUpdate').textContent = `last update: ${data.lastUpdate}`;
                 
-                updateStats(data.summary, data.detailedTokenUsage);
+                updateStats(data.summary, data.detailedTokenUsage, data);
                 allConversations = data.conversations;
                 allData = data; // Store data globally for access
                 window.allData = data; // Keep for backward compatibility
@@ -1665,7 +1769,7 @@
             }
         }
         
-        function updateStats(summary, detailedTokenUsage) {
+        function updateStats(summary, detailedTokenUsage, data = null) {
             document.getElementById('totalConversations').textContent = summary.totalConversations.toLocaleString();
             
             // Use detailed token usage for accurate totals
@@ -1686,8 +1790,10 @@
             // Update Claude sessions
             if (summary.claudeSessions) {
                 document.getElementById('claudeSessions').textContent = summary.claudeSessions.total.toLocaleString();
-                document.getElementById('claudeSessionsDetail').textContent = 
-                    `this month: ${summary.claudeSessions.currentMonth} • this week: ${summary.claudeSessions.thisWeek}`;
+                
+                // Update Claude sessions popover
+                document.getElementById('claudeSessionsMonth').textContent = summary.claudeSessions.currentMonth;
+                document.getElementById('claudeSessionsWeek').textContent = summary.claudeSessions.thisWeek;
             }
         }
         
@@ -1715,6 +1821,36 @@
         function hideTokenPopover() {
             popoverTimeout = setTimeout(() => {
                 const popover = document.getElementById('tokenPopover');
+                if (popover) {
+                    popover.style.display = 'none';
+                }
+            }, 100); // Small delay to allow moving to popover
+        }
+        
+        let claudeSessionsPopoverTimeout;
+        
+        function showClaudeSessionsPopover(event) {
+            clearTimeout(claudeSessionsPopoverTimeout);
+            const popover = document.getElementById('claudeSessionsPopover');
+            if (popover) {
+                popover.style.display = 'block';
+                popover.style.visibility = 'visible';
+                popover.style.opacity = '1';
+                
+                // Add event listeners to popover to keep it open when hovering over it
+                popover.addEventListener('mouseenter', () => {
+                    clearTimeout(claudeSessionsPopoverTimeout);
+                });
+                
+                popover.addEventListener('mouseleave', () => {
+                    hideClaudeSessionsPopover();
+                });
+            }
+        }
+        
+        function hideClaudeSessionsPopover() {
+            claudeSessionsPopoverTimeout = setTimeout(() => {
+                const popover = document.getElementById('claudeSessionsPopover');
                 if (popover) {
                     popover.style.display = 'none';
                 }

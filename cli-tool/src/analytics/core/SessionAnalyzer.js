@@ -41,11 +41,22 @@ class SessionAnalyzer {
   /**
    * Analyze all conversations to extract session information
    * @param {Array} conversations - Array of conversation objects with parsed messages
+   * @param {Object} claudeSessionInfo - Real Claude session information from statsig files
    * @returns {Object} Session analysis data
    */
-  analyzeSessionData(conversations) {
-    const sessions = this.extractSessions(conversations);
-    const currentSession = this.getCurrentActiveSession(sessions);
+  analyzeSessionData(conversations, claudeSessionInfo = null) {
+    let sessions, currentSession;
+    
+    if (claudeSessionInfo && claudeSessionInfo.hasSession) {
+      // Use real Claude session information
+      sessions = this.extractSessionsFromClaudeInfo(conversations, claudeSessionInfo);
+      currentSession = this.getCurrentActiveSessionFromClaudeInfo(sessions, claudeSessionInfo);
+    } else {
+      // Fallback to old logic
+      sessions = this.extractSessions(conversations);
+      currentSession = this.getCurrentActiveSession(sessions);
+    }
+    
     const monthlyUsage = this.calculateMonthlyUsage(sessions);
     const userPlan = this.detectUserPlan(conversations);
     
@@ -57,7 +68,8 @@ class SessionAnalyzer {
       monthlyUsage,
       userPlan,
       limits: limits,
-      warnings: this.generateWarnings(currentSession, monthlyUsage, userPlan)
+      warnings: this.generateWarnings(currentSession, monthlyUsage, userPlan),
+      claudeSessionInfo
     };
   }
 
@@ -244,6 +256,132 @@ class SessionAnalyzer {
     return sessions.sort((a, b) => b.startTime - a.startTime);
   }
 
+
+  /**
+   * Extract sessions based on real Claude session information
+   * @param {Array} conversations - Array of conversation objects
+   * @param {Object} claudeSessionInfo - Real Claude session information
+   * @returns {Array} Array of session objects
+   */
+  extractSessionsFromClaudeInfo(conversations, claudeSessionInfo) {
+    // Get all messages from all conversations
+    const allMessages = [];
+    
+    conversations.forEach(conversation => {
+      if (!conversation.parsedMessages || conversation.parsedMessages.length === 0) {
+        return;
+      }
+
+      const sortedMessages = conversation.parsedMessages.sort((a, b) => 
+        new Date(a.timestamp) - new Date(b.timestamp)
+      );
+
+      sortedMessages.forEach(message => {
+        allMessages.push({
+          timestamp: message.timestamp,
+          role: message.role,
+          conversationId: conversation.id,
+          usage: message.usage
+        });
+      });
+    });
+
+    // Sort all messages by timestamp
+    allMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    // Create current session based on Claude's actual session window
+    const sessionStartTime = new Date(claudeSessionInfo.startTime);
+    const sessionEndTime = new Date(claudeSessionInfo.startTime + claudeSessionInfo.sessionLimit.ms);
+    const now = new Date();
+    
+    // Find the first user message that occurred AT OR AFTER the Claude session started
+    // This handles cases where a conversation was ongoing when Claude session reset
+    const firstMessageAfterSessionStart = allMessages.find(msg => {
+      const msgTime = new Date(msg.timestamp);
+      return msg.role === 'user' && msgTime >= sessionStartTime;
+    });
+    
+    let effectiveSessionStart = sessionStartTime;
+    if (firstMessageAfterSessionStart) {
+      effectiveSessionStart = new Date(firstMessageAfterSessionStart.timestamp);
+    }
+    
+    // Filter messages that are within the current Claude session window AND after the effective session start
+    const currentSessionMessages = allMessages.filter(msg => {
+      const msgTime = new Date(msg.timestamp);
+      return msgTime >= effectiveSessionStart && msgTime < sessionEndTime;
+    });
+
+    if (currentSessionMessages.length === 0) {
+      return [];
+    }
+
+    // Create the current session object
+    const session = {
+      id: `claude_session_${claudeSessionInfo.sessionId.substring(0, 8)}`,
+      startTime: effectiveSessionStart,
+      endTime: sessionEndTime,
+      messages: currentSessionMessages,
+      tokenUsage: {
+        input: 0,
+        output: 0,
+        cacheCreation: 0,
+        cacheRead: 0,
+        total: 0
+      },
+      conversations: [...new Set(currentSessionMessages.map(msg => msg.conversationId))],
+      serviceTier: null,
+      isActive: now >= sessionStartTime && now < sessionEndTime && !claudeSessionInfo.estimatedTimeRemaining.isExpired
+    };
+
+    // Calculate token usage for this session
+    currentSessionMessages.forEach(message => {
+      if (message.usage) {
+        session.tokenUsage.input += message.usage.input_tokens || 0;
+        session.tokenUsage.output += message.usage.output_tokens || 0;
+        session.tokenUsage.cacheCreation += message.usage.cache_creation_input_tokens || 0;
+        session.tokenUsage.cacheRead += message.usage.cache_read_input_tokens || 0;
+        session.serviceTier = message.usage.service_tier || session.serviceTier;
+      }
+    });
+    
+    session.tokenUsage.total = session.tokenUsage.input + session.tokenUsage.output + 
+                              session.tokenUsage.cacheCreation + session.tokenUsage.cacheRead;
+
+    // Only count USER messages for session limits
+    const userMessages = currentSessionMessages.filter(msg => msg.role === 'user');
+    
+    // Calculate session usage with message complexity weighting
+    const sessionUsage = this.calculateSessionUsage(userMessages);
+    session.messageCount = sessionUsage.messageCount;
+    session.messageWeight = sessionUsage.totalWeight;
+    session.usageDetails = sessionUsage;
+    session.conversationCount = session.conversations.length;
+    
+    // Use Claude's actual time remaining
+    session.timeRemaining = Math.max(0, claudeSessionInfo.estimatedTimeRemaining.ms);
+    session.actualDuration = claudeSessionInfo.sessionDuration.ms;
+    session.duration = claudeSessionInfo.sessionLimit.ms;
+    
+    return [session];
+  }
+
+  /**
+   * Get current active session based on Claude session info
+   * @param {Array} sessions - Array of session objects
+   * @param {Object} claudeSessionInfo - Real Claude session information
+   * @returns {Object|null} Current active session or null
+   */
+  getCurrentActiveSessionFromClaudeInfo(sessions, claudeSessionInfo) {
+    if (sessions.length === 0) return null;
+    
+    // If Claude session is expired, return null
+    if (claudeSessionInfo.estimatedTimeRemaining.isExpired) {
+      return null;
+    }
+    
+    return sessions[0]; // Since we only create one session based on Claude's current session
+  }
 
   /**
    * Get current active session
