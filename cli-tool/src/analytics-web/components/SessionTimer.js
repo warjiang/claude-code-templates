@@ -12,6 +12,7 @@ class SessionTimer {
     this.isInitialized = false;
     this.refreshInterval = 1000; // 1 second for real-time updates
     this.SESSION_DURATION = 5 * 60 * 60 * 1000; // 5 hours in milliseconds
+    this.isTooltipVisible = false; // Track tooltip state globally
   }
 
   /**
@@ -184,7 +185,12 @@ class SessionTimer {
             <div class="session-timer-progress-item">
               <div class="session-timer-progress-header">
                 <span class="session-timer-progress-label">Messages</span>
-                <span class="session-timer-progress-value">${timer.messagesUsed}/${timer.messagesLimit} ${timer.messageWeight ? `(${timer.messageWeight.toFixed(1)}x)` : ''}</span>
+                <span class="session-timer-progress-value">
+                  ${timer.messagesUsed}/${timer.messagesLimit}
+                  <span class="session-timer-info-icon" data-tooltip="message-info" title="Message calculation info">
+                    ℹ️
+                  </span>
+                </span>
               </div>
               <div class="session-timer-progress-bar">
                 <div class="session-timer-progress-fill" 
@@ -233,6 +239,135 @@ class SessionTimer {
         </div>
       </div>
     `;
+    
+    // Add popover to the container
+    this.addPopover(container);
+    
+    // Add popover event listeners
+    this.setupPopoverEvents(container);
+  }
+  
+  /**
+   * Add popover to the container
+   */
+  addPopover(container) {
+    // Check if popover already exists
+    const existingPopover = document.getElementById('message-info-tooltip');
+    if (existingPopover) {
+      // Don't recreate if it already exists, just return
+      return;
+    }
+    
+    // Create popover HTML
+    const popoverHTML = `
+      <div class="session-timer-tooltip" id="message-info-tooltip" style="display: ${this.isTooltipVisible ? 'block' : 'none'};">
+        <div class="session-timer-tooltip-content">
+          <h4>Message Count Calculation</h4>
+          <p>This count includes only user messages (your prompts) within the current 5-hour session window. Assistant responses are not counted toward usage limits.</p>
+          <p>The actual limit varies based on message length, conversation context, and current system capacity. The displayed limit is an estimate for typical usage.</p>
+          <div class="session-timer-tooltip-link">
+            <a href="https://support.anthropic.com/en/articles/9797557-usage-limit-best-practices" target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-external-link-alt"></i> Usage Limit Best Practices
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Add popover to document body for better positioning
+    document.body.insertAdjacentHTML('beforeend', popoverHTML);
+  }
+  
+  /**
+   * Setup popover event listeners
+   */
+  setupPopoverEvents(container) {
+    const infoIcon = container.querySelector('.session-timer-info-icon');
+    const tooltip = document.getElementById('message-info-tooltip');
+    
+    if (infoIcon && tooltip) {
+      // Remove existing listeners to prevent duplicates
+      const existingClickHandler = infoIcon.clickHandler;
+      if (existingClickHandler) {
+        infoIcon.removeEventListener('click', existingClickHandler);
+      }
+      
+      // Create new click handler
+      const clickHandler = (e) => {
+        e.stopPropagation();
+        if (this.isTooltipVisible) {
+          this.hideTooltip(tooltip);
+          this.isTooltipVisible = false;
+        } else {
+          this.showTooltip(tooltip, infoIcon);
+          this.isTooltipVisible = true;
+        }
+      };
+      
+      // Store handler reference for cleanup
+      infoIcon.clickHandler = clickHandler;
+      
+      // Add click listener
+      infoIcon.addEventListener('click', clickHandler);
+      
+      // Setup document click listener only once
+      if (!this.documentClickSetup) {
+        document.addEventListener('click', (e) => {
+          if (this.isTooltipVisible && !tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
+            this.hideTooltip(tooltip);
+            this.isTooltipVisible = false;
+          }
+        });
+        this.documentClickSetup = true;
+      }
+      
+      // Prevent tooltip from closing when clicking inside it
+      tooltip.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    }
+  }
+  
+  /**
+   * Show tooltip with positioning
+   */
+  showTooltip(tooltip, trigger) {
+    const rect = trigger.getBoundingClientRect();
+    tooltip.style.display = 'block';
+    const tooltipRect = tooltip.getBoundingClientRect();
+    
+    // Position tooltip below the icon
+    tooltip.style.left = `${rect.left - tooltipRect.width / 2 + rect.width / 2}px`;
+    tooltip.style.top = `${rect.bottom + 10}px`;
+    
+    // Adjust position if tooltip goes off-screen horizontally
+    const viewportWidth = window.innerWidth;
+    const tooltipLeft = parseInt(tooltip.style.left);
+    
+    if (tooltipLeft < 10) {
+      tooltip.style.left = '10px';
+    } else if (tooltipLeft + tooltipRect.width > viewportWidth - 10) {
+      tooltip.style.left = `${viewportWidth - tooltipRect.width - 10}px`;
+    }
+    
+    // Adjust position if tooltip goes off-screen vertically
+    const viewportHeight = window.innerHeight;
+    const tooltipTop = parseInt(tooltip.style.top);
+    
+    if (tooltipTop + tooltipRect.height > viewportHeight - 10) {
+      // If it goes off-screen below, position it above the trigger
+      tooltip.style.top = `${rect.top - tooltipRect.height - 10}px`;
+    }
+    
+    this.isTooltipVisible = true;
+  }
+  
+  /**
+   * Hide tooltip
+   */
+  hideTooltip(tooltip) {
+    tooltip.style.display = 'none';
+    this.isTooltipVisible = false;
   }
 
   /**

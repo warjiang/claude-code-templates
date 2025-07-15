@@ -11,23 +11,29 @@ class SessionAnalyzer {
     
     // Plan-specific message limits (conservative estimates)
     this.PLAN_LIMITS = {
+      'free': {
+        name: 'Free Plan',
+        messagesPerSession: null,
+        monthlyPrice: 0,
+        hasSessionLimits: false
+      },
       'standard': {
+        name: 'Pro Plan',
+        messagesPerSession: 45,
+        monthlyPrice: 20,
+        hasSessionLimits: true
+      },
+      'max': {
         name: 'Max Plan (5x)',
         messagesPerSession: 225,
         monthlyPrice: 100,
         hasSessionLimits: true
       },
       'premium': {
-        name: 'Max Plan (20x)',
+        name: 'Max Plan (5x)',
         messagesPerSession: 900,
         monthlyPrice: 200,
         hasSessionLimits: true
-      },
-      'pro': {
-        name: 'Pro Plan',
-        messagesPerSession: 120, // Pro plan practical limit (varies by message length)
-        monthlyPrice: 20,
-        hasSessionLimits: false // Pro plan doesn't have 5-hour session limits
       }
     };
   }
@@ -43,12 +49,14 @@ class SessionAnalyzer {
     const monthlyUsage = this.calculateMonthlyUsage(sessions);
     const userPlan = this.detectUserPlan(conversations);
     
+    const limits = this.PLAN_LIMITS[userPlan.planType] || this.PLAN_LIMITS['standard'];
+    
     return {
       sessions,
       currentSession,
       monthlyUsage,
       userPlan,
-      limits: this.PLAN_LIMITS[userPlan.planType] || this.PLAN_LIMITS['pro'],
+      limits: limits,
       warnings: this.generateWarnings(currentSession, monthlyUsage, userPlan)
     };
   }
@@ -307,13 +315,14 @@ class SessionAnalyzer {
     // Map service tier to plan type - Pro plan users typically have 'standard' service tier
     // Default to Pro plan since most users have Pro plan
     const planMapping = {
-      'standard': 'pro',      // Pro Plan (most common tier)
-      'premium': 'premium',   // Max Plan 20x
-      'max': 'standard'       // Max Plan 5x
+      'free': 'free',           // Free Plan - daily limits
+      'standard': 'standard',   // Pro Plan - 45 messages per 5-hour session
+      'premium': 'premium',     // Max Plan 20x - 900 messages per 5-hour session
+      'max': 'max'             // Max Plan 5x - 225 messages per 5-hour session
     };
 
     const detectedTier = latestTier || 'standard';
-    const planType = planMapping[detectedTier] || 'pro';
+    const planType = planMapping[detectedTier] || 'standard';
 
     return {
       tier: detectedTier,
@@ -421,21 +430,24 @@ class SessionAnalyzer {
       };
     }
 
+    // Ensure limits exist, fallback to standard plan
+    const planLimits = limits || this.PLAN_LIMITS['standard'];
+    
     // Use weighted message calculation for more accurate progress
-    const weightedProgress = (currentSession.messageWeight / limits.messagesPerSession) * 100;
+    const weightedProgress = (currentSession.messageWeight / planLimits.messagesPerSession) * 100;
     
     return {
       hasActiveSession: true,
       timeRemaining: currentSession.timeRemaining,
       timeRemainingFormatted: this.formatTimeRemaining(currentSession.timeRemaining),
       messagesUsed: currentSession.messageCount,
-      messagesLimit: limits.messagesPerSession,
+      messagesLimit: planLimits.messagesPerSession,
       messageWeight: currentSession.messageWeight,
       usageDetails: currentSession.usageDetails,
       tokensUsed: currentSession.tokenUsage.total,
       sessionProgress: weightedProgress,
-      sessionProgressSimple: (currentSession.messageCount / limits.messagesPerSession) * 100,
-      planName: limits.name,
+      sessionProgressSimple: (currentSession.messageCount / planLimits.messagesPerSession) * 100,
+      planName: planLimits.name,
       monthlySessionsUsed: monthlyUsage.sessionCount,
       monthlySessionsLimit: this.MONTHLY_SESSION_LIMIT,
       warnings: warnings.filter(w => w.type.includes('session')),

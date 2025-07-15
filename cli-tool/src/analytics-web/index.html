@@ -122,6 +122,65 @@
             margin-top: 2px;
         }
         
+        .token-popover {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            padding: 12px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            display: none;
+            z-index: 1000;
+            min-width: 200px;
+            white-space: nowrap;
+            pointer-events: auto;
+        }
+        
+        .token-popover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-bottom-color: #30363d;
+        }
+        
+        .token-popover::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: #21262d;
+            margin-top: 1px;
+        }
+        
+        .token-breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .token-breakdown-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .token-type {
+            color: #7d8590;
+        }
+        
+        .token-value {
+            color: #c9d1d9;
+            font-weight: 500;
+        }
+        
         .chart-controls {
             display: flex;
             align-items: center;
@@ -377,6 +436,8 @@
             color: #7d8590;
             font-size: 0.75rem;
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            display: inline-flex;
+            align-items: center;
         }
         
         .session-timer-progress-bar {
@@ -493,6 +554,94 @@
             color: #93c5fd;
         }
         
+        /* Session Timer Info Icon and Popover */
+        .session-timer-label-with-info {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .session-timer-info-icon {
+            color: #7d8590;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 4px;
+            opacity: 0.6;
+            line-height: 1;
+            vertical-align: middle;
+            padding: 2px;
+            border-radius: 2px;
+        }
+        
+        .session-timer-info-icon:hover {
+            color: #58a6ff;
+            opacity: 1;
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+        
+        .session-timer-info-icon:active {
+            background-color: rgba(88, 166, 255, 0.2);
+        }
+        
+        .session-timer-tooltip {
+            position: absolute;
+            z-index: 1000;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 0;
+            box-shadow: 0 16px 32px rgba(1, 4, 9, 0.85);
+            max-width: 300px;
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
+        
+        .session-timer-tooltip-content {
+            padding: 12px;
+        }
+        
+        .session-timer-tooltip-content h4 {
+            margin: 0 0 8px 0;
+            color: #f0f6fc;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .session-timer-tooltip-content p {
+            margin: 0 0 8px 0;
+            color: #c9d1d9;
+            line-height: 1.5;
+        }
+        
+        .session-timer-tooltip-content p:last-of-type {
+            margin-bottom: 12px;
+        }
+        
+        .session-timer-tooltip-link {
+            border-top: 1px solid #30363d;
+            padding-top: 8px;
+        }
+        
+        .session-timer-tooltip-link a {
+            color: #58a6ff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s ease;
+        }
+        
+        .session-timer-tooltip-link a:hover {
+            color: #79c0ff;
+        }
+        
+        .session-timer-tooltip-link i {
+            font-size: 0.65rem;
+        }
+        
         .charts-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -526,11 +675,18 @@
         .filter-bar {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 16px;
             margin: 20px 0;
             padding: 12px 0;
             border-top: 1px solid #21262d;
             border-bottom: 1px solid #21262d;
+        }
+        
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
         
         .filter-label {
@@ -541,6 +697,11 @@
         .filter-buttons {
             display: flex;
             gap: 8px;
+        }
+        
+        .filter-actions {
+            display: flex;
+            align-items: center;
         }
         
         .filter-btn {
@@ -918,6 +1079,20 @@
             position: relative;
         }
         
+        .message-metadata {
+            margin: 8px 0;
+            padding: 4px 8px;
+            background: #161b22;
+            border-radius: 4px;
+            border-left: 2px solid #30363d;
+        }
+        
+        .message-id {
+            margin-top: 8px;
+            text-align: right;
+            opacity: 0.7;
+        }
+        
         .message:last-child {
             border-bottom: none;
         }
@@ -1069,7 +1244,7 @@
         <div class="terminal-header">
             <div class="terminal-title">
                 <span class="status-dot"></span>
-                claude-code-analytics 1
+                claude-code-analytics <span id="app-version">1.8.0</span>
             </div>
             <div class="terminal-subtitle">real-time monitoring dashboard</div>
             <div class="terminal-subtitle" id="lastUpdate"></div>
@@ -1099,9 +1274,31 @@
                     <span class="stat-value" id="claudeSessions">0</span>
                     <span class="stat-sublabel" id="claudeSessionsDetail"></span>
                 </div>
-                <div class="stat">
+                <div class="stat" style="position: relative;">
                     <span class="stat-label">tokens:</span>
-                    <span class="stat-value" id="totalTokens">0</span>
+                    <span class="stat-value" id="totalTokens" 
+                          onmouseenter="showTokenPopover(event)" 
+                          onmouseleave="hideTokenPopover()"
+                          onclick="showTokenPopover(event)"
+                          style="cursor: help;">0</span>
+                    <div class="token-popover" id="tokenPopover">
+                        <div class="token-breakdown-item">
+                            <span class="token-type">Input:</span>
+                            <span class="token-value" id="inputTokens">0</span>
+                        </div>
+                        <div class="token-breakdown-item">
+                            <span class="token-type">Output:</span>
+                            <span class="token-value" id="outputTokens">0</span>
+                        </div>
+                        <div class="token-breakdown-item">
+                            <span class="token-type">Cache Creation:</span>
+                            <span class="token-value" id="cacheCreationTokens">0</span>
+                        </div>
+                        <div class="token-breakdown-item">
+                            <span class="token-type">Cache Read:</span>
+                            <span class="token-value" id="cacheReadTokens">0</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="stat">
                     <span class="stat-label">projects:</span>
@@ -1132,9 +1329,6 @@
                     </div>
                 </div>
                 <div class="chart-controls-right">
-                    <button class="refresh-btn" onclick="toggleNotifications()" id="notificationBtn">
-                        enable notifications
-                    </button>
                     <button class="refresh-btn" onclick="refreshCharts()" id="refreshBtn">
                         refresh charts
                     </button>
@@ -1158,12 +1352,19 @@
             </div>
             
             <div class="filter-bar">
-                <span class="filter-label">filter conversations:</span>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" data-filter="active">active</button>
-                    <button class="filter-btn" data-filter="recent">recent</button>
-                    <button class="filter-btn" data-filter="inactive">inactive</button>
-                    <button class="filter-btn" data-filter="all">all</button>
+                <div class="filter-section">
+                    <span class="filter-label">filter conversations:</span>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="active">active</button>
+                        <button class="filter-btn" data-filter="recent">recent</button>
+                        <button class="filter-btn" data-filter="inactive">inactive</button>
+                        <button class="filter-btn" data-filter="all">all</button>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="refresh-btn" onclick="toggleNotifications()" id="notificationBtn">
+                        enable notifications
+                    </button>
                 </div>
             </div>
             
@@ -1230,6 +1431,21 @@
         let previousConversationStates = new Map();
         let sessionTimerComponent = null;
         
+        async function loadVersion() {
+            try {
+                const response = await fetch('/api/version');
+                const data = await response.json();
+                
+                const versionElement = document.getElementById('app-version');
+                if (versionElement) {
+                    versionElement.textContent = data.version;
+                }
+            } catch (error) {
+                console.error('Error loading version:', error);
+                // Keep fallback version if API fails
+            }
+        }
+        
         async function loadData() {
             try {
                 const response = await fetch('/api/data');
@@ -1243,7 +1459,7 @@
                 // Update timestamp
                 document.getElementById('lastUpdate').textContent = `last update: ${data.lastUpdate}`;
                 
-                updateStats(data.summary);
+                updateStats(data.summary, data.detailedTokenUsage);
                 allConversations = data.conversations;
                 allData = data; // Store data globally for access
                 window.allData = data; // Keep for backward compatibility
@@ -1297,7 +1513,7 @@
                 // Update timestamp
                 document.getElementById('lastUpdate').textContent = `last update: ${data.lastUpdate}`;
                 
-                updateStats(data.summary);
+                updateStats(data.summary, data.detailedTokenUsage);
                 allConversations = data.conversations;
                 allData = data; // Store data globally for access
                 window.allData = data; // Keep for backward compatibility
@@ -1449,9 +1665,21 @@
             }
         }
         
-        function updateStats(summary) {
+        function updateStats(summary, detailedTokenUsage) {
             document.getElementById('totalConversations').textContent = summary.totalConversations.toLocaleString();
-            document.getElementById('totalTokens').textContent = summary.totalTokens.toLocaleString();
+            
+            // Use detailed token usage for accurate totals
+            const totalTokens = detailedTokenUsage ? detailedTokenUsage.total : summary.totalTokens;
+            document.getElementById('totalTokens').textContent = totalTokens.toLocaleString();
+            
+            // Update detailed token breakdown
+            if (detailedTokenUsage) {
+                document.getElementById('inputTokens').textContent = detailedTokenUsage.inputTokens.toLocaleString();
+                document.getElementById('outputTokens').textContent = detailedTokenUsage.outputTokens.toLocaleString();
+                document.getElementById('cacheCreationTokens').textContent = detailedTokenUsage.cacheCreationTokens.toLocaleString();
+                document.getElementById('cacheReadTokens').textContent = detailedTokenUsage.cacheReadTokens.toLocaleString();
+            }
+            
             document.getElementById('activeProjects').textContent = summary.activeProjects;
             document.getElementById('dataSize').textContent = summary.totalFileSize;
             
@@ -1461,6 +1689,36 @@
                 document.getElementById('claudeSessionsDetail').textContent = 
                     `this month: ${summary.claudeSessions.currentMonth} • this week: ${summary.claudeSessions.thisWeek}`;
             }
+        }
+        
+        let popoverTimeout;
+        
+        function showTokenPopover(event) {
+            clearTimeout(popoverTimeout);
+            const popover = document.getElementById('tokenPopover');
+            if (popover) {
+                popover.style.display = 'block';
+                popover.style.visibility = 'visible';
+                popover.style.opacity = '1';
+                
+                // Add event listeners to popover to keep it open when hovering over it
+                popover.addEventListener('mouseenter', () => {
+                    clearTimeout(popoverTimeout);
+                });
+                
+                popover.addEventListener('mouseleave', () => {
+                    hideTokenPopover();
+                });
+            }
+        }
+        
+        function hideTokenPopover() {
+            popoverTimeout = setTimeout(() => {
+                const popover = document.getElementById('tokenPopover');
+                if (popover) {
+                    popover.style.display = 'none';
+                }
+            }, 100); // Small delay to allow moving to popover
         }
         
         function initializeDateInputs() {
@@ -1772,7 +2030,7 @@
             noSessionsDiv.style.display = 'none';
             
             tableBody.innerHTML = filteredConversations.map(conv => `
-                <tr onclick="showSessionDetail('${conv.id}')" style="cursor: pointer;">
+                <tr data-session-id="${conv.id}" onclick="showSessionDetail('${conv.id}')" style="cursor: pointer;">
                     <td>
                         <div class="session-id-container">
                             <div class="session-id">
@@ -1872,26 +2130,38 @@
                     tooltip: 'User input'
                 };
             } else if (message.role === 'assistant') {
-                const content = message.content || '';
+                // Use the new metadata fields to determine type more accurately
                 
-                if (typeof content === 'string') {
-                    if (content.includes('[Tool:') || content.includes('tool_use')) {
-                        return {
-                            type: 'tool',
-                            tooltip: 'Tool execution'
-                        };
-                    } else if (content.includes('error') || content.includes('Error') || content.includes('failed')) {
-                        return {
-                            type: 'error',
-                            tooltip: 'Error in response'
-                        };
-                    } else {
-                        return {
-                            type: 'success',
-                            tooltip: 'Successful response'
-                        };
-                    }
+                // Check if message has tool use based on stop_reason or content blocks
+                if (message.stop_reason === 'tool_use' || message.hasToolUse) {
+                    return {
+                        type: 'tool',
+                        tooltip: 'Tool execution'
+                    };
                 }
+                
+                // Check if message has tool results
+                if (message.hasToolResult) {
+                    return {
+                        type: 'tool',
+                        tooltip: 'Tool result'
+                    };
+                }
+                
+                // Check for actual errors based on stop_reason or specific error patterns
+                if (message.stop_reason === 'error' || 
+                    (message.content && message.content.includes('I apologize') && message.content.includes('error'))) {
+                    return {
+                        type: 'error',
+                        tooltip: 'Error in response'
+                    };
+                }
+                
+                // Normal successful response
+                return {
+                    type: 'success',
+                    tooltip: 'Successful response'
+                };
             }
             
             return {
@@ -2042,6 +2312,24 @@
                     container.innerHTML = reversedMessages.map((message, index) => {
                         const messageType = getMessageType(message);
                         const messageNum = filteredMessages.length - index;
+                        
+                        // Build additional info display
+                        const additionalInfo = [];
+                        if (message.model) additionalInfo.push(`Model: ${message.model}`);
+                        if (message.stop_reason) additionalInfo.push(`Stop: ${message.stop_reason}`);
+                        if (message.usage) {
+                            const usage = message.usage;
+                            if (usage.input_tokens) additionalInfo.push(`In: ${usage.input_tokens}t`);
+                            if (usage.output_tokens) additionalInfo.push(`Out: ${usage.output_tokens}t`);
+                            if (usage.cache_creation_input_tokens) additionalInfo.push(`Cache: ${usage.cache_creation_input_tokens}t`);
+                            if (usage.service_tier) additionalInfo.push(`Tier: ${usage.service_tier}`);
+                        }
+                        if (message.contentBlocks && message.contentBlocks.length > 0) {
+                            const blockTypes = message.contentBlocks.map(b => b.type).join(', ');
+                            additionalInfo.push(`Blocks: ${blockTypes}`);
+                        }
+                        if (message.version) additionalInfo.push(`v${message.version}`);
+                        
                         return `
                             <div class="message">
                                 <div class="message-type-indicator ${messageType.type}" data-tooltip="${messageType.tooltip}"></div>
@@ -2051,7 +2339,13 @@
                                         #${messageNum} • ${message.timestamp ? formatMessageTime(message.timestamp) : 'unknown time'}
                                     </div>
                                 </div>
+                                ${additionalInfo.length > 0 ? `
+                                    <div class="message-metadata">
+                                        <small style="color: #7d8590; font-size: 0.8rem;">${additionalInfo.join(' • ')}</small>
+                                    </div>
+                                ` : ''}
                                 <div class="message-content">${truncateContent(message.content || 'no content')}</div>
+                                ${message.message_id ? `<div class="message-id"><small style="color: #7d8590; font-size: 0.7rem;">ID: ${message.message_id}</small></div>` : ''}
                             </div>
                         `;
                     }).join('');
@@ -2192,6 +2486,7 @@
             function initWhenReady() {
                 if (typeof Chart !== 'undefined') {
                     console.log('Chart.js loaded successfully');
+                    loadVersion();
                     loadData();
                     
                     // Regular refresh for conversation data every 1 second (slower)

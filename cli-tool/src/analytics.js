@@ -4,6 +4,7 @@ const path = require('path');
 const express = require('express');
 const open = require('open');
 const os = require('os');
+const packageJson = require('../package.json');
 const StateCalculator = require('./analytics/core/StateCalculator');
 const ProcessDetector = require('./analytics/core/ProcessDetector');
 const ConversationAnalyzer = require('./analytics/core/ConversationAnalyzer');
@@ -159,13 +160,49 @@ class ClaudeAnalytics {
     });
 
     return {
-      total: totalInputTokens + totalOutputTokens,
+      total: totalInputTokens + totalOutputTokens + totalCacheCreationTokens + totalCacheReadTokens,
       inputTokens: totalInputTokens,
       outputTokens: totalOutputTokens,
       cacheCreationTokens: totalCacheCreationTokens,
       cacheReadTokens: totalCacheReadTokens,
       messagesWithUsage: messagesWithUsage,
       totalMessages: parsedMessages.length,
+    };
+  }
+
+  calculateDetailedTokenUsage() {
+    if (!this.data || !this.data.conversations) {
+      return null;
+    }
+
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
+    let totalCacheCreationTokens = 0;
+    let totalCacheReadTokens = 0;
+    let totalMessages = 0;
+    let messagesWithUsage = 0;
+
+    this.data.conversations.forEach(conversation => {
+      if (conversation.tokenUsage) {
+        totalInputTokens += conversation.tokenUsage.inputTokens || 0;
+        totalOutputTokens += conversation.tokenUsage.outputTokens || 0;
+        totalCacheCreationTokens += conversation.tokenUsage.cacheCreationTokens || 0;
+        totalCacheReadTokens += conversation.tokenUsage.cacheReadTokens || 0;
+        messagesWithUsage += conversation.tokenUsage.messagesWithUsage || 0;
+        totalMessages += conversation.tokenUsage.totalMessages || 0;
+      }
+    });
+
+    const total = totalInputTokens + totalOutputTokens + totalCacheCreationTokens + totalCacheReadTokens;
+
+    return {
+      total,
+      inputTokens: totalInputTokens,
+      outputTokens: totalOutputTokens,
+      cacheCreationTokens: totalCacheCreationTokens,
+      cacheReadTokens: totalCacheReadTokens,
+      messagesWithUsage,
+      totalMessages
     };
   }
 
@@ -485,13 +522,27 @@ class ClaudeAnalytics {
 
     // API endpoints
     this.app.get('/api/data', async (req, res) => {
-      // Add timestamp to verify data freshness
-      const dataWithTimestamp = {
-        ...this.data,
-        timestamp: new Date().toISOString(),
-        lastUpdate: new Date().toLocaleString(),
-      };
-      res.json(dataWithTimestamp);
+      try {
+        // Calculate detailed token usage
+        const detailedTokenUsage = this.calculateDetailedTokenUsage();
+        
+        // Add timestamp to verify data freshness
+        const dataWithTimestamp = {
+          ...this.data,
+          detailedTokenUsage,
+          timestamp: new Date().toISOString(),
+          lastUpdate: new Date().toLocaleString(),
+        };
+        res.json(dataWithTimestamp);
+      } catch (error) {
+        console.error('Error calculating detailed token usage:', error);
+        res.json({
+          ...this.data,
+          detailedTokenUsage: null,
+          timestamp: new Date().toISOString(),
+          lastUpdate: new Date().toLocaleString(),
+        });
+      }
     });
 
     this.app.get('/api/realtime', async (req, res) => {
@@ -579,23 +630,82 @@ class ClaudeAnalytics {
         }
 
         // Read the conversation file to get full message history
-        const conversationFile = path.join(this.claudeDir, conversation.fileName);
+        const conversationFile = conversation.filePath;
+        
+        if (!conversationFile) {
+          return res.status(404).json({ 
+            error: 'Conversation file path not found',
+            conversationId: conversationId,
+            conversationKeys: Object.keys(conversation),
+            hasFilePath: !!conversation.filePath,
+            hasFileName: !!conversation.filename
+          });
+        }
+        
         if (!await fs.pathExists(conversationFile)) {
-          return res.status(404).json({ error: 'Conversation file not found' });
+          return res.status(404).json({ error: 'Conversation file not found', path: conversationFile });
         }
 
         const content = await fs.readFile(conversationFile, 'utf8');
-        const messages = content.split('\n')
-          .filter(line => line.trim())
-          .map(line => {
-            try {
-              return JSON.parse(line);
-            } catch (error) {
-              console.warn('Error parsing message line:', error);
-              return null;
+        const lines = content.trim().split('\n').filter(line => line.trim());
+        const rawMessages = lines.map(line => {
+          try {
+            return JSON.parse(line);
+          } catch (error) {
+            console.warn('Error parsing message line:', error);
+            return null;
+          }
+        }).filter(Boolean);
+
+        // Extract actual messages from Claude Code format
+        const messages = rawMessages.map(item => {
+          if (item.message && item.message.role) {
+            let content = '';
+
+            if (typeof item.message.content === 'string') {
+              content = item.message.content;
+            } else if (Array.isArray(item.message.content)) {
+              content = item.message.content
+                .map(block => {
+                  if (block.type === 'text') return block.text;
+                  if (block.type === 'tool_use') return `[Tool: ${block.name}]`;
+                  if (block.type === 'tool_result') return '[Tool Result]';
+                  return block.content || '';
+                })
+                .join('\n');
+            } else if (item.message.content && typeof item.message.content === 'object' && item.message.content.length) {
+              content = item.message.content[0].text || '';
             }
-          })
-          .filter(msg => msg !== null);
+
+            return {
+              role: item.message.role,
+              content: content || 'No content',
+              timestamp: item.timestamp,
+              type: item.type,
+              stop_reason: item.message.stop_reason || null,
+              message_id: item.message.id || null,
+              model: item.message.model || null,
+              usage: item.message.usage || null,
+              hasToolUse: item.message.content && Array.isArray(item.message.content) && 
+                         item.message.content.some(block => block.type === 'tool_use'),
+              hasToolResult: item.message.content && Array.isArray(item.message.content) && 
+                            item.message.content.some(block => block.type === 'tool_result'),
+              contentBlocks: item.message.content && Array.isArray(item.message.content) ? 
+                            item.message.content.map(block => ({ type: block.type, name: block.name || null })) : [],
+              rawContent: item.message.content || null,
+              parentUuid: item.parentUuid || null,
+              uuid: item.uuid || null,
+              sessionId: item.sessionId || null,
+              userType: item.userType || null,
+              cwd: item.cwd || null,
+              version: item.version || null,
+              isCompactSummary: item.isCompactSummary || false,
+              isSidechain: item.isSidechain || false
+            };
+          }
+          return null;
+        }).filter(Boolean);
+
 
         res.json({
           conversation: {
@@ -613,9 +723,11 @@ class ClaudeAnalytics {
 
       } catch (error) {
         console.error('Error getting conversation history:', error);
+        console.error('Error stack:', error.stack);
         res.status(500).json({ 
           error: 'Failed to load conversation history',
-          details: error.message 
+          details: error.message,
+          stack: error.stack
         });
       }
     });
@@ -691,72 +803,7 @@ class ClaudeAnalytics {
       }
     });
 
-    // Session detail endpoint
-    this.app.get('/api/session/:sessionId', async (req, res) => {
-      const sessionId = req.params.sessionId;
-
-      try {
-        const session = this.data.conversations.find(conv => conv.id === sessionId);
-        if (!session) {
-          return res.status(404).json({
-            error: 'Session not found'
-          });
-        }
-
-        // Read the actual conversation file
-        const content = await fs.readFile(session.filePath, 'utf8');
-        const lines = content.trim().split('\n').filter(line => line.trim());
-        const rawMessages = lines.map(line => {
-          try {
-            return JSON.parse(line);
-          } catch {
-            return null;
-          }
-        }).filter(Boolean);
-
-        // Extract actual messages from Claude Code format
-        const messages = rawMessages.map(item => {
-          if (item.message && item.message.role) {
-            let content = '';
-
-            if (typeof item.message.content === 'string') {
-              content = item.message.content;
-            } else if (Array.isArray(item.message.content)) {
-              content = item.message.content
-                .map(block => {
-                  if (block.type === 'text') return block.text;
-                  if (block.type === 'tool_use') return `[Tool: ${block.name}]`;
-                  if (block.type === 'tool_result') return '[Tool Result]';
-                  return block.content || '';
-                })
-                .join('\n');
-            } else if (item.message.content && item.message.content.length) {
-              content = item.message.content[0].text || '';
-            }
-
-            return {
-              role: item.message.role,
-              content: content || 'No content',
-              timestamp: item.timestamp,
-              type: item.type,
-            };
-          }
-          return null;
-        }).filter(Boolean);
-
-        res.json({
-          session: session,
-          messages: messages,
-          timestamp: new Date().toISOString(),
-        });
-
-      } catch (error) {
-        console.error(chalk.red('Error loading session details:'), error.message);
-        res.status(500).json({
-          error: 'Failed to load session details'
-        });
-      }
-    });
+    // Remove duplicate endpoint - this conflicts with the correct one above
 
     // System health endpoint
     this.app.get('/api/system/health', (req, res) => {
@@ -792,6 +839,16 @@ class ClaudeAnalytics {
           timestamp: Date.now()
         });
       }
+    });
+
+    // Version endpoint
+    this.app.get('/api/version', (req, res) => {
+      res.json({
+        version: packageJson.version,
+        name: packageJson.name,
+        description: packageJson.description,
+        timestamp: Date.now()
+      });
     });
 
     // Performance metrics endpoint
