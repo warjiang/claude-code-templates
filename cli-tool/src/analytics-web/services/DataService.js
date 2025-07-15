@@ -131,11 +131,12 @@ class DataService {
   }
 
   /**
-   * Get session data for detailed analysis
-   * @returns {Promise<Object>} Session data
+   * Get session data for Max plan usage tracking
+   * @returns {Promise<Object>} Session data including timer and usage info
    */
   async getSessionData() {
-    return await this.cachedFetch('/api/session/data');
+    const cacheDuration = this.realTimeEnabled ? 30000 : 5000; // 30s with real-time, 5s without
+    return await this.cachedFetch('/api/session/data', { cacheDuration });
   }
 
   /**

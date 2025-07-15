@@ -125,6 +125,7 @@ class ConversationAnalyzer {
             status: stateCalculator.determineConversationStatus(parsedMessages, stats.mtime),
             conversationState: stateCalculator.determineConversationState(parsedMessages, stats.mtime),
             statusSquares: await this.getCachedStatusSquares(filePath, parsedMessages),
+            parsedMessages: parsedMessages, // Include parsed messages for session analysis
           };
 
           conversations.push(conversation);

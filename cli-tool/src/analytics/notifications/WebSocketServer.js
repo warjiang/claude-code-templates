@@ -6,8 +6,9 @@ const WebSocket = require('ws');
 const chalk = require('chalk');
 
 class WebSocketServer {
-  constructor(httpServer, options = {}) {
+  constructor(httpServer, options = {}, performanceMonitor = null) {
     this.httpServer = httpServer;
+    this.performanceMonitor = performanceMonitor;
     this.options = {
       port: options.port || 3334,
       path: options.path || '/ws',
@@ -86,6 +87,15 @@ class WebSocketServer {
     this.clients.set(clientId, clientInfo);
     console.log(chalk.green(`🔗 WebSocket client connected: ${clientId} (${this.clients.size} total)`));
 
+    // Track WebSocket connection in performance monitor
+    if (this.performanceMonitor) {
+      this.performanceMonitor.recordWebSocket('connection', {
+        clientId,
+        totalClients: this.clients.size,
+        ip: request.socket.remoteAddress
+      });
+    }
+
     // Send welcome message
     this.sendToClient(clientId, {
       type: 'connection',
@@ -130,6 +140,15 @@ class WebSocketServer {
       if (!client) return;
 
       console.log(chalk.cyan(`📨 Message from ${clientId}:`), data.type);
+
+      // Track message in performance monitor
+      if (this.performanceMonitor) {
+        this.performanceMonitor.recordWebSocket('message_received', {
+          clientId,
+          messageType: data.type,
+          messageSize: message.length
+        });
+      }
 
       switch (data.type) {
         case 'subscribe':
@@ -208,6 +227,16 @@ class WebSocketServer {
     this.clients.delete(clientId);
     console.log(chalk.yellow(`🔗 WebSocket client disconnected: ${clientId} (${this.clients.size} remaining)`));
     console.log(chalk.gray(`   Close code: ${code}, Reason: ${reason || 'No reason provided'}`));
+
+    // Track disconnection in performance monitor
+    if (this.performanceMonitor) {
+      this.performanceMonitor.recordWebSocket('disconnection', {
+        clientId,
+        closeCode: code,
+        totalClients: this.clients.size,
+        reason: reason?.toString() || 'No reason provided'
+      });
+    }
   }
 
   /**

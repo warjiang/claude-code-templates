@@ -114,6 +114,95 @@ npx create-claude-config     # Create-style command
 | `--mcps-stats` | Analyze MCP server configurations | `--mcps-stats` |
 | `--help` | Show help information | `--help` |
 
+## 🏗️ Modular Architecture
+
+The analytics dashboard is built with a modern, scalable modular architecture designed for performance and maintainability.
+
+### Backend Architecture
+
+#### Core Modules
+- **`StateCalculator`** - Advanced conversation state detection with real-time analysis
+- **`ProcessDetector`** - Running process detection and conversation linking
+- **`ConversationAnalyzer`** - Message parsing, token counting, and conversation analysis
+- **`FileWatcher`** - Real-time file system monitoring with efficient change detection
+- **`DataCache`** - Multi-level caching system with smart invalidation strategies
+
+#### Data Layer
+- **`DataCache`** - Intelligent caching with file content, parsed data, and computation result caching
+- **Performance Monitoring** - Request tracking, memory monitoring, and system health metrics
+
+#### Notification System
+- **`WebSocketServer`** - Real-time WebSocket communication with client management
+- **`NotificationManager`** - Event-driven notification system with subscription management
+- **Real-time Updates** - Live conversation state changes and data refresh notifications
+
+#### Performance & Monitoring
+- **`PerformanceMonitor`** - Comprehensive performance tracking and system health monitoring
+- **Express Middleware** - Request timing, error tracking, and API performance metrics
+- **WebSocket Monitoring** - Connection tracking, message metrics, and client health monitoring
+
+### Frontend Architecture
+
+#### Modular Components
+- **`Dashboard`** - Main orchestration component with state management integration
+- **`ConversationTable`** - Interactive conversation display with real-time status updates
+- **`Charts`** - Dynamic data visualization with Chart.js integration
+- **`StateService`** - Reactive state management with subscriber patterns
+- **`DataService`** - API communication with intelligent caching and real-time integration
+- **`WebSocketService`** - Real-time communication with automatic reconnection
+
+#### Real-time Features
+- **Live State Detection** - Real-time conversation status: "Claude working...", "User typing...", "Awaiting input..."
+- **Auto-refresh** - Smart polling with WebSocket fallback for seamless data updates
+- **Browser Notifications** - Desktop notifications for important state changes
+- **Responsive Design** - Mobile-friendly interface with real-time data synchronization
+
+### Performance Optimizations
+
+#### Caching Strategy
+- **File Content Cache** - Reduces disk I/O with timestamp-based invalidation
+- **Parsed Data Cache** - Stores analyzed conversation data with dependency tracking
+- **API Response Cache** - Client-side caching with TTL and smart refresh
+- **Computation Cache** - Caches expensive calculations with automatic invalidation
+
+#### Real-time Efficiency
+- **WebSocket Integration** - Eliminates polling overhead for live updates
+- **Smart Refresh** - Only updates changed data with differential loading
+- **Process Detection** - Efficient system process monitoring without performance impact
+- **Memory Management** - Automatic cleanup of old metrics and cached data
+
+### Testing Framework
+
+#### Comprehensive Test Suite
+- **Unit Tests** - Individual module testing with 80%+ coverage requirement
+- **Integration Tests** - End-to-end system testing with real data scenarios
+- **Performance Tests** - Load testing and performance regression detection
+- **WebSocket Tests** - Real-time communication testing with mock clients
+
+#### Test Coverage
+- **Backend Modules**: StateCalculator, DataCache, WebSocketServer, PerformanceMonitor
+- **Frontend Services**: DataService, StateService, WebSocketService  
+- **Integration Testing**: Complete analytics system with real conversation data
+- **Performance Testing**: Concurrent operations, memory usage, and response times
+
+### Development Benefits
+
+#### Scalability
+- **Modular Design** - Easy to extend with new features and integrations
+- **Dependency Injection** - Loose coupling for flexible testing and development
+- **Event-driven Architecture** - Scalable notification system for future enhancements
+
+#### Maintainability  
+- **Separation of Concerns** - Clear boundaries between data, business logic, and presentation
+- **Comprehensive Logging** - Detailed performance and error tracking for debugging
+- **Type Safety** - Consistent error handling and data validation throughout
+
+#### Performance
+- **Multi-level Caching** - Optimized data access patterns with intelligent invalidation
+- **Real-time Updates** - WebSocket-based communication eliminates polling overhead
+- **Memory Optimization** - Automatic cleanup and configurable memory thresholds
+- **Request Monitoring** - Complete visibility into system performance and bottlenecks
+
 ## Safety Features
 
 - **Automatic Backups**: Existing files are backed up before changes

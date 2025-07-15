@@ -152,6 +152,13 @@ class Dashboard {
           </div>
         </div>
 
+        <!-- Session Timer Section -->
+        <div class="session-timer-section">
+          <div id="session-timer-container">
+            <!-- SessionTimer component will be mounted here -->
+          </div>
+        </div>
+
         <!-- Charts Section -->
         <div class="charts-section">
           <div class="chart-container">
@@ -205,6 +212,17 @@ class Dashboard {
    * Initialize child components
    */
   async initializeComponents() {
+    // Initialize SessionTimer
+    const sessionTimerContainer = this.container.querySelector('#session-timer-container');
+    if (sessionTimerContainer && window.SessionTimer) {
+      this.components.sessionTimer = new SessionTimer(
+        sessionTimerContainer,
+        this.dataService,
+        this.stateService
+      );
+      await this.components.sessionTimer.initialize();
+    }
+
     // Initialize ConversationTable
     const tableContainer = this.container.querySelector('#conversations-table');
     this.components.conversationTable = new ConversationTable(
