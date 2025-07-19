@@ -10,6 +10,8 @@
 
 🌐 **[Browse Templates Online](https://davila7.github.io/claude-code-templates/)** - Explore all available templates with interactive previews and installation commands.
 
+<img width="1155" height="855" alt="Screenshot 2025-07-19 at 08 45 05" src="https://github.com/user-attachments/assets/72b89472-890f-40a1-b89f-28441e6a8ce4" />
+
 ## 📋 Quick Start
 
 ```bash
