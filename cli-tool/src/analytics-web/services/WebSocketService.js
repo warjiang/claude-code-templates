@@ -8,7 +8,7 @@ class WebSocketService {
     this.url = null;
     this.isConnected = false;
     this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 5;
+    this.maxReconnectAttempts = 1; // Reduce attempts to minimize console noise
     this.reconnectDelay = 1000;
     this.maxReconnectDelay = 30000;
     this.heartbeatInterval = null;
@@ -17,7 +17,7 @@ class WebSocketService {
     this.eventListeners = new Map();
     this.subscriptions = new Set();
     this.messageQueue = [];
-    this.autoReconnect = true;
+    this.autoReconnect = false; // Disable auto-reconnect to reduce console spam
     
     // Message ID tracking for responses
     this.messageId = 0;
@@ -64,7 +64,7 @@ class WebSocketService {
         this.ws.onerror = (event) => {
           this.handleError(event);
           if (!this.isConnected) {
-            reject(new Error('WebSocket connection failed'));
+            reject(new Error(`WebSocket connection failed to ${this.url}`));
           }
         };
         
@@ -152,7 +152,7 @@ class WebSocketService {
    * @param {CloseEvent} event - Close event
    */
   handleClose(event) {
-    console.log('🔌 WebSocket disconnected:', event.code, event.reason);
+    console.info('ℹ️ WebSocket disconnected (polling mode active)');
     this.isConnected = false;
     this.stopHeartbeat();
     
@@ -170,7 +170,7 @@ class WebSocketService {
    * @param {Event} event - Error event
    */
   handleError(event) {
-    console.error('❌ WebSocket error:', event);
+    console.warn('⚠️ WebSocket connection failed (using polling mode instead)');
     this.emit('error', { event });
   }
 

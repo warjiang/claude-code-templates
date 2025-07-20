@@ -576,7 +576,8 @@ class ConversationAnalyzer {
     const totalFileSize = conversations.reduce((sum, conv) => sum + conv.fileSize, 0);
 
     // Calculate real Claude sessions (5-hour periods)
-    const claudeSessions = await this.calculateClaudeSessions(conversations);
+    const claudeSessionsResult = await this.calculateClaudeSessions(conversations);
+    const claudeSessions = claudeSessionsResult?.total || 0;
 
     return {
       totalConversations,
@@ -585,8 +586,11 @@ class ConversationAnalyzer {
       activeProjects,
       avgTokensPerConversation,
       totalFileSize: this.formatBytes(totalFileSize),
+      dataSize: this.formatBytes(totalFileSize), // Alias for original dashboard compatibility
       lastActivity: conversations.length > 0 ? conversations[0].lastModified : null,
       claudeSessions,
+      claudeSessionsDetail: claudeSessions > 0 ? `${claudeSessions} session${claudeSessions > 1 ? 's' : ''}` : 'no sessions',
+      claudeSessionsFullData: claudeSessionsResult, // Keep full session data for detailed analysis
     };
   }
 

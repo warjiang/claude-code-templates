@@ -1,0 +1,197 @@
+/**
+ * Sidebar - Minimalist navigation sidebar for the analytics dashboard
+ * Provides navigation between Dashboard and Agents sections
+ */
+class Sidebar {
+  constructor(container, onNavigate) {
+    this.container = container;
+    this.onNavigate = onNavigate;
+    this.currentPage = 'dashboard';
+    this.isCollapsed = true; // Start collapsed for minimal design
+    this.hoverTimeout = null;
+    
+    this.init();
+  }
+
+  /**
+   * Initialize the sidebar
+   */
+  init() {
+    this.render();
+    this.bindEvents();
+  }
+
+  /**
+   * Render the sidebar structure
+   */
+  render() {
+    this.container.innerHTML = `
+      <nav class="sidebar ${this.isCollapsed ? 'collapsed' : ''}">
+        <div class="sidebar-header">
+          <div class="logo">
+            <div class="logo-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/>
+              </svg>
+            </div>
+            <span class="logo-text">Claude Analytics</span>
+          </div>
+        </div>
+        
+        <div class="sidebar-content">
+          <ul class="nav-menu">
+            <li class="nav-item ${this.currentPage === 'dashboard' ? 'active' : ''}" data-page="dashboard" title="Dashboard">
+              <a href="#" class="nav-link">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                  </svg>
+                </div>
+                <span class="nav-text">Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item ${this.currentPage === 'agents' ? 'active' : ''}" data-page="agents" title="Agent Conversations">
+              <a href="#" class="nav-link">
+                <div class="nav-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+                  </svg>
+                </div>
+                <span class="nav-text">Conversations</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="sidebar-footer">
+          <div class="connection-status" title="Connection Status">
+            <div class="status-indicator">
+              <span class="status-dot ${this.getConnectionStatus()}"></span>
+              <span class="status-text">Live</span>
+            </div>
+          </div>
+        </div>
+      </nav>
+    `;
+  }
+
+  /**
+   * Bind event listeners
+   */
+  bindEvents() {
+    const sidebar = this.container.querySelector('.sidebar');
+    
+    // Navigation items
+    const navItems = this.container.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = item.getAttribute('data-page');
+        this.navigateToPage(page);
+      });
+    });
+
+    // Hover to expand when collapsed
+    sidebar.addEventListener('mouseenter', () => {
+      if (this.isCollapsed) {
+        this.expandOnHover();
+      }
+    });
+
+    sidebar.addEventListener('mouseleave', () => {
+      if (this.isCollapsed) {
+        this.collapseOnLeave();
+      }
+    });
+  }
+
+  /**
+   * Set active page (visual update only)
+   * @param {string} page - Page identifier
+   */
+  setActivePage(page) {
+    // Update active state visually
+    const navItems = this.container.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+      item.classList.toggle('active', item.getAttribute('data-page') === page);
+    });
+    
+    this.currentPage = page;
+  }
+
+  /**
+   * Handle navigation click and notify parent
+   * @param {string} page - Page identifier
+   */
+  navigateToPage(page) {
+    if (page === this.currentPage) return;
+    
+    console.log(`🖱️ Sidebar navigation clicked: ${page}`);
+    
+    // Notify parent component for actual navigation
+    if (this.onNavigate) {
+      this.onNavigate(page);
+    }
+  }
+
+  /**
+   * Expand sidebar on hover
+   */
+  expandOnHover() {
+    if (this.hoverTimeout) {
+      clearTimeout(this.hoverTimeout);
+    }
+    
+    const sidebar = this.container.querySelector('.sidebar');
+    sidebar.classList.add('hover-expanded');
+  }
+
+  /**
+   * Collapse sidebar when mouse leaves
+   */
+  collapseOnLeave() {
+    this.hoverTimeout = setTimeout(() => {
+      const sidebar = this.container.querySelector('.sidebar');
+      sidebar.classList.remove('hover-expanded');
+    }, 200); // Small delay to prevent flickering
+  }
+
+  /**
+   * Get connection status class
+   * @returns {string} Status class
+   */
+  getConnectionStatus() {
+    // This would normally check actual connection status
+    return 'connected';
+  }
+
+  /**
+   * Update connection status
+   * @param {string} status - Connection status
+   */
+  updateConnectionStatus(status) {
+    const statusDot = this.container.querySelector('.status-dot');
+    const statusText = this.container.querySelector('.status-text');
+    
+    if (statusDot) {
+      statusDot.className = `status-dot ${status}`;
+    }
+    
+    if (statusText) {
+      statusText.textContent = status === 'connected' ? 'Live' : 'Offline';
+    }
+  }
+
+  /**
+   * Destroy sidebar
+   */
+  destroy() {
+    // Clean up event listeners and DOM
+    this.container.innerHTML = '';
+  }
+}
+
+// Export for module use
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Sidebar;
+}

@@ -91,17 +91,19 @@ class DataService {
 
       return data;
     } catch (error) {
-      console.error(`Error fetching ${endpoint}:`, error);
+      console.warn(`Server not available for ${endpoint}:`, error.message);
       
       // Return cached data if available, even if stale
       if (this.cache.has(cacheKey)) {
-        console.warn('Using stale cached data due to fetch error');
+        console.log('Using cached data from previous request');
         return this.cache.get(cacheKey).data;
       }
       
+      // No fallback data - throw error if server unavailable
       throw error;
     }
   }
+
 
   /**
    * Get conversations data
@@ -109,6 +111,19 @@ class DataService {
    */
   async getConversations() {
     return await this.cachedFetch('/api/data');
+  }
+
+  /**
+   * Get paginated conversations
+   * @param {number} page - Page number (0-based)
+   * @param {number} limit - Number of conversations per page
+   * @returns {Promise<Object>} Paginated conversations data
+   */
+  async getConversationsPaginated(page = 0, limit = 10) {
+    const cacheDuration = this.realTimeEnabled ? 30000 : 5000;
+    return await this.cachedFetch(`/api/conversations?page=${page}&limit=${limit}`, {
+      cacheDuration
+    });
   }
 
   /**
@@ -181,7 +196,11 @@ class DataService {
    * Setup WebSocket integration for real-time updates
    */
   setupWebSocketIntegration() {
-    if (!this.webSocketService) return;
+    if (!this.webSocketService) {
+      console.log('⚠️ No WebSocket service available - starting polling immediately');
+      this.startFallbackPolling();
+      return;
+    }
     
     console.log('🔌 Setting up WebSocket integration for DataService');
     
@@ -202,6 +221,7 @@ class DataService {
       console.log('✅ WebSocket connected - enabling real-time updates');
       this.realTimeEnabled = true;
       this.subscribeToChannels();
+      this.stopFallbackPolling(); // Stop polling when WebSocket connects
     });
     
     this.webSocketService.on('disconnected', () => {
@@ -209,6 +229,14 @@ class DataService {
       this.realTimeEnabled = false;
       this.startFallbackPolling();
     });
+    
+    // Start polling immediately as fallback, stop if WebSocket connects successfully
+    setTimeout(() => {
+      if (!this.realTimeEnabled) {
+        console.log('⚠️ WebSocket not connected after timeout - starting fallback polling');
+        this.startFallbackPolling();
+      }
+    }, 1000); // Give WebSocket 1 second to connect
   }
   
   /**
@@ -293,7 +321,17 @@ class DataService {
   startFallbackPolling() {
     if (!this.refreshInterval) {
       console.log('🔄 Starting fallback polling due to WebSocket disconnect');
-      this.startPeriodicRefresh(10000); // More frequent polling as fallback
+      this.startPeriodicRefresh(5000); // Very frequent polling as fallback (5 seconds)
+    }
+  }
+  
+  /**
+   * Stop fallback polling when WebSocket reconnects
+   */
+  stopFallbackPolling() {
+    if (this.refreshInterval) {
+      console.log('🛑 Stopping fallback polling - WebSocket reconnected');
+      this.stopPeriodicRefresh();
     }
   }
 

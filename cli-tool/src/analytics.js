@@ -518,6 +518,21 @@ class ClaudeAnalytics {
   }
 
   setupWebServer() {
+    // Add CORS middleware
+    this.app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+      
+      // Handle preflight requests
+      if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+        return;
+      }
+      
+      next();
+    });
+    
     // Add performance monitoring middleware
     this.app.use(this.performanceMonitor.createExpressMiddleware());
     
@@ -554,6 +569,39 @@ class ClaudeAnalytics {
           timestamp: new Date().toISOString(),
           lastUpdate: new Date().toLocaleString(),
         });
+      }
+    });
+
+    // Paginated conversations endpoint
+    this.app.get('/api/conversations', async (req, res) => {
+      try {
+        const page = parseInt(req.query.page) || 0;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = page * limit;
+        
+        // Sort conversations by lastModified (most recent first)
+        const sortedConversations = [...this.data.conversations]
+          .sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+        
+        const paginatedConversations = sortedConversations.slice(offset, offset + limit);
+        const totalCount = this.data.conversations.length;
+        const hasMore = offset + limit < totalCount;
+        
+        res.json({
+          conversations: paginatedConversations,
+          pagination: {
+            page,
+            limit,
+            offset,
+            totalCount,
+            hasMore,
+            currentCount: paginatedConversations.length
+          },
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error getting paginated conversations:', error);
+        res.status(500).json({ error: 'Failed to get conversations' });
       }
     });
 
@@ -603,6 +651,31 @@ class ClaudeAnalytics {
         res.json({ activeStates, timestamp: Date.now() });
       } catch (error) {
         res.status(500).json({ error: 'Failed to get conversation states' });
+      }
+    });
+
+    // Conversation messages endpoint
+    this.app.get('/api/conversations/:id/messages', async (req, res) => {
+      try {
+        const conversationId = req.params.id;
+        const conversation = this.data.conversations.find(conv => conv.id === conversationId);
+        
+        if (!conversation) {
+          return res.status(404).json({ error: 'Conversation not found' });
+        }
+        
+        // Read messages from the JSONL file
+        const messages = await this.conversationAnalyzer.getParsedConversation(conversation.filePath);
+        
+        res.json({
+          conversationId,
+          messages,
+          messageCount: messages.length,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Error loading conversation messages:', error);
+        res.status(500).json({ error: 'Failed to load conversation messages' });
       }
     });
 
@@ -1172,6 +1245,14 @@ async function runAnalytics(options = {}) {
   }
 }
 
+
+// If this file is executed directly, run analytics
+if (require.main === module) {
+  runAnalytics().catch(error => {
+    console.error(chalk.red('❌ Analytics startup failed:'), error);
+    process.exit(1);
+  });
+}
 
 module.exports = {
   runAnalytics

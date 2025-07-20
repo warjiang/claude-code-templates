@@ -1,91 +1,60 @@
-
-> claude-code-templates@1.8.0 start
-> node bin/create-claude-config.js --analytics
-
-
- ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗
-██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝
-██║     ██║     ███████║██║   ██║██║  ██║█████╗  
-██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝  
-╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗
- ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝
-
- ██████╗ ██████╗ ██████╗ ███████╗
-██╔════╝██╔═══██╗██╔══██╗██╔════╝
-██║     ██║   ██║██║  ██║█████╗  
-██║     ██║   ██║██║  ██║██╔══╝  
-╚██████╗╚██████╔╝██████╔╝███████╗
- ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
-
-████████╗███████╗███╗   ███╗██████╗ ██╗      █████╗ ████████╗███████╗███████╗
-╚══██╔══╝██╔════╝████╗ ████║██╔══██╗██║     ██╔══██╗╚══██╔══╝██╔════╝██╔════╝
-   ██║   █████╗  ██╔████╔██║██████╔╝██║     ███████║   ██║   █████╗  ███████╗
-   ██║   ██╔══╝  ██║╚██╔╝██║██╔═══╝ ██║     ██╔══██║   ██║   ██╔══╝  ╚════██║
-   ██║   ███████╗██║ ╚═╝ ██║██║     ███████╗██║  ██║   ██║   ███████╗███████║
-   ╚═╝   ╚══════╝╚═╝     ╚═╝╚═╝     ╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚══════╝
-
-     🚀 Setup Claude Code for any project language 🚀
 📊 Starting Claude Code Analytics Dashboard...
 📊 Starting performance monitoring...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
 👀 Setting up file watchers for real-time updates...
-❌ Error recorded: uncaught_exception - listen EADDRINUSE: address already in use :::3333
+🚀 Analytics dashboard started at http://localhost:3333
+🔌 Initializing WebSocket server...
+✅ WebSocket server initialized on /ws
+📢 Initializing Notification Manager...
+✅ Notification Manager initialized
+✅ WebSocket and notifications initialized
+🌐 Opening browser...
+✅ Analytics dashboard is running!
+Press Ctrl+C to stop the server
 🔄 Conversation file changed, updating data...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversations across 4 projects
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversations across 4 projects
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
-Found 93 conversation files
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
@@ -93,9 +62,105 @@ Found 93 conversations across 4 projects
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+🗑️  Evicted 356 old cache entries
+🗑️  Enforced size limits, evicted 427 entries
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+🔄 Conversation file changed, updating data...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+🔄 Conversation file changed, updating data...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 🔄 Conversation file changed, updating data...
@@ -104,46 +169,117 @@ Found 93 conversation files
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+🗑️  Evicted 258 old cache entries
+🗑️  Enforced size limits, evicted 521 entries
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
 🔄 Conversation file changed, updating data...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+🔄 Conversation file changed, updating data...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+🔄 Conversation file changed, updating data...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
@@ -151,176 +287,182 @@ Found 93 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
 ✅ Data updated
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
+🗑️  Evicted 292 old cache entries
+🗑️  Enforced size limits, evicted 491 entries
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+🔄 Conversation file changed, updating data...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+🔄 Conversation file changed, updating data...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 192MB
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 311MB
 
 📊 Performance Report:
 Uptime: 60s
-Memory: 192MB heap used
-Errors: 2 in last 5 minutes
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 198MB
+Requests: 139 (139 success, 0 errors)
+Avg Response Time: 57.43ms
+Memory: 311MB heap used
+Errors: 1 in last 5 minutes
+🗑️  Evicted 388 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+🗑️  Evicted 1 old cache entries
+🗑️  Evicted 1 old cache entries
+🗑️  Evicted 2 old cache entries
 
 📊 Performance Report:
 Uptime: 120s
-Memory: 198MB heap used
-Errors: 3 in last 5 minutes
+Requests: 401 (401 success, 0 errors)
+Avg Response Time: 31.07ms
+Memory: 23MB heap used
+Errors: 1 in last 5 minutes
+🗑️  Evicted 3 old cache entries
 ⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 🔄 Conversation file changed, updating data...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+🗑️  Evicted 104 old cache entries
+🗑️  Enforced size limits, evicted 212 entries
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
 ✅ Data updated
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
@@ -328,124 +470,117 @@ Found 93 conversations across 4 projects
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
 🔄 Conversation file changed, updating data...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversations across 4 projects
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversations across 4 projects
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
+Found 130 conversations across 4 projects
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+🗑️  Evicted 258 old cache entries
+🗑️  Enforced size limits, evicted 525 entries
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 231MB
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 334MB
 
 📊 Performance Report:
 Uptime: 180s
-Memory: 231MB heap used
-Errors: 4 in last 5 minutes
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Requests: 542 (542 success, 0 errors)
+Avg Response Time: 29.52ms
+Memory: 334MB heap used
+Errors: 2 in last 5 minutes
+🗑️  Evicted 294 old cache entries
+🗑️  Enforced size limits, evicted 490 entries
+🗑️  Evicted 26 old cache entries
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 🔄 Conversation file changed, updating data...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
 ✅ Data updated
 🔄 Conversation file changed, updating data...
 📊 Analyzing Claude Code data...
@@ -453,1137 +588,586 @@ Found 93 conversations across 4 projects
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 214MB
+🗑️  Evicted 258 old cache entries
+🗑️  Enforced size limits, evicted 525 entries
 
 📊 Performance Report:
 Uptime: 240s
-Memory: 214MB heap used
-Errors: 5 in last 5 minutes
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Requests: 627 (627 success, 0 errors)
+Avg Response Time: 28.71ms
+Memory: 48MB heap used
+Errors: 2 in last 5 minutes
+🗑️  Evicted 26 old cache entries
 ⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 222MB
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+🗑️  Evicted 3 old cache entries
 
 📊 Performance Report:
 Uptime: 300s
-Memory: 222MB heap used
-Errors: 6 in last 5 minutes
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+Requests: 772 (770 success, 2 errors)
+Avg Response Time: 27.19ms
+Memory: 71MB heap used
+Errors: 2 in last 5 minutes
+🗑️  Evicted 6 old cache entries
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+🗑️  Evicted 285 old cache entries
+🗑️  Enforced size limits, evicted 500 entries
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 200MB
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+🗑️  Evicted 332 old cache entries
+🗑️  Enforced size limits, evicted 453 entries
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 309MB
 
 📊 Performance Report:
 Uptime: 360s
-Memory: 200MB heap used
-Errors: 5 in last 5 minutes
+Requests: 1000 (998 success, 2 errors)
+Avg Response Time: 32.24ms
+Memory: 309MB heap used
+Errors: 2 in last 5 minutes
+🗑️  Evicted 260 old cache entries
+🗑️  Enforced size limits, evicted 525 entries
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
 ⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+⏱️ Throttling data refresh notification
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
@@ -1592,172 +1176,524 @@ Found 93 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+🗑️  Evicted 260 old cache entries
+🗑️  Enforced size limits, evicted 525 entries
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 244MB
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+🗑️  Evicted 345 old cache entries
+🗑️  Enforced size limits, evicted 440 entries
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+🗑️  Evicted 260 old cache entries
+🗑️  Enforced size limits, evicted 525 entries
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 361MB
 
 📊 Performance Report:
 Uptime: 420s
-Memory: 244MB heap used
-Errors: 5 in last 5 minutes
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
+Requests: 930 (928 success, 2 errors)
+Avg Response Time: 35.82ms
+Memory: 361MB heap used
+Errors: 3 in last 5 minutes
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+🗑️  Evicted 260 old cache entries
+🗑️  Enforced size limits, evicted 525 entries
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
+✅ Data updated
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
 🔄 Conversation file changed, updating data...
 📊 Analyzing Claude Code data...
@@ -1765,858 +1701,1291 @@ Found 93 conversations across 4 projects
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
+Found 130 conversations across 4 projects
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
+Found 130 conversations across 4 projects
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+⏱️ Throttling data refresh notification
 ✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+🗑️  Evicted 258 old cache entries
+🗑️  Enforced size limits, evicted 525 entries
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 🔄 Conversation file changed, updating data...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 🔄 Conversation file changed, updating data...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+🔄 Conversation file changed, updating data...
+📊 Analyzing Claude Code data...
+📁 Project directory changed...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
 ✅ Data updated
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 211MB
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+⏱️ Throttling data refresh notification
+✅ Data updated
+🗑️  Evicted 327 old cache entries
+🗑️  Enforced size limits, evicted 456 entries
+🗑️  Evicted 26 old cache entries
 
 📊 Performance Report:
 Uptime: 480s
-Memory: 211MB heap used
-Errors: 5 in last 5 minutes
+Requests: 928 (926 success, 2 errors)
+Avg Response Time: 37ms
+Memory: 48MB heap used
+Errors: 2 in last 5 minutes
+🗑️  Evicted 1 old cache entries
 ⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 205MB
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
 
 📊 Performance Report:
 Uptime: 540s
-Memory: 205MB heap used
-Errors: 5 in last 5 minutes
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 194MB
+Requests: 1000 (999 success, 1 errors)
+Avg Response Time: 33.44ms
+Memory: 23MB heap used
+Errors: 2 in last 5 minutes
+🗑️  Evicted 3 old cache entries
+🗑️  Evicted 3 old cache entries
 
 📊 Performance Report:
 Uptime: 600s
-Memory: 194MB heap used
-Errors: 5 in last 5 minutes
+Requests: 1000 (998 success, 2 errors)
+Avg Response Time: 33.88ms
+Memory: 23MB heap used
+Errors: 2 in last 5 minutes
 ⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-⏱️  Periodic data refresh...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 200MB
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
 
 📊 Performance Report:
 Uptime: 660s
-Memory: 200MB heap used
-Errors: 5 in last 5 minutes
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
+Requests: 865 (863 success, 2 errors)
+Avg Response Time: 21.26ms
+Memory: 27MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 720s
+Requests: 911 (909 success, 2 errors)
+Avg Response Time: 18.16ms
+Memory: 26MB heap used
 ⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
-📊 Analyzing Claude Code data...
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 780s
+Requests: 942 (940 success, 2 errors)
+Avg Response Time: 15.85ms
+Memory: 26MB heap used
+
+📊 Performance Report:
+Uptime: 840s
+Requests: 868 (866 success, 2 errors)
+Avg Response Time: 16.23ms
+Memory: 25MB heap used
 ⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 900s
+Requests: 849 (849 success, 0 errors)
+Avg Response Time: 15.9ms
+Memory: 23MB heap used
+
+📊 Performance Report:
+Uptime: 960s
+Requests: 843 (843 success, 0 errors)
+Avg Response Time: 16.88ms
+Memory: 23MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 1020s
+Requests: 723 (723 success, 0 errors)
+Avg Response Time: 18.24ms
+Memory: 54MB heap used
+
+📊 Performance Report:
+Uptime: 1080s
+Requests: 585 (585 success, 0 errors)
+Avg Response Time: 21.02ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 1140s
+Requests: 446 (446 success, 0 errors)
+Avg Response Time: 25.6ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 1200s
+Requests: 309 (309 success, 0 errors)
+Avg Response Time: 34.55ms
+Memory: 54MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 1260s
+Requests: 178 (178 success, 0 errors)
+Avg Response Time: 53.17ms
+Memory: 54MB heap used
+
+📊 Performance Report:
+Uptime: 1320s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 61.92ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 1380s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 61.45ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 1440s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 63.88ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 1500s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 64.88ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 1560s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 65ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 1620s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 66.44ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 1680s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 68.2ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 1740s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 68.26ms
+Memory: 54MB heap used
+
+📊 Performance Report:
+Uptime: 1800s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 67.82ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 1860s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 67.19ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 1920s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 65.93ms
+Memory: 54MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 1980s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 63.46ms
+Memory: 54MB heap used
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-🔄 Conversation file changed, updating data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 333MB
+
+📊 Performance Report:
+Uptime: 2040s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 60.68ms
+Memory: 333MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 2100s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 58.68ms
+Memory: 53MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 2160s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 57.3ms
+Memory: 54MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 2220s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.28ms
+Memory: 24MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 2280s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.36ms
+Memory: 54MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 2340s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.54ms
+Memory: 53MB heap used
+
+📊 Performance Report:
+Uptime: 2400s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.92ms
+Memory: 54MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 2460s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.94ms
+Memory: 54MB heap used
+
+📊 Performance Report:
+Uptime: 2520s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.99ms
+Memory: 54MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 2580s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.13ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 2640s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.62ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 2700s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.68ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 2760s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.4ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 2820s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.03ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 2880s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.8ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 2940s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.53ms
+Memory: 54MB heap used
+
+📊 Performance Report:
+Uptime: 3000s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.98ms
+Memory: 54MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 3060s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 57.05ms
+Memory: 54MB heap used
+
+📊 Performance Report:
+Uptime: 3120s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.82ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 3180s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.14ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 3240s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.63ms
+Memory: 54MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 3300s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.27ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 3360s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.76ms
+Memory: 54MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 3420s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.72ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 3480s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.57ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 3540s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.11ms
+Memory: 54MB heap used
+
+📊 Performance Report:
+Uptime: 3600s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.22ms
+Memory: 54MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 3660s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.97ms
+Memory: 54MB heap used
+
+📊 Performance Report:
+Uptime: 3720s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 57.42ms
+Memory: 54MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 3780s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 57.49ms
+Memory: 24MB heap used
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-🔄 Conversation file changed, updating data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 336MB
+
+📊 Performance Report:
+Uptime: 3840s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 57.5ms
+Memory: 336MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 3900s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 58.25ms
+Memory: 53MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 3960s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 58.38ms
+Memory: 27MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 4020s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 57.38ms
+Memory: 53MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 4080s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.54ms
+Memory: 53MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 4140s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.83ms
+Memory: 53MB heap used
+
+📊 Performance Report:
+Uptime: 4200s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.83ms
+Memory: 23MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 4260s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.36ms
+Memory: 53MB heap used
+
+📊 Performance Report:
+Uptime: 4320s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 52.53ms
+Memory: 53MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 4380s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 51.38ms
+Memory: 23MB heap used
+
+📊 Performance Report:
+Uptime: 4440s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 52.92ms
+Memory: 53MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 4500s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.23ms
+Memory: 23MB heap used
+
+📊 Performance Report:
+Uptime: 4560s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.69ms
+Memory: 23MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 4620s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.6ms
+Memory: 23MB heap used
+
+📊 Performance Report:
+Uptime: 4680s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 58.16ms
+Memory: 53MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 4740s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.86ms
+Memory: 23MB heap used
+
+📊 Performance Report:
+Uptime: 4800s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.4ms
+Memory: 23MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 4860s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56.23ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 4920s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.36ms
+Memory: 53MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 4980s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.14ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 5040s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 55.46ms
+Memory: 53MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 5100s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 56ms
+Memory: 23MB heap used
+
+📊 Performance Report:
+Uptime: 5160s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.93ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 5220s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.97ms
+Memory: 24MB heap used
+
+📊 Performance Report:
+Uptime: 5280s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.86ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 5340s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 52.4ms
+Memory: 23MB heap used
+
+📊 Performance Report:
+Uptime: 5400s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.26ms
+Memory: 53MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 5460s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.35ms
+Memory: 23MB heap used
+
+📊 Performance Report:
+Uptime: 5520s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.46ms
+Memory: 24MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 5580s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.81ms
+Memory: 24MB heap used
 📁 Project directory changed...
 📊 Analyzing Claude Code data...
-📁 Project directory changed...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+✅ Data updated
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 335MB
+
+📊 Performance Report:
+Uptime: 5640s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 54.27ms
+Memory: 335MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-Found 93 conversation files
-Found 93 conversation files
-Found 93 conversation files
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
-📁 Project directory changed...
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 5700s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.64ms
+Memory: 23MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 5760s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.54ms
+Memory: 53MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
 📊 Analyzing Claude Code data...
-Found 93 conversation files
+Found 130 conversation files
 ✅ Data analysis complete
-Found 93 conversations across 4 projects
-✅ Data updated
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 5820s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 52.35ms
+Memory: 23MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 5880s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 52.07ms
+Memory: 22MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 5940s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 51.44ms
+Memory: 22MB heap used
+
+📊 Performance Report:
+Uptime: 6000s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 51.26ms
+Memory: 22MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 6060s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 51.75ms
+Memory: 22MB heap used
+
+📊 Performance Report:
+Uptime: 6120s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 51.32ms
+Memory: 22MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 348MB
+
+📊 Performance Report:
+Uptime: 6180s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 51.89ms
+Memory: 348MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 6240s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.53ms
+Memory: 23MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 6300s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 53.56ms
+Memory: 22MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 6360s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 58.21ms
+Memory: 22MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 6420s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 59.84ms
+Memory: 22MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 6480s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 60.05ms
+Memory: 22MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 348MB
+
+📊 Performance Report:
+Uptime: 6540s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 62.89ms
+Memory: 348MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 6600s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 63.86ms
+Memory: 23MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 6660s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 60.26ms
+Memory: 22MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 6720s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 59.19ms
+Memory: 22MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 362MB
+
+📊 Performance Report:
+Uptime: 6780s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 59.16ms
+Memory: 362MB heap used
+Errors: 2 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 6840s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 57.6ms
+Memory: 23MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 6900s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 58.56ms
+Memory: 22MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 6960s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 59.66ms
+Memory: 22MB heap used
+Errors: 1 in last 5 minutes
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+
+📊 Performance Report:
+Uptime: 7020s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 61.56ms
+Memory: 22MB heap used
+Errors: 1 in last 5 minutes
+
+📊 Performance Report:
+Uptime: 7080s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 62.11ms
+Memory: 22MB heap used
+⏱️  Periodic data refresh...
+📊 Analyzing Claude Code data...
+Found 130 conversation files
+✅ Data analysis complete
+Found 130 conversations across 4 projects
+📊 Data refreshed (source: data_refresh)
+🗑️  Evicted 390 old cache entries
+🗑️  Enforced size limits, evicted 420 entries
+❌ Error recorded: memory_threshold - Memory usage exceeded threshold: 361MB
+
+📊 Performance Report:
+Uptime: 7140s
+Requests: 160 (160 success, 0 errors)
+Avg Response Time: 59.71ms
+Memory: 361MB heap used
+Errors: 1 in last 5 minutes
