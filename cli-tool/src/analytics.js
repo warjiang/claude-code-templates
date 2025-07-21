@@ -494,6 +494,37 @@ class ClaudeAnalytics {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
+  /**
+   * Handle conversation file changes and detect new messages
+   * @param {string} conversationId - Conversation ID that changed
+   * @param {string} filePath - Path to the conversation file
+   */
+  async handleConversationChange(conversationId, filePath) {
+    try {
+      console.log(chalk.blue(`📨 Handling conversation change: ${conversationId}`));
+      
+      // Get the latest messages from the file
+      const messages = await this.conversationAnalyzer.getParsedConversation(filePath);
+      
+      if (messages && messages.length > 0) {
+        // Get the most recent message
+        const latestMessage = messages[messages.length - 1];
+        
+        // Send WebSocket notification for new message
+        if (this.notificationManager) {
+          this.notificationManager.notifyNewMessage(conversationId, latestMessage, {
+            totalMessages: messages.length,
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        console.log(chalk.green(`✅ Notified new message in conversation ${conversationId}`));
+      }
+    } catch (error) {
+      console.error(chalk.red(`Error handling conversation change for ${conversationId}:`), error);
+    }
+  }
+
   setupFileWatchers() {
     // Setup file watchers using the FileWatcher module
     this.fileWatcher.setupFileWatchers(
@@ -513,7 +544,11 @@ class ClaudeAnalytics {
         this.data.orphanProcesses = enrichmentResult.orphanProcesses;
       },
       // DataCache for cache invalidation
-      this.dataCache
+      this.dataCache,
+      // Conversation change callback for real-time message updates
+      async (conversationId, filePath) => {
+        await this.handleConversationChange(conversationId, filePath);
+      }
     );
   }
 
@@ -625,54 +660,110 @@ class ClaudeAnalytics {
       });
     });
 
-    // NEW: Ultra-fast endpoint ONLY for conversation states
+    // NEW: Ultra-fast endpoint for ALL conversation states
     this.app.get('/api/conversation-state', async (req, res) => {
       try {
-        // Only detect processes and calculate states - no file reading
+        // Detect running processes for accurate state calculation
         const runningProcesses = await this.processDetector.detectRunningClaudeProcesses();
-        const activeStates = [];
+        const activeStates = {};
         
-        // Quick state calculation for active conversations only
+        // Calculate states for ALL conversations, not just those with runningProcess
         for (const conversation of this.data.conversations) {
-          if (conversation.runningProcess) {
-            // Use existing state calculation but faster
-            const state = this.stateCalculator.quickStateCalculation(conversation, runningProcesses);
-            if (state) {
-              activeStates.push({
-                id: conversation.id,
-                project: conversation.project,
-                state: state,
-                timestamp: Date.now()
-              });
+          try {
+            let state;
+            
+            // First try quick calculation if there's a running process
+            if (conversation.runningProcess) {
+              state = this.stateCalculator.quickStateCalculation(conversation, runningProcesses);
             }
+            
+            // If no quick state found, use full state calculation
+            if (!state) {
+              // For conversations without running processes, use basic heuristics
+              const now = new Date();
+              const timeDiff = (now - new Date(conversation.lastModified)) / (1000 * 60); // minutes
+              
+              if (timeDiff < 5) {
+                state = 'Recently active';
+              } else if (timeDiff < 60) {
+                state = 'Idle';
+              } else if (timeDiff < 1440) { // 24 hours
+                state = 'Inactive';
+              } else {
+                state = 'Old';
+              }
+            }
+            
+            // Store state with conversation ID as key
+            activeStates[conversation.id] = state;
+            
+          } catch (error) {
+            console.error(`Error calculating state for conversation ${conversation.id}:`, error);
+            activeStates[conversation.id] = 'unknown';
           }
         }
         
         res.json({ activeStates, timestamp: Date.now() });
       } catch (error) {
+        console.error('Error getting conversation states:', error);
         res.status(500).json({ error: 'Failed to get conversation states' });
       }
     });
 
-    // Conversation messages endpoint
+    // Conversation messages endpoint with optional pagination
     this.app.get('/api/conversations/:id/messages', async (req, res) => {
       try {
         const conversationId = req.params.id;
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+        
         const conversation = this.data.conversations.find(conv => conv.id === conversationId);
         
         if (!conversation) {
           return res.status(404).json({ error: 'Conversation not found' });
         }
         
-        // Read messages from the JSONL file
-        const messages = await this.conversationAnalyzer.getParsedConversation(conversation.filePath);
+        // Read all messages from the JSONL file
+        const allMessages = await this.conversationAnalyzer.getParsedConversation(conversation.filePath);
         
-        res.json({
-          conversationId,
-          messages,
-          messageCount: messages.length,
-          timestamp: new Date().toISOString()
-        });
+        // If pagination parameters are provided, use pagination
+        if (!isNaN(page) && !isNaN(limit)) {
+          // Sort messages by timestamp (newest first for reverse pagination)
+          const sortedMessages = allMessages.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          
+          // Calculate pagination
+          const totalCount = sortedMessages.length;
+          const offset = page * limit;
+          const hasMore = offset + limit < totalCount;
+          
+          // Get page of messages (reverse order - newest first)
+          const paginatedMessages = sortedMessages.slice(offset, offset + limit);
+          
+          // For display, we want messages in chronological order (oldest first)
+          const messagesInDisplayOrder = [...paginatedMessages].reverse();
+          
+          res.json({
+            conversationId,
+            messages: messagesInDisplayOrder,
+            pagination: {
+              page,
+              limit,
+              offset,
+              totalCount,
+              hasMore,
+              currentCount: paginatedMessages.length
+            },
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          // Non-paginated response (backward compatibility)
+          res.json({
+            conversationId,
+            messages: allMessages,
+            messageCount: allMessages.length,
+            timestamp: new Date().toISOString()
+          });
+        }
       } catch (error) {
         console.error('Error loading conversation messages:', error);
         res.status(500).json({ error: 'Failed to load conversation messages' });
@@ -988,6 +1079,35 @@ class ClaudeAnalytics {
       }
     });
 
+    // Cache management endpoint
+    this.app.post('/api/cache/clear', (req, res) => {
+      try {
+        // Clear specific cache types or all
+        const { type } = req.body;
+        
+        if (!type || type === 'all') {
+          // Clear all caches
+          this.dataCache.invalidateComputations();
+          this.dataCache.caches.parsedConversations.clear();
+          this.dataCache.caches.fileContent.clear();
+          this.dataCache.caches.fileStats.clear();
+          console.log(chalk.yellow('🗑️  All caches cleared manually'));
+          res.json({ success: true, message: 'All caches cleared' });
+        } else if (type === 'conversations') {
+          // Clear only conversation-related caches
+          this.dataCache.caches.parsedConversations.clear();
+          this.dataCache.caches.fileContent.clear();
+          console.log(chalk.yellow('🗑️  Conversation caches cleared manually'));
+          res.json({ success: true, message: 'Conversation caches cleared' });
+        } else {
+          res.status(400).json({ error: 'Invalid cache type. Use "all" or "conversations"' });
+        }
+      } catch (error) {
+        console.error('Error clearing cache:', error);
+        res.status(500).json({ error: 'Failed to clear cache' });
+      }
+    });
+
     // Main dashboard route
     this.app.get('/', (req, res) => {
       res.sendFile(path.join(__dirname, 'analytics-web', 'index.html'));
@@ -1180,6 +1300,7 @@ class ClaudeAnalytics {
       };
     }
   }
+
 
   stop() {
     // Stop file watchers

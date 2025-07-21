@@ -216,6 +216,12 @@ class DataService {
       this.handleRealTimeStateChange(data);
     });
     
+    // Listen for new messages
+    this.webSocketService.on('new_message', (data) => {
+      console.log('📨 Real-time new message received');
+      this.handleNewMessage(data);
+    });
+    
     // Listen for connection status
     this.webSocketService.on('connected', () => {
       console.log('✅ WebSocket connected - enabling real-time updates');
@@ -278,6 +284,24 @@ class DataService {
     
     // Notify listeners
     this.notifyListeners('conversation_state_change', data);
+  }
+  
+  /**
+   * Handle real-time new message
+   * @param {Object} data - New message data
+   */
+  handleNewMessage(data) {
+    // Clear relevant cache entries for the affected conversation
+    this.clearCacheEntry(`/api/conversations/${data.conversationId}/messages`);
+    
+    // Notify listeners about the new message
+    this.notifyListeners('new_message', {
+      conversationId: data.conversationId,
+      message: data.message,
+      metadata: data.metadata
+    });
+    
+    console.log('📨 DataService: New message processed for conversation', data.conversationId);
   }
   
   /**
@@ -365,6 +389,39 @@ class DataService {
     return false;
   }
   
+  /**
+   * Clear server-side cache via API
+   * @param {string} type - Cache type to clear ('all', 'conversations', or undefined for all)
+   * @returns {Promise<boolean>} Success status
+   */
+  async clearServerCache(type = 'all') {
+    try {
+      console.log(`🗑️ Clearing server cache: ${type}`);
+      const response = await fetch('/api/cache/clear', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Server cache cleared:', result.message);
+        
+        // Also clear local cache
+        this.clearCache();
+        return true;
+      } else {
+        console.error('❌ Failed to clear server cache:', response.statusText);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Error clearing server cache:', error);
+      return false;
+    }
+  }
+
   /**
    * Set WebSocket service (for late initialization)
    * @param {WebSocketService} webSocketService - WebSocket service instance

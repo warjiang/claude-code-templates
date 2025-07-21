@@ -9,6 +9,7 @@
     <!-- Component Scripts -->
     <script src="components/SessionTimer.js"></script>
     <script src="components/ConversationTable.js"></script>
+    <script src="components/ToolDisplay.js"></script>
     <script src="components/Sidebar.js"></script>
     <script src="components/DashboardPage.js"></script>
     <script src="components/AgentsPage.js"></script>
@@ -1721,6 +1722,460 @@
             margin-top: 4px;
             border: 1px solid #30363d;
         }
+
+        /* Terminal Chat Styles */
+        .messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 8px;
+        }
+
+        .terminal-message {
+            display: flex;
+            width: 100%;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.3;
+        }
+
+        .terminal-message.user {
+            justify-content: flex-end;
+        }
+
+        .terminal-message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message-container {
+            max-width: 75%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: 6px;
+            padding: 10px 12px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .terminal-message.user .message-container {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+            border-left: 4px solid var(--text-success);
+        }
+
+        .terminal-message.assistant .message-container {
+            background: var(--bg-tertiary);
+            border: 1px solid rgba(213, 116, 85, 0.3);
+            border-left: 4px solid var(--text-accent);
+        }
+
+        /* Terminal window effect */
+        .message-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border-secondary);
+            border-radius: 6px 6px 0 0;
+        }
+
+        .terminal-message.user .message-container::before {
+            background: rgba(63, 185, 80, 0.2);
+        }
+
+        .terminal-message.assistant .message-container::before {
+            background: rgba(213, 116, 85, 0.2);
+        }
+
+        .message-prompt {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
+        .message-type-indicator {
+            display: inline-block;
+            border-radius: 2px;
+            width: 12px;
+            height: 12px;
+            vertical-align: baseline;
+            margin-top: 2px;
+        }
+
+        .type-icon {
+            display: none;
+        }
+
+        .type-label {
+            display: none;
+        }
+
+        /* Message Type Colors */
+        .type-user-input {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--text-success);
+            border: 1px solid rgba(63, 185, 80, 0.4);
+        }
+
+        .type-tool-result {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.4);
+        }
+
+        .type-response {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+
+        .type-tools-only {
+            background: rgba(249, 115, 22, 0.2);
+            color: #f97316;
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .type-response-tools {
+            background: rgba(213, 116, 85, 0.2);
+            color: var(--text-accent);
+            border: 1px solid rgba(213, 116, 85, 0.4);
+        }
+
+        .prompt-char {
+            color: var(--text-accent);
+            font-weight: bold;
+            width: 12px;
+        }
+
+        .terminal-message.user .prompt-char {
+            color: var(--text-success);
+        }
+
+        .message-metadata {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-left: auto;
+            flex-wrap: wrap;
+            line-height: 1;
+        }
+
+        .role-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            min-width: 50px;
+        }
+
+        .timestamp {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
+
+        .tokens {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-family: monospace;
+        }
+
+        .tool-count {
+            color: #f97316;
+            font-size: 0.7rem;
+            font-family: monospace;
+        }
+
+        .model {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-family: monospace;
+        }
+
+        .message-id {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            font-family: monospace;
+            opacity: 0.8;
+        }
+
+        .confirmation-context {
+            color: var(--text-info);
+            font-size: 0.75rem;
+            font-style: italic;
+            margin-left: 8px;
+        }
+
+        .message-body {
+            color: var(--text-primary);
+            padding: 4px 0 0 0;
+            font-size: 0.85rem;
+        }
+
+        .terminal-message.user .message-body {
+            text-align: left;
+        }
+
+        .terminal-message.assistant .message-body {
+            text-align: left;
+        }
+
+        /* Terminal Tool Styles */
+        .terminal-tool {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            margin: 4px 0;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            border-left: 2px solid transparent;
+        }
+
+        .terminal-tool .tool-prompt {
+            color: #f97316;
+            font-weight: bold;
+            width: 12px;
+        }
+
+        .terminal-tool.tool-use {
+            border-left-color: #f97316;
+        }
+
+        .terminal-tool.tool-result {
+            border-left-color: var(--text-success);
+        }
+
+        .terminal-tool.tool-result .tool-prompt {
+            color: var(--text-success);
+        }
+
+        .terminal-tool.tool-result.error {
+            border-left-color: var(--text-error);
+        }
+
+        .terminal-tool.tool-result.error .tool-prompt {
+            color: var(--text-error);
+        }
+
+        .terminal-tool.large {
+            border-left-color: #a855f7;
+        }
+
+        .terminal-tool.large .tool-prompt {
+            color: #a855f7;
+        }
+
+        .terminal-tool .tool-name {
+            color: var(--text-primary);
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .terminal-tool .tool-status {
+            color: var(--text-secondary);
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        .terminal-tool .tool-id {
+            color: var(--text-secondary);
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        .terminal-tool .tool-summary {
+            color: var(--text-secondary);
+            flex: 1;
+        }
+
+        .terminal-tool .tool-output {
+            color: var(--text-secondary);
+            flex: 1;
+            word-break: break-all;
+        }
+
+        /* Enhanced Bash Tool Styles */
+        .terminal-tool.bash-output {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid #30363d;
+        }
+
+        .terminal-tool.bash-output .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .bash-console {
+            width: 100%;
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .bash-command {
+            color: #58a6ff;
+            font-weight: 600;
+        }
+
+        .console-error {
+            color: #ff7b72;
+        }
+
+        .console-warning {
+            color: #f0883e;
+        }
+
+        .console-success {
+            color: #3fb950;
+        }
+
+        .console-info {
+            color: #58a6ff;
+        }
+
+        .console-command {
+            color: #d2a8ff;
+        }
+
+        .console-output {
+            color: #c9d1d9;
+        }
+
+        /* Compact Tool Display - Terminal Console Style */
+        .terminal-tool.compact {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            position: relative;
+        }
+
+        .terminal-tool.compact .tool-prompt {
+            font-size: 0.8rem;
+            margin-right: 6px;
+            color: #7d8590;
+        }
+
+        .terminal-tool.compact .tool-command {
+            color: #c9d1d9;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+        .tool-name-bold {
+            font-weight: 600;
+            color: #58a6ff;
+            font-size: 0.75rem;
+        }
+
+        .terminal-tool.compact .tool-output-compact {
+            margin-left: 12px;
+            margin-top: 4px;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            width: calc(100% - 12px);
+            color: #8b949e;
+        }
+
+        .terminal-tool.compact.error {
+            border-color: #f85149;
+            background: rgba(248, 81, 73, 0.05);
+        }
+
+        .terminal-tool.compact.error .tool-prompt {
+            color: #f85149;
+        }
+
+        /* Terminal console window effect */
+        .terminal-tool.compact::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background: #30363d;
+            border-radius: 50%;
+            box-shadow: -12px 0 #30363d, -24px 0 #30363d;
+        }
+
+        .json-output, .text-output {
+            margin: 0;
+            padding: 6px 8px;
+            background: #010409;
+            border: none;
+            border-radius: 2px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            color: #c9d1d9;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .json-output {
+            color: #79c0ff;
+        }
+
+        .continuation {
+            color: #7d8590;
+            font-style: italic;
+        }
+
+        .array-output, .object-output, .empty-output {
+            color: #7d8590;
+            font-style: italic;
+            font-size: 0.75rem;
+        }
+
+        /* Code blocks in message content */
+        .message-body .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-secondary);
+            border-radius: 3px;
+            padding: 8px;
+            margin: 4px 0;
+            font-size: 0.75rem;
+            overflow-x: auto;
+        }
+
+        .message-body .inline-code {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-secondary);
+            border-radius: 2px;
+            padding: 1px 4px;
+            font-size: 0.8em;
+        }
+
+        .empty-content {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 0.8rem;
+        }
         
         .back-btn {
             margin-bottom: 20px;
@@ -1967,6 +2422,14 @@
             width: 24px;
             height: 24px;
             flex-shrink: 0;
+            color: var(--text-secondary);
+        }
+        
+        .nav-item.active .nav-icon {
+            color: var(--text-accent);
+        }
+        
+        .sidebar.hover-expanded .nav-icon {
             color: inherit;
         }
         
@@ -2853,6 +3316,24 @@
             animation: spin 1s linear infinite;
         }
 
+        .loading-spinner.small {
+            width: 16px;
+            height: 16px;
+            border-width: 1px;
+        }
+
+        .messages-loading-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-primary);
+        }
+
         .retry-messages {
             background: var(--text-accent);
             color: white;
@@ -2939,6 +3420,54 @@
         .sidebar-conversation-badge.status-unknown {
             background: rgba(248, 81, 73, 0.2);
             color: var(--text-error);
+        }
+
+        /* Additional state classes for new conversation states */
+        .status-dot.status-typing {
+            background: var(--text-info);
+        }
+        
+        .status-dot.status-pending {
+            background: var(--text-warning);
+        }
+        
+        .status-dot.status-recent {
+            background: var(--text-success);
+        }
+        
+        .status-dot.status-inactive {
+            background: var(--text-secondary);
+        }
+        
+        .status-dot.status-old {
+            background: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .sidebar-conversation-badge.status-typing {
+            background: rgba(165, 214, 255, 0.2);
+            color: var(--text-info);
+        }
+        
+        .sidebar-conversation-badge.status-pending {
+            background: rgba(249, 115, 22, 0.2);
+            color: var(--text-warning);
+        }
+        
+        .sidebar-conversation-badge.status-recent {
+            background: rgba(63, 185, 80, 0.2);
+            color: var(--text-success);
+        }
+        
+        .sidebar-conversation-badge.status-inactive {
+            background: rgba(125, 133, 144, 0.2);
+            color: var(--text-secondary);
+        }
+        
+        .sidebar-conversation-badge.status-old {
+            background: rgba(125, 133, 144, 0.1);
+            color: var(--text-secondary);
+            opacity: 0.7;
         }
         
         /* Meta Item Styles (reused) */
@@ -3253,6 +3782,79 @@
             border-radius: 4px;
             cursor: pointer;
             font-family: inherit;
+        }
+
+        /* Conversation State Banner */
+        .conversation-state-banner {
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-primary);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            z-index: 100;
+        }
+
+        .state-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .state-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            transition: background-color 0.3s ease;
+        }
+
+        .state-dot.status-active {
+            background: var(--text-success);
+            animation: pulse 2s infinite;
+        }
+
+        .state-dot.status-waiting {
+            background: var(--text-info);
+        }
+
+        .state-dot.status-typing {
+            background: var(--text-warning);
+            animation: pulse 1.5s infinite;
+        }
+
+        .state-dot.status-working {
+            background: var(--text-accent);
+            animation: pulse 1s infinite;
+        }
+
+        .state-dot.status-idle {
+            background: var(--text-secondary);
+        }
+
+        .state-text {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .state-timestamp {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
         }
     </style>
 </head>

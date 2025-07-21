@@ -105,6 +105,43 @@ class NotificationManager {
   }
 
   /**
+   * Send new message notification for real-time updates
+   * @param {string} conversationId - Conversation ID
+   * @param {Object} message - New message object
+   * @param {Object} metadata - Additional metadata
+   */
+  notifyNewMessage(conversationId, message, metadata = {}) {
+    const notification = {
+      type: 'new_message',
+      conversationId,
+      message,
+      metadata,
+      timestamp: new Date().toISOString(),
+      id: this.generateNotificationId()
+    };
+
+    // Don't throttle new message notifications - they should be immediate
+    this.addToHistory(notification);
+
+    // Send via WebSocket
+    if (this.webSocketServer) {
+      this.webSocketServer.broadcast({
+        type: 'new_message',
+        data: {
+          conversationId,
+          message,
+          metadata
+        }
+      });
+    }
+
+    // Send to local subscribers
+    this.notifySubscribers('new_message', notification);
+
+    console.log(chalk.blue(`📨 New message notification sent for conversation ${conversationId}`));
+  }
+
+  /**
    * Send system status notification
    * @param {Object} status - System status
    * @param {string} level - Notification level (info, warning, error)

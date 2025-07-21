@@ -93,6 +93,21 @@ Monitor and optimize your Claude Code agents with our comprehensive analytics da
 - **Performance Monitoring**: Track Claude Code agent performance and optimization opportunities
 - **Usage Patterns**: Identify your most productive coding sessions and workflows
 
+### 🤖 Agent Chats Manager
+Monitor and analyze Claude agent interactions in real-time
+```mermaid
+graph TD
+    A[Claude Code writes message] --> B[.jsonl file changes]
+    B --> C[FileWatcher detects change]
+    C --> D[handleConversationChange]
+    D --> E[getParsedConversation]
+    E --> F[notifyNewMessage]
+    F --> G[WebSocketServer.broadcast]
+    G --> H[Frontend WebSocketService]
+    H --> I[AgentsPage.handleNewMessage]
+    I --> J[Updates UI in real time]
+```
+
 ### 🔍 Comprehensive Health Check
 Complete system validation and configuration verification:
 - **System Requirements**: Validate OS, Node.js, memory, and network connectivity

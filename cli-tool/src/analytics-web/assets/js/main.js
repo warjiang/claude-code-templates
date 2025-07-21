@@ -39,8 +39,11 @@ class AnalyticsDashboard {
   async initializeServices() {
     console.log('🔧 Initializing services...');
     
-    // Initialize DataService
-    this.services.data = new DataService();
+    // Initialize WebSocketService
+    this.services.webSocket = new WebSocketService();
+    
+    // Initialize DataService with WebSocket integration
+    this.services.data = new DataService(this.services.webSocket);
     
     // Initialize StateService
     this.services.state = new StateService();
@@ -48,7 +51,33 @@ class AnalyticsDashboard {
     // Initialize Charts service (placeholder)
     this.services.chart = new Charts(null, this.services.data, this.services.state);
     
-    // Start periodic data refresh
+    // Setup DataService -> StateService integration for real-time updates
+    this.services.data.addEventListener((type, data) => {
+      switch (type) {
+        case 'new_message':
+          // Route new message events to StateService which will notify AgentsPage
+          this.services.state.notifyListeners('new_message', data);
+          break;
+        case 'conversation_state_change':
+          // Route state changes to StateService
+          this.services.state.notifyListeners('conversation_state_change', data);
+          break;
+        case 'data_refresh':
+          // Route data refresh events to StateService
+          this.services.state.notifyListeners('data_refresh', data);
+          break;
+      }
+    });
+    
+    // Connect WebSocket (will fallback to polling if connection fails)
+    try {
+      await this.services.webSocket.connect();
+      console.log('✅ WebSocket connected successfully');
+    } catch (error) {
+      console.log('⚠️ WebSocket connection failed, falling back to polling');
+    }
+    
+    // Start periodic data refresh (will adjust based on WebSocket availability)
     this.services.data.startPeriodicRefresh();
     
     console.log('✅ Services initialized');

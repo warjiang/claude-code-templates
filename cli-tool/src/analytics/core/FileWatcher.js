@@ -20,13 +20,14 @@ class FileWatcher {
    * @param {Function} processRefreshCallback - Callback to refresh process data
    * @param {Object} dataCache - DataCache instance for invalidation
    */
-  setupFileWatchers(claudeDir, dataRefreshCallback, processRefreshCallback, dataCache = null) {
+  setupFileWatchers(claudeDir, dataRefreshCallback, processRefreshCallback, dataCache = null, conversationChangeCallback = null) {
     console.log(chalk.blue('👀 Setting up file watchers for real-time updates...'));
 
     this.claudeDir = claudeDir;
     this.dataRefreshCallback = dataRefreshCallback;
     this.processRefreshCallback = processRefreshCallback;
     this.dataCache = dataCache;
+    this.conversationChangeCallback = conversationChangeCallback;
 
     this.setupConversationWatcher();
     this.setupProjectWatcher();
@@ -47,11 +48,20 @@ class FileWatcher {
     });
 
     conversationWatcher.on('change', async (filePath) => {
-      console.log(chalk.yellow('🔄 Conversation file changed, updating data...'));
+      console.log(chalk.yellow(`🔄 Conversation file changed: ${filePath}`));
+      
+      // Extract conversation ID from file path
+      const conversationId = this.extractConversationId(filePath);
       
       // Invalidate cache for the changed file
       if (this.dataCache && filePath) {
         this.dataCache.invalidateFile(filePath);
+      }
+      
+      // Notify specific conversation change if callback exists
+      if (this.conversationChangeCallback && conversationId) {
+        console.log(chalk.blue(`📨 Notifying conversation change: ${conversationId}`));
+        await this.conversationChangeCallback(conversationId, filePath);
       }
       
       await this.triggerDataRefresh();
@@ -112,6 +122,36 @@ class FileWatcher {
     }, 30000); // Every 30 seconds (reduced from 10 seconds)
 
     this.intervals.push(processRefreshInterval);
+  }
+
+  /**
+   * Extract conversation ID from file path
+   * @param {string} filePath - Path to the conversation file
+   * @returns {string|null} Conversation ID or null if not found
+   */
+  extractConversationId(filePath) {
+    try {
+      // Handle different path formats:
+      // /Users/user/.claude/projects/PROJECT_NAME/conversation.jsonl -> PROJECT_NAME
+      // /Users/user/.claude/CONVERSATION_ID.jsonl -> CONVERSATION_ID
+      
+      const pathParts = filePath.split(path.sep);
+      const fileName = pathParts[pathParts.length - 1];
+      
+      if (fileName === 'conversation.jsonl') {
+        // Project-based conversation
+        const projectName = pathParts[pathParts.length - 2];
+        return projectName;
+      } else if (fileName.endsWith('.jsonl')) {
+        // Direct conversation file
+        return fileName.replace('.jsonl', '');
+      }
+      
+      return null;
+    } catch (error) {
+      console.error(chalk.red('Error extracting conversation ID:'), error);
+      return null;
+    }
   }
 
   /**

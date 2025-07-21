@@ -113,6 +113,15 @@ class StateService {
       }
     });
   }
+  
+  /**
+   * Notify listeners with specific action and data (alias for real-time events)
+   * @param {string} action - Action type
+   * @param {Object} data - Event data
+   */
+  notifyListeners(action, data) {
+    this.notifySubscribers(action, data);
+  }
 
   /**
    * Update conversations data

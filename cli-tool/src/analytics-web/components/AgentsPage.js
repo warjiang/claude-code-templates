@@ -16,7 +16,7 @@ class AgentsPage {
     };
     this.isInitialized = false;
     
-    // Pagination state
+    // Pagination state for conversations
     this.pagination = {
       currentPage: 0,
       limit: 10,
@@ -24,9 +24,21 @@ class AgentsPage {
       isLoading: false
     };
     
+    // Pagination state for messages
+    this.messagesPagination = {
+      currentPage: 0,
+      limit: 10,
+      hasMore: true,
+      isLoading: false,
+      conversationId: null
+    };
+    
     // Loaded conversations cache
     this.loadedConversations = [];
-    this.loadedMessages = new Map(); // Cache messages by conversation ID
+    this.loadedMessages = new Map(); // Cache messages by conversation ID (now stores paginated data)
+    
+    // Initialize tool display component
+    this.toolDisplay = new ToolDisplay();
     
     // Subscribe to state changes
     this.unsubscribe = this.stateService.subscribe(this.handleStateChange.bind(this));
@@ -64,7 +76,16 @@ class AgentsPage {
         console.log('🔄 WebSocket: Conversation list updated');
         break;
       case 'update_conversation_states':
-        this.updateConversationStates(state.conversationStates);
+        console.log(`🔄 WebSocket update_conversation_states:`, {
+          conversationStates: state.conversationStates,
+          type: typeof state.conversationStates,
+          keys: state.conversationStates ? Object.keys(state.conversationStates) : 'none'
+        });
+        
+        // Handle both direct states object and nested structure
+        const activeStates = state.conversationStates?.activeStates || state.conversationStates || {};
+        
+        this.updateConversationStates(activeStates);
         break;
       case 'set_loading':
         this.updateLoadingState(state.isLoading);
@@ -80,9 +101,58 @@ class AgentsPage {
         console.log('🔄 WebSocket: Real-time data refresh');
         this.updateConversationStatesOnly();
         break;
+      case 'new_message':
+        // Handle new message in real-time
+        console.log('📨 WebSocket: New message received', state);
+        this.handleNewMessage(state.conversationId, state.message, state.metadata);
+        break;
     }
   }
   
+  /**
+   * Handle new message received via WebSocket
+   * @param {string} conversationId - Conversation ID that received new message
+   * @param {Object} message - New message object
+   * @param {Object} metadata - Additional metadata
+   */
+  handleNewMessage(conversationId, message, metadata) {
+    console.log(`📨 Handling new message for conversation ${conversationId}:`, { message, metadata });
+    
+    // Only process if this conversation is currently selected
+    if (this.selectedConversationId !== conversationId) {
+      console.log(`📨 Message for ${conversationId} but ${this.selectedConversationId} is selected - ignoring`);
+      return;
+    }
+    
+    // Get current messages for this conversation
+    const existingMessages = this.loadedMessages.get(conversationId) || [];
+    
+    // Check if we already have this message (avoid duplicates)
+    const messageExists = existingMessages.some(msg => 
+      msg.id === message.id || 
+      (msg.timestamp === message.timestamp && msg.role === message.role)
+    );
+    
+    if (!messageExists) {
+      // Add new message to the end
+      const updatedMessages = [...existingMessages, message];
+      this.loadedMessages.set(conversationId, updatedMessages);
+      
+      // Re-render messages with new message
+      this.renderCachedMessages(updatedMessages, false);
+      
+      // Auto-scroll to new message
+      this.scrollToBottom();
+      
+      // Show notification
+      this.showNewMessageNotification(message, metadata);
+      
+      console.log(`✅ Added new message to conversation ${conversationId}`);
+    } else {
+      console.log(`📨 Message already exists in conversation ${conversationId} - skipping`);
+    }
+  }
+
   /**
    * Update only conversation states without affecting pagination
    */
@@ -91,8 +161,17 @@ class AgentsPage {
       const statesData = await this.dataService.getConversationStates();
       const activeStates = statesData?.activeStates || {};
       
+      // Update StateService with fresh states
+      this.stateService.updateConversationStates(activeStates);
+      
       // Update states in already loaded conversations
       this.updateConversationStateElements(activeStates);
+      
+      // Update banner if we have a selected conversation
+      if (this.selectedConversationId && activeStates[this.selectedConversationId]) {
+        console.log(`🔄 Updating banner for ${this.selectedConversationId}: ${activeStates[this.selectedConversationId]}`);
+        this.updateStateBanner(this.selectedConversationId, activeStates[this.selectedConversationId]);
+      }
       
     } catch (error) {
       console.error('Error updating conversation states:', error);
@@ -140,11 +219,11 @@ class AgentsPage {
               <div class="status-header">
                 <span class="session-timer-status-dot active"></span>
                 <h1 class="page-title">
-                  Agent Conversations
+                  Claude Code web UI
                 </h1>
               </div>
               <div class="page-subtitle">
-                Monitor and analyze Claude agent interactions in real-time
+                Monitor and analyze Claude Code agent interactions in real-time
               </div>
             </div>
           </div>
@@ -156,11 +235,9 @@ class AgentsPage {
             <div class="filter-group">
               <label class="filter-label">Status:</label>
               <select class="filter-select" id="status-filter">
-                <option value="all">All Conversations</option>
+                <option value="all">All</option>
                 <option value="active">Active</option>
-                <option value="idle">Idle</option>
-                <option value="waiting">Waiting for Input</option>
-                <option value="completed">Completed</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
             
@@ -204,7 +281,7 @@ class AgentsPage {
           <!-- Left Sidebar: Conversations List -->
           <div class="conversations-sidebar">
             <div class="sidebar-header">
-              <h3>Conversations</h3>
+              <h3>Chats</h3>
               <span class="conversation-count" id="sidebar-count">0</span>
             </div>
             <div class="conversations-list" id="conversations-list">
@@ -239,6 +316,15 @@ class AgentsPage {
                 <h4>No conversation selected</h4>
                 <p>Choose a conversation from the sidebar to view its messages</p>
               </div>
+            </div>
+            
+            <!-- Conversation State Banner -->
+            <div class="conversation-state-banner" id="conversation-state-banner" style="display: none;">
+              <div class="state-indicator">
+                <span class="state-dot" id="state-dot"></span>
+                <span class="state-text" id="state-text">Ready</span>
+              </div>
+              <div class="state-timestamp" id="state-timestamp"></div>
             </div>
           </div>
         </div>
@@ -344,10 +430,12 @@ class AgentsPage {
   }
 
   /**
-   * Load initial conversations data
+   * Load initial conversations data using paginated API
    */
   async loadConversationsData() {
     try {
+      console.log('🔄 Starting paginated conversation loading...');
+      
       // Reset pagination state
       this.pagination = {
         currentPage: 0,
@@ -356,9 +444,21 @@ class AgentsPage {
         isLoading: false
       };
       this.loadedConversations = [];
+      this.loadedMessages.clear(); // Clear message cache too
+      
+      // Clear the list container
+      const listContainer = this.container.querySelector('#conversations-list');
+      if (listContainer) {
+        listContainer.innerHTML = '';
+      }
+      
+      // Hide empty state initially
+      this.hideEmptyState();
       
       // Load first page and states
       await this.loadMoreConversations();
+      
+      console.log(`✅ Initial load complete. Loaded ${this.loadedConversations.length} conversations`);
       
     } catch (error) {
       console.error('Error loading conversations data:', error);
@@ -375,6 +475,7 @@ class AgentsPage {
     }
     
     try {
+      
       this.pagination.isLoading = true;
       this.updateLoadingIndicator(true);
       
@@ -383,24 +484,46 @@ class AgentsPage {
         this.dataService.getConversationStates()
       ]);
       
+      console.log(`🔍 loadMoreConversations - States data:`, {
+        statesData,
+        activeStates: statesData?.activeStates,
+        statesCount: statesData?.activeStates ? Object.keys(statesData.activeStates).length : 0
+      });
+      
       // Update pagination info
       this.pagination.hasMore = conversationsData.pagination.hasMore;
       this.pagination.currentPage = conversationsData.pagination.page + 1;
       
+      // Get only NEW conversations for this page
+      const newConversations = conversationsData.conversations;
+      
       // Add new conversations to loaded list
-      this.loadedConversations.push(...conversationsData.conversations);
+      this.loadedConversations.push(...newConversations);
       
       // Log summary for monitoring
-      console.log(`📊 Loaded page ${conversationsData.pagination.page} with ${conversationsData.conversations.length} conversations`);
+      console.log(`📊 Loaded page ${conversationsData.pagination.page} with ${newConversations.length} conversations`);
       console.log(`🔄 Total conversations: ${this.loadedConversations.length}/${conversationsData.pagination.totalCount}`);
-      
-      // Update state and render
-      this.stateService.updateConversations(this.loadedConversations);
-      this.stateService.updateConversationStates(statesData);
       
       // Extract activeStates from the response structure
       const activeStates = statesData?.activeStates || {};
-      this.renderConversationsList(this.loadedConversations, activeStates);
+      
+      // Update state with correct format
+      this.stateService.updateConversations(this.loadedConversations);
+      this.stateService.updateConversationStates(activeStates);
+      
+      console.log(`🔍 Updated StateService with:`, {
+        conversationsCount: this.loadedConversations.length,
+        activeStatesCount: Object.keys(activeStates).length,
+        firstFewStates: Object.keys(activeStates).slice(0, 3)
+      });
+      
+      // For initial load (page 0), replace content. For subsequent loads, append
+      const isInitialLoad = conversationsData.pagination.page === 0;
+      this.renderConversationsList(
+        isInitialLoad ? this.loadedConversations : newConversations, 
+        activeStates, 
+        !isInitialLoad
+      );
       
     } catch (error) {
       console.error('Error loading more conversations:', error);
@@ -415,34 +538,32 @@ class AgentsPage {
    * Render conversations list
    * @param {Array} conversations - Conversations data
    * @param {Object} states - Conversation states
+   * @param {boolean} append - Whether to append or replace content
    */
-  renderConversationsList(conversations, states) {
+  renderConversationsList(conversations, states, append = false) {
     const listContainer = this.container.querySelector('#conversations-list');
     const filteredConversations = this.filterConversations(conversations, states);
     
     this.updateResultsCount(filteredConversations.length);
     this.updateClearFiltersButton();
     
-    if (filteredConversations.length === 0) {
+    if (filteredConversations.length === 0 && !append) {
       this.showEmptyState();
       return;
     }
     
     this.hideEmptyState();
     
-    listContainer.innerHTML = filteredConversations.map(conv => {
+    const conversationHTML = filteredConversations.map(conv => {
       const state = states[conv.id] || 'unknown';
       const stateClass = this.getStateClass(state);
-      const lastActivity = this.formatRelativeTime(new Date(conv.lastModified));
-      const messageCount = conv.messageCount || 0;
-      
       
       return `
         <div class="sidebar-conversation-item" data-id="${conv.id}">
           <div class="sidebar-conversation-header">
             <div class="sidebar-conversation-title">
               <span class="status-dot ${stateClass}"></span>
-              <h4 class="sidebar-conversation-name">${conv.title || `Conv ${conv.id.slice(-8)}`}</h4>
+              <h4 class="sidebar-conversation-name">${conv.title || `Chat ${conv.id.slice(-8)}`}</h4>
             </div>
             <span class="sidebar-conversation-badge ${stateClass}">${this.getStateLabel(state)}</span>
           </div>
@@ -450,24 +571,22 @@ class AgentsPage {
           <div class="sidebar-conversation-meta">
             <span class="sidebar-meta-item">
               <span class="sidebar-meta-icon">📁</span>
-              ${this.truncateText(conv.project || 'Unknown', 15)}
-            </span>
-            <span class="sidebar-meta-item">
-              <span class="sidebar-meta-icon">💬</span>
-              ${messageCount}
-            </span>
-            <span class="sidebar-meta-item">
-              <span class="sidebar-meta-icon">🕒</span>
-              ${lastActivity}
+              ${this.truncateText(conv.project || 'Unknown', 12)}
             </span>
           </div>
           
           <div class="sidebar-conversation-preview">
-            <p class="sidebar-preview-text">${this.truncateText(conv.lastMessage || 'No messages', 60)}</p>
+            <p class="sidebar-preview-text">${this.getSimpleConversationPreview(conv)}</p>
           </div>
         </div>
       `;
     }).join('');
+    
+    if (append) {
+      listContainer.insertAdjacentHTML('beforeend', conversationHTML);
+    } else {
+      listContainer.innerHTML = conversationHTML;
+    }
     
     // Bind card actions
     this.bindListActions();
@@ -559,6 +678,9 @@ class AgentsPage {
         `;
       }
     }
+    
+    // Show and update the state banner
+    this.showStateBanner(this.selectedConversationId);
   }
   
   /**
@@ -566,38 +688,280 @@ class AgentsPage {
    * @param {string} conversationId - Conversation ID
    */
   async loadConversationMessages(conversationId) {
+    // Reset pagination for new conversation
+    this.messagesPagination = {
+      currentPage: 0,
+      limit: 10,
+      hasMore: true,
+      isLoading: false,
+      conversationId: conversationId
+    };
+    
+    // Clear cached messages for this conversation
+    this.loadedMessages.delete(conversationId);
+    
+    // Load first page of messages
+    await this.loadMoreMessages(conversationId, true);
+  }
+
+  /**
+   * Show and update conversation state banner
+   * @param {string} conversationId - Conversation ID
+   */
+  showStateBanner(conversationId) {
+    const banner = this.container.querySelector('#conversation-state-banner');
+    if (!banner) return;
+    
+    // Show the banner
+    banner.style.display = 'flex';
+    
+    // Get current state from WebSocket or cache
+    const conversationStates = this.stateService.getStateProperty('conversationStates') || {};
+    const currentState = conversationStates[conversationId] || 'unknown';
+    
+    console.log(`🔍 Debug banner state for ${conversationId}:`, {
+      conversationId,
+      currentState,
+      availableStates: Object.keys(conversationStates),
+      stateValue: conversationStates[conversationId],
+      totalStates: Object.keys(conversationStates).length,
+      allStates: conversationStates
+    });
+    
+    // If we don't have the state yet, try to fetch it after a short delay
+    if (currentState === 'unknown') {
+      setTimeout(() => {
+        this.fetchConversationState(conversationId);
+      }, 100);
+    }
+    
+    // Update banner with current state
+    this.updateStateBanner(conversationId, currentState);
+  }
+
+  /**
+   * Update conversation state banner
+   * @param {string} conversationId - Conversation ID  
+   * @param {string} state - Current conversation state
+   */
+  updateStateBanner(conversationId, state) {
+    const banner = this.container.querySelector('#conversation-state-banner');
+    const stateDot = this.container.querySelector('#state-dot');
+    const stateText = this.container.querySelector('#state-text');
+    const stateTimestamp = this.container.querySelector('#state-timestamp');
+    
+    console.log(`🎯 updateStateBanner called:`, {
+      conversationId,
+      state,
+      bannerExists: !!banner,
+      elementsExist: { stateDot: !!stateDot, stateText: !!stateText, stateTimestamp: !!stateTimestamp }
+    });
+    
+    if (!banner || !stateDot || !stateText || !stateTimestamp) {
+      console.warn('❌ Banner elements not found');
+      return;
+    }
+    
+    // Map states to user-friendly messages
+    const stateMessages = {
+      'Claude Code working...': {
+        text: 'Claude Code is working...',
+        class: 'status-working'
+      },
+      'Awaiting user input...': {
+        text: 'Waiting for your response',
+        class: 'status-waiting'
+      },
+      'User typing...': {
+        text: 'User typing...',
+        class: 'status-typing'
+      },
+      'Awaiting response...': {
+        text: 'Awaiting Claude response',
+        class: 'status-waiting'
+      },
+      'Recently active': {
+        text: 'Recently active',
+        class: 'status-active'
+      },
+      'Idle': {
+        text: 'Idle',
+        class: 'status-idle'
+      },
+      'Inactive': {
+        text: 'Inactive',
+        class: 'status-idle'
+      },
+      'Old': {
+        text: 'No recent activity',
+        class: 'status-idle'
+      },
+      'unknown': {
+        text: 'Loading conversation state...',
+        class: 'status-idle'
+      }
+    };
+    
+    const stateInfo = stateMessages[state] || stateMessages['unknown'];
+    
+    // Update dot class
+    stateDot.className = `state-dot ${stateInfo.class}`;
+    
+    // Update text
+    stateText.textContent = stateInfo.text;
+    
+    // Update timestamp
+    const now = new Date();
+    stateTimestamp.textContent = `Updated ${now.toLocaleTimeString()}`;
+    
+    console.log(`🔄 State banner updated: ${conversationId} -> ${state}`);
+  }
+
+  /**
+   * Fetch conversation state from API
+   * @param {string} conversationId - Conversation ID
+   */
+  async fetchConversationState(conversationId) {
+    try {
+      console.log(`🔄 Fetching state for conversation: ${conversationId}`);
+      const stateData = await this.dataService.getConversationStates();
+      
+      if (stateData && stateData.activeStates && stateData.activeStates[conversationId]) {
+        const state = stateData.activeStates[conversationId];
+        console.log(`✅ Found state for ${conversationId}: ${state}`);
+        
+        // Update the StateService with the new data
+        this.stateService.updateConversationStates(stateData.activeStates);
+        
+        // Update the banner with the real state
+        this.updateStateBanner(conversationId, state);
+      } else {
+        console.log(`⚠️ No state found for conversation ${conversationId}`);
+        // Keep showing unknown for now
+      }
+    } catch (error) {
+      console.error('Error fetching conversation state:', error);
+    }
+  }
+
+  /**
+   * Hide conversation state banner
+   */
+  hideStateBanner() {
+    const banner = this.container.querySelector('#conversation-state-banner');
+    if (banner) {
+      banner.style.display = 'none';
+    }
+  }
+
+  /**
+   * Auto-scroll to bottom of messages
+   */
+  scrollToBottom() {
+    const messagesContent = this.container.querySelector('#messages-content');
+    if (messagesContent) {
+      messagesContent.scrollTop = messagesContent.scrollHeight;
+    }
+  }
+
+  /**
+   * Show notification for new message
+   * @param {Object} message - New message object
+   * @param {Object} metadata - Message metadata
+   */
+  showNewMessageNotification(message, metadata) {
+    // Update banner if it's showing to reflect new activity
+    if (this.selectedConversationId) {
+      const banner = this.container.querySelector('#conversation-state-banner');
+      if (banner && banner.style.display !== 'none') {
+        // Temporarily highlight the banner to show activity
+        banner.style.backgroundColor = 'rgba(213, 116, 85, 0.1)';
+        setTimeout(() => {
+          banner.style.backgroundColor = '';
+        }, 1000);
+      }
+    }
+    
+    // Could add visual indicator for new message (pulse, notification badge, etc.)
+    console.log(`🔔 New message notification: ${message.role} message in conversation`);
+  }
+
+  /**
+   * Load more messages (for infinite scroll)
+   * @param {string} conversationId - Conversation ID
+   * @param {boolean} isInitialLoad - Whether this is the initial load
+   */
+  async loadMoreMessages(conversationId, isInitialLoad = false) {
     const messagesContent = this.container.querySelector('#messages-content');
     if (!messagesContent) return;
     
+    // Prevent concurrent loading
+    if (this.messagesPagination.isLoading || !this.messagesPagination.hasMore) {
+      return;
+    }
+    
+    // Ensure we're loading for the correct conversation
+    if (this.messagesPagination.conversationId !== conversationId) {
+      return;
+    }
+    
     try {
-      // Check if messages are already cached
-      if (this.loadedMessages.has(conversationId)) {
-        console.log(`📋 Using cached messages for conversation ${conversationId.slice(-8)}`);
-        this.renderCachedMessages(this.loadedMessages.get(conversationId));
-        return;
+      this.messagesPagination.isLoading = true;
+      
+      if (isInitialLoad) {
+        // Show loading state for initial load
+        messagesContent.innerHTML = `
+          <div class="messages-loading">
+            <div class="loading-spinner"></div>
+            <span>Loading messages...</span>
+          </div>
+        `;
+      } else {
+        // Show loading indicator at top for infinite scroll
+        this.showMessagesLoadingIndicator(true);
       }
       
-      // Show loading state
-      messagesContent.innerHTML = `
-        <div class="messages-loading">
-          <div class="loading-spinner"></div>
-          <span>Loading messages...</span>
-        </div>
-      `;
+      // Fetch paginated messages from the server
+      const messagesData = await this.dataService.cachedFetch(
+        `/api/conversations/${conversationId}/messages?page=${this.messagesPagination.currentPage}&limit=${this.messagesPagination.limit}`
+      );
       
-      console.log(`📥 Loading messages for conversation ${conversationId.slice(-8)}`);
-      
-      // Fetch actual messages from the server
-      const messagesData = await this.dataService.cachedFetch(`/api/conversations/${conversationId}/messages`);
-      
-      if (messagesData && messagesData.messages && messagesData.messages.length > 0) {
-        // Cache the messages
-        this.loadedMessages.set(conversationId, messagesData.messages);
+      if (messagesData && messagesData.messages) {
+        // Update pagination state - handle both paginated and non-paginated responses
+        if (messagesData.pagination) {
+          // Paginated response
+          this.messagesPagination.hasMore = messagesData.pagination.hasMore;
+          this.messagesPagination.currentPage = messagesData.pagination.page + 1;
+        } else {
+          // Non-paginated response (fallback) - treat as complete data
+          this.messagesPagination.hasMore = false;
+          this.messagesPagination.currentPage = 1;
+        }
         
-        this.renderCachedMessages(messagesData.messages);
+        // Get existing messages or initialize
+        let existingMessages = this.loadedMessages.get(conversationId) || [];
         
-        console.log(`✅ Loaded ${messagesData.messages.length} messages for conversation ${conversationId.slice(-8)}`);
-      } else {
+        if (isInitialLoad) {
+          // For initial load, replace all messages
+          existingMessages = messagesData.messages;
+        } else {
+          // For infinite scroll, prepend older messages (they come in chronological order)
+          existingMessages = [...messagesData.messages, ...existingMessages];
+        }
+        
+        // Cache the combined messages
+        this.loadedMessages.set(conversationId, existingMessages);
+        
+        // Render messages
+        this.renderCachedMessages(existingMessages, !isInitialLoad);
+        
+        // Setup scroll listener for infinite scroll (only on initial load)
+        if (isInitialLoad) {
+          this.setupMessagesScrollListener(conversationId);
+        }
+        
+        
+      } else if (isInitialLoad) {
         messagesContent.innerHTML = `
           <div class="no-messages-found">
             <div class="no-messages-icon">💭</div>
@@ -609,20 +973,28 @@ class AgentsPage {
       
     } catch (error) {
       console.error('Error loading messages:', error);
-      messagesContent.innerHTML = `
-        <div class="messages-error">
-          <span class="error-icon">⚠️</span>
-          <span>Failed to load messages</span>
-          <button class="retry-messages" data-conversation-id="${conversationId}">Retry</button>
-        </div>
-      `;
       
-      // Bind retry button event
-      const retryBtn = messagesContent.querySelector('.retry-messages');
-      if (retryBtn) {
-        retryBtn.addEventListener('click', () => {
-          this.loadConversationMessages(conversationId);
-        });
+      if (isInitialLoad) {
+        messagesContent.innerHTML = `
+          <div class="messages-error">
+            <span class="error-icon">⚠️</span>
+            <span>Failed to load messages</span>
+            <button class="retry-messages" data-conversation-id="${conversationId}">Retry</button>
+          </div>
+        `;
+        
+        // Bind retry button event
+        const retryBtn = messagesContent.querySelector('.retry-messages');
+        if (retryBtn) {
+          retryBtn.addEventListener('click', () => {
+            this.loadConversationMessages(conversationId);
+          });
+        }
+      }
+    } finally {
+      this.messagesPagination.isLoading = false;
+      if (!isInitialLoad) {
+        this.showMessagesLoadingIndicator(false);
       }
     }
   }
@@ -630,89 +1002,330 @@ class AgentsPage {
   /**
    * Render cached messages
    * @param {Array} messages - Array of messages
+   * @param {boolean} prepend - Whether to prepend messages (for infinite scroll)
    */
-  renderCachedMessages(messages) {
+  renderCachedMessages(messages, prepend = false) {
     const messagesContent = this.container.querySelector('#messages-content');
     if (!messagesContent) return;
     
-    messagesContent.innerHTML = `
+    const messageHTML = `
+      <div class="messages-loading-indicator" style="display: none;">
+        <div class="loading-spinner small"></div>
+        <span>Loading older messages...</span>
+      </div>
       <div class="messages-list">
         ${messages.map(msg => this.renderMessage(msg)).join('')}
       </div>
     `;
     
-    // Scroll to bottom to show latest messages
-    setTimeout(() => {
-      messagesContent.scrollTop = messagesContent.scrollHeight;
-    }, 100);
+    if (prepend) {
+      // For infinite scroll, we need to maintain scroll position
+      const oldScrollHeight = messagesContent.scrollHeight;
+      
+      // Update content
+      messagesContent.innerHTML = messageHTML;
+      
+      // Restore scroll position relative to the bottom
+      const newScrollHeight = messagesContent.scrollHeight;
+      const scrollDifference = newScrollHeight - oldScrollHeight;
+      messagesContent.scrollTop += scrollDifference;
+    } else {
+      // Initial load - just replace content and scroll to bottom
+      messagesContent.innerHTML = messageHTML;
+      
+      // Scroll to bottom for new conversation load
+      setTimeout(() => {
+        messagesContent.scrollTop = messagesContent.scrollHeight;
+      }, 100);
+    }
+    
+    // Bind tool display events
+    this.toolDisplay.bindEvents(messagesContent);
+  }
+
+  /**
+   * Show/hide messages loading indicator
+   * @param {boolean} show - Whether to show the indicator
+   */
+  showMessagesLoadingIndicator(show) {
+    const messagesContent = this.container.querySelector('#messages-content');
+    if (!messagesContent) return;
+    
+    const indicator = messagesContent.querySelector('.messages-loading-indicator');
+    if (indicator) {
+      indicator.style.display = show ? 'flex' : 'none';
+    }
+  }
+
+  /**
+   * Setup scroll listener for infinite scroll in messages
+   * @param {string} conversationId - Current conversation ID
+   */
+  setupMessagesScrollListener(conversationId) {
+    const messagesContent = this.container.querySelector('#messages-content');
+    if (!messagesContent) return;
+    
+    // Remove existing listener if any
+    if (this.messagesScrollListener) {
+      messagesContent.removeEventListener('scroll', this.messagesScrollListener);
+    }
+    
+    // Create new listener
+    this.messagesScrollListener = () => {
+      // Check if we've scrolled near the top (for loading older messages)
+      const scrollTop = messagesContent.scrollTop;
+      const threshold = 100; // pixels from top
+      
+      if (scrollTop <= threshold && this.messagesPagination.hasMore && !this.messagesPagination.isLoading) {
+        this.loadMoreMessages(conversationId, false);
+      }
+    };
+    
+    // Add listener
+    messagesContent.addEventListener('scroll', this.messagesScrollListener);
   }
   
-  
   /**
-   * Render a single message
+   * Render a single message with terminal-style formatting
    * @param {Object} message - Message object
    * @returns {string} HTML string
    */
   renderMessage(message) {
     const timestamp = this.formatRelativeTime(new Date(message.timestamp));
+    const fullTimestamp = new Date(message.timestamp).toLocaleString();
     const isUser = message.role === 'user';
     
+    // Detect message content types
+    const messageType = this.getMessageType(message);
+    
+    // Detect if message contains tools
+    const hasTools = Array.isArray(message.content) && 
+                    message.content.some(block => block.type === 'tool_use');
+    const toolCount = hasTools ? 
+                     message.content.filter(block => block.type === 'tool_use').length : 0;
+    
+    // Terminal-style prompt
+    const prompt = isUser ? '>' : '#';
+    const roleLabel = isUser ? 'user' : 'claude';
+    
+    // Get message ID (short version for display)
+    const messageId = message.id ? message.id.slice(-8) : 'unknown';
+    
     return `
-      <div class="message ${isUser ? 'message-user' : 'message-assistant'}">
-        <div class="message-header">
-          <div class="message-role">
-            <span class="role-icon">${isUser ? '👤' : '🤖'}</span>
-            <span class="role-name">${isUser ? 'User' : 'Claude'}</span>
+      <div class="terminal-message ${isUser ? 'user' : 'assistant'}" data-message-id="${message.id || ''}">
+        <div class="message-container">
+          <div class="message-prompt">
+            <span class="prompt-char">${prompt}</span>
+            <div class="message-metadata">
+              <span class="timestamp" title="${fullTimestamp}">${timestamp}</span>
+              <span class="role-label">${roleLabel}</span>
+              <span class="message-id" title="Message ID: ${message.id || 'unknown'}">[${messageId}]</span>
+              ${message.usage ? `
+                <span class="tokens">
+                  ${message.usage.input_tokens > 0 ? `i:${message.usage.input_tokens}` : ''}
+                  ${message.usage.output_tokens > 0 ? `o:${message.usage.output_tokens}` : ''}
+                  ${message.usage.cache_read_input_tokens > 0 ? `c:${message.usage.cache_read_input_tokens}` : ''}
+                </span>
+              ` : ''}
+              ${hasTools ? `<span class="tool-count">[${toolCount}t]</span>` : ''}
+              ${message.model ? `<span class="model">[${message.model.replace('claude-', '').replace('-20250514', '')}]</span>` : ''}
+              <div class="message-type-indicator ${messageType.class}" title="${messageType.label}"></div>
+            </div>
           </div>
-          <div class="message-meta">
-            <span class="message-timestamp">${timestamp}</span>
-            ${message.usage ? `
-              <span class="message-tokens">
-                ${message.usage.input_tokens > 0 ? `📥 ${message.usage.input_tokens}` : ''}
-                ${message.usage.output_tokens > 0 ? `📤 ${message.usage.output_tokens}` : ''}
-              </span>
-            ` : ''}
-            ${message.model ? `
-              <span class="message-model">
-                🤖 ${message.model}
-              </span>
-            ` : ''}
+          <div class="message-body">
+            ${this.formatMessageContent(message.content, message)}
           </div>
-        </div>
-        <div class="message-content">
-          <div class="message-text">${this.formatMessageContent(message.content)}</div>
         </div>
       </div>
     `;
   }
+
+  /**
+   * Get message type based on content
+   * @param {Object} message - Message object
+   * @returns {Object} Message type info
+   */
+  getMessageType(message) {
+    const isUser = message.role === 'user';
+    
+    if (isUser) {
+      // User message types
+      if (typeof message.content === 'string') {
+        if (message.content.includes('Tool Result')) {
+          return { label: 'TOOL_RESULT', class: 'type-tool-result' };
+        }
+        return { label: 'INPUT', class: 'type-user-input' };
+      }
+      return { label: 'INPUT', class: 'type-user-input' };
+    } else {
+      // Claude message types
+      if (Array.isArray(message.content)) {
+        const hasText = message.content.some(block => block.type === 'text');
+        const hasTools = message.content.some(block => block.type === 'tool_use');
+        
+        if (hasTools && hasText) {
+          return { label: 'RESPONSE+TOOLS', class: 'type-response-tools' };
+        } else if (hasTools) {
+          return { label: 'TOOLS', class: 'type-tools-only' };
+        } else if (hasText) {
+          return { label: 'RESPONSE', class: 'type-response' };
+        }
+      }
+      return { label: 'RESPONSE', class: 'type-response' };
+    }
+  }
+
+  /**
+   * Get icon for message type
+   * @param {Object} messageType - Message type object
+   * @returns {string} Unicode icon
+   */
+  getMessageTypeIcon(messageType) {
+    const icons = {
+      'INPUT': '◆',
+      'TOOL_RESULT': '◇',
+      'RESPONSE': '■',
+      'TOOLS': '▲',
+      'RESPONSE+TOOLS': '●'
+    };
+    return icons[messageType.label] || '□';
+  }
   
   /**
-   * Format message content (basic markdown-like formatting)
+   * Format message content with support for text and tool calls
    * @param {string|Array} content - Message content
    * @returns {string} Formatted HTML
    */
-  formatMessageContent(content) {
-    let textContent = '';
+  formatMessageContent(content, message = null) {
+    let result = '';
     
     // Handle different content formats
     if (Array.isArray(content)) {
       // Assistant messages with content blocks
-      textContent = content
-        .filter(block => block.type === 'text')
-        .map(block => block.text)
-        .join('\n');
-    } else if (typeof content === 'string') {
-      // User messages with plain text
-      textContent = content;
-    } else {
-      textContent = String(content || '');
+      content.forEach(block => {
+        if (block.type === 'text') {
+          result += this.formatTextContent(block.text);
+        } else if (block.type === 'tool_use') {
+          result += this.toolDisplay.renderToolUse(block);
+        } else if (block.type === 'tool_result') {
+          result += this.toolDisplay.renderToolResult(block);
+        }
+      });
+    } else if (typeof content === 'string' && content.trim() !== '') {
+      // User messages with plain text - check for special patterns
+      if (content.includes('Tool Result') && content.length > 1000) {
+        // This is likely a large tool result that should be handled specially
+        result += this.formatLargeToolResult(content);
+      } else {
+        // Check if this is a confirmation response "[ok]" or similar
+        const enhancedContent = this.enhanceConfirmationMessage(content, message);
+        result = this.formatTextContent(enhancedContent);
+      }
+    } else if (content && typeof content === 'object') {
+      // Handle edge cases where content might be an object
+      result = this.formatTextContent(JSON.stringify(content, null, 2));
     }
     
-    // Basic code block formatting
-    return textContent
+    return result || '<em class="empty-content">No displayable content available</em>';
+  }
+  
+  /**
+   * Format regular text content
+   * @param {string} text - Text content
+   * @returns {string} Formatted HTML
+   */
+  formatTextContent(text) {
+    if (!text || text.trim() === '') return '';
+    
+    // Escape HTML to prevent XSS
+    const escapeHtml = (str) => {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    };
+    
+    const escapedText = escapeHtml(text);
+    
+    // Basic markdown-like formatting (applied after escaping)
+    return escapedText
       .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="code-block"><code>$2</code></pre>')
       .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
       .replace(/\n/g, '<br>');
+  }
+
+  /**
+   * Format large tool result content safely
+   * @param {string} content - Large tool result content
+   * @returns {string} Safe formatted content
+   */
+  formatLargeToolResult(content) {
+    // Extract tool result ID if present
+    const toolIdMatch = content.match(/Tool Result\s+([A-Za-z0-9]+)/);
+    const toolId = toolIdMatch ? toolIdMatch[1] : 'unknown';
+    
+    const escapeHtml = (str) => {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    };
+    
+    const preview = content.length > 80 
+      ? escapeHtml(content.substring(0, 80)) + '...' 
+      : escapeHtml(content);
+    
+    return `
+      <div class="terminal-tool tool-result large">
+        <span class="tool-prompt">></span>
+        <span class="tool-status">[LARGE]</span>
+        <span class="tool-id">[${toolId}]</span>
+        <span class="tool-output">${content.length}b: ${preview}</span>
+      </div>
+    `;
+  }
+
+  /**
+   * Enhance confirmation messages like "[ok]" with context information
+   * @param {string} content - Original message content
+   * @param {Object} message - Full message object with metadata
+   * @returns {string} Enhanced message content
+   */
+  enhanceConfirmationMessage(content, message) {
+    const trimmedContent = content.trim();
+    
+    // Detect simple confirmation patterns
+    const confirmationPatterns = [
+      /^\[ok\]$/i,
+      /^ok$/i,
+      /^yes$/i,
+      /^\[yes\]$/i,
+      /^y$/i,
+      /^\[y\]$/i,
+      /^1$/,  // Choice selection
+      /^2$/,
+      /^3$/
+    ];
+    
+    const isConfirmation = confirmationPatterns.some(pattern => pattern.test(trimmedContent));
+    
+    if (isConfirmation && message) {
+      // Try to extract context from the message timestamp
+      const messageTime = message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : 'unknown time';
+      
+      // Enhanced display for confirmation messages
+      return `${content} <span class="confirmation-context">(User confirmation at ${messageTime})</span>`;
+    }
+    
+    // For other potential confirmation-like messages, check if they seem like choices
+    if (/^[1-9]$/.test(trimmedContent)) {
+      return `${content} <span class="confirmation-context">(Menu selection)</span>`;
+    }
+    
+    // Check for common CLI responses
+    if (/^(continue|proceed|accept|confirm|done)$/i.test(trimmedContent)) {
+      return `${content} <span class="confirmation-context">(User command)</span>`;
+    }
+    
+    return content;
   }
 
   /**
@@ -740,6 +1353,8 @@ class AgentsPage {
    */
   updateClearFiltersButton() {
     const clearBtn = this.container.querySelector('#clear-filters');
+    if (!clearBtn) return; // Guard against null when AgentsPage isn't rendered
+    
     const hasActiveFilters = this.filters.status !== 'all' || 
                            this.filters.timeRange !== '7d' || 
                            this.filters.search !== '';
@@ -772,7 +1387,8 @@ class AgentsPage {
     if (this.filters.status !== 'all') {
       filtered = filtered.filter(conv => {
         const state = states[conv.id] || 'unknown';
-        return state === this.filters.status;
+        const category = this.getStateCategory(state);
+        return category === this.filters.status;
       });
     }
     
@@ -815,16 +1431,143 @@ class AgentsPage {
   }
 
   /**
+   * Get state category for filtering
+   * @param {string} state - Detailed conversation state
+   * @returns {string} Category: 'active' or 'inactive'
+   */
+  getStateCategory(state) {
+    // Active states - conversation is currently being used or recently active
+    const activeStates = [
+      'Claude Code working...',
+      'Awaiting user input...',
+      'User typing...',
+      'Awaiting response...',
+      'Recently active'
+    ];
+    
+    // Inactive states - conversation is idle or old
+    const inactiveStates = [
+      'Idle',
+      'Inactive',
+      'Old',
+      'unknown'
+    ];
+    
+    if (activeStates.includes(state)) {
+      return 'active';
+    } else if (inactiveStates.includes(state)) {
+      return 'inactive';
+    } else {
+      // Default for any unknown states
+      return 'inactive';
+    }
+  }
+
+  /**
+   * Get simple conversation preview text (avoids repeating metadata)
+   * @param {Object} conv - Conversation object
+   * @returns {string} Preview text
+   */
+  getSimpleConversationPreview(conv) {
+    // If we have a last message, show it (this is the most useful info)
+    if (conv.lastMessage && conv.lastMessage.trim()) {
+      const lastMsg = conv.lastMessage.trim();
+      
+      // Check if last message is a simple confirmation and try to make it more descriptive
+      if (this.isSimpleConfirmation(lastMsg)) {
+        const messageCount = conv.messageCount || 0;
+        const lastActivity = conv.lastModified ? this.formatRelativeTime(new Date(conv.lastModified)) : 'recently';
+        return `User confirmed action • ${messageCount} messages • ${lastActivity}`;
+      }
+      
+      // Check if it's a tool-related message
+      if (lastMsg.includes('Tool Result') || lastMsg.includes('[Tool:')) {
+        return `Tool execution completed • ${this.truncateText(lastMsg, 60)}`;
+      }
+      
+      return this.truncateText(lastMsg, 80);
+    }
+    
+    // For empty conversations, show descriptive text
+    const messageCount = conv.messageCount || 0;
+    if (messageCount === 0) {
+      return 'Empty conversation - click to start chatting';
+    }
+    
+    // For conversations without lastMessage but with messages, show informative text
+    const lastActivity = conv.lastModified ? this.formatRelativeTime(new Date(conv.lastModified)) : 'unknown';
+    return `${messageCount} messages • Last activity ${lastActivity}`;
+  }
+  
+  /**
+   * Check if a message is a simple confirmation
+   * @param {string} message - Message content
+   * @returns {boolean} True if it's a simple confirmation
+   */
+  isSimpleConfirmation(message) {
+    const trimmed = message.trim();
+    const confirmationPatterns = [
+      /^\[ok\]$/i,
+      /^ok$/i,
+      /^yes$/i,
+      /^\[yes\]$/i,
+      /^y$/i,
+      /^\[y\]$/i,
+      /^[1-9]$/,  // Choice selection
+      /^(continue|proceed|accept|confirm|done)$/i
+    ];
+    
+    return confirmationPatterns.some(pattern => pattern.test(trimmed));
+  }
+
+  /**
+   * Get conversation preview text (legacy method - still used in other places)
+   * @param {Object} conv - Conversation object
+   * @param {string} state - Conversation state
+   * @returns {string} Preview text
+   */
+  getConversationPreview(conv, state) {
+    // If we have a last message, show it
+    if (conv.lastMessage && conv.lastMessage.trim()) {
+      return this.truncateText(conv.lastMessage, 60);
+    }
+    
+    // Otherwise, show conversation info based on state and metadata
+    const messageCount = conv.messageCount || 0;
+    
+    if (messageCount === 0) {
+      return `Empty conversation • Project: ${conv.project || 'Unknown'}`;
+    }
+    
+    // Show state-based preview
+    if (state === 'Claude Code working...') {
+      return `Claude is working • ${messageCount} messages`;
+    } else if (state === 'Awaiting user input...') {
+      return `Waiting for your input • ${messageCount} messages`;
+    } else if (state === 'User typing...') {
+      return `Ready for your message • ${messageCount} messages`;
+    } else if (state === 'Recently active') {
+      return `Recently active • ${messageCount} messages`;
+    } else {
+      return `${messageCount} messages • Last active ${this.formatRelativeTime(new Date(conv.lastModified))}`;
+    }
+  }
+
+  /**
    * Get state CSS class
    * @param {string} state - Conversation state
    * @returns {string} CSS class
    */
   getStateClass(state) {
     const stateClasses = {
-      'active': 'status-active',
-      'idle': 'status-idle',
-      'waiting': 'status-waiting',
-      'completed': 'status-completed',
+      'Claude Code working...': 'status-active',
+      'Awaiting user input...': 'status-waiting',
+      'User typing...': 'status-typing',
+      'Awaiting response...': 'status-pending',
+      'Recently active': 'status-recent',
+      'Idle': 'status-idle',
+      'Inactive': 'status-inactive',
+      'Old': 'status-old',
       'unknown': 'status-unknown'
     };
     return stateClasses[state] || 'status-unknown';
@@ -837,13 +1580,17 @@ class AgentsPage {
    */
   getStateLabel(state) {
     const stateLabels = {
-      'active': 'Active',
-      'idle': 'Idle',
-      'waiting': 'Waiting',
-      'completed': 'Completed',
+      'Claude Code working...': 'Working',
+      'Awaiting user input...': 'Awaiting input',
+      'User typing...': 'Typing',
+      'Awaiting response...': 'Awaiting response',
+      'Recently active': 'Recent',
+      'Idle': 'Idle',
+      'Inactive': 'Inactive',
+      'Old': 'Old',
       'unknown': 'Unknown'
     };
-    return stateLabels[state] || 'Unknown';
+    return stateLabels[state] || state;
   }
 
   /**
@@ -873,6 +1620,8 @@ class AgentsPage {
    */
   clearSearch() {
     const searchInput = this.container.querySelector('#search-filter');
+    if (!searchInput) return; // Guard against null when AgentsPage isn't rendered
+    
     searchInput.value = '';
     this.updateFilter('search', '');
   }
@@ -888,9 +1637,13 @@ class AgentsPage {
     };
     
     // Reset UI
-    this.container.querySelector('#status-filter').value = 'all';
-    this.container.querySelector('#time-filter').value = '7d';
-    this.container.querySelector('#search-filter').value = '';
+    const statusFilter = this.container.querySelector('#status-filter');
+    const timeFilter = this.container.querySelector('#time-filter');
+    const searchFilter = this.container.querySelector('#search-filter');
+    
+    if (statusFilter) statusFilter.value = 'all';
+    if (timeFilter) timeFilter.value = '7d';
+    if (searchFilter) searchFilter.value = '';
     
     // Restart from beginning when clearing filters
     this.refreshFromBeginning();
@@ -937,18 +1690,27 @@ class AgentsPage {
    */
   async refreshConversations() {
     const refreshBtn = this.container.querySelector('#refresh-conversations');
+    if (!refreshBtn) return; // Guard against null when AgentsPage isn't rendered
+    
     refreshBtn.disabled = true;
-    refreshBtn.querySelector('.btn-icon').style.animation = 'spin 1s linear infinite';
+    const iconElement = refreshBtn.querySelector('.btn-icon');
+    if (iconElement) {
+      iconElement.style.animation = 'spin 1s linear infinite';
+    }
 
     try {
-      this.dataService.clearCache();
+      // Clear both server and client cache to force fresh data
+      console.log('🔄 Refreshing conversations with full cache clear...');
+      await this.dataService.clearServerCache('conversations');
       await this.loadConversationsData();
     } catch (error) {
       console.error('Error refreshing conversations:', error);
       this.stateService.setError('Failed to refresh conversations');
     } finally {
       refreshBtn.disabled = false;
-      refreshBtn.querySelector('.btn-icon').style.animation = '';
+      if (iconElement) {
+        iconElement.style.animation = '';
+      }
     }
   }
 
@@ -974,16 +1736,24 @@ class AgentsPage {
    * Show empty state
    */
   showEmptyState() {
-    this.container.querySelector('#conversations-list').style.display = 'none';
-    this.container.querySelector('#empty-state').style.display = 'flex';
+    const conversationsList = this.container.querySelector('#conversations-list');
+    const emptyState = this.container.querySelector('#empty-state');
+    if (!conversationsList || !emptyState) return; // Guard against null when AgentsPage isn't rendered
+    
+    conversationsList.style.display = 'none';
+    emptyState.style.display = 'flex';
   }
 
   /**
    * Hide empty state
    */
   hideEmptyState() {
-    this.container.querySelector('#conversations-list').style.display = 'block';
-    this.container.querySelector('#empty-state').style.display = 'none';
+    const conversationsList = this.container.querySelector('#conversations-list');
+    const emptyState = this.container.querySelector('#empty-state');
+    if (!conversationsList || !emptyState) return; // Guard against null when AgentsPage isn't rendered
+    
+    conversationsList.style.display = 'block';
+    emptyState.style.display = 'none';
   }
 
   /**
@@ -996,8 +1766,12 @@ class AgentsPage {
       btn.classList.toggle('active', btn.dataset.view === view);
     });
 
-    const gridSection = this.container.querySelector('#conversations-grid').parentNode;
+    const gridElement = this.container.querySelector('#conversations-grid');
     const tableSection = this.container.querySelector('.conversations-table-section');
+    
+    if (!gridElement || !tableSection) return; // Guard against null when AgentsPage isn't rendered
+    
+    const gridSection = gridElement.parentNode;
 
     if (view === 'table') {
       gridSection.style.display = 'none';
@@ -1078,19 +1852,32 @@ class AgentsPage {
 
   /**
    * Update conversation states
-   * @param {Object} statesData - Conversation states data
+   * @param {Object} activeStates - Active conversation states (direct object, not nested)
    */
-  updateConversationStates(statesData) {
+  updateConversationStates(activeStates) {
     const conversations = this.stateService.getStateProperty('conversations') || [];
-    const activeStates = statesData?.activeStates || {};
-    this.renderConversationsList(conversations, activeStates);
+    
+    console.log(`🔄 updateConversationStates called with:`, {
+      activeStatesCount: Object.keys(activeStates || {}).length,
+      selectedConversation: this.selectedConversationId,
+      selectedState: activeStates?.[this.selectedConversationId]
+    });
+    
+    // Re-render conversation list with new states
+    this.renderConversationsList(conversations, activeStates || {});
+    
+    // Update banner if we have a selected conversation
+    if (this.selectedConversationId && activeStates && activeStates[this.selectedConversationId]) {
+      console.log(`🔄 Updating banner from updateConversationStates: ${this.selectedConversationId} -> ${activeStates[this.selectedConversationId]}`);
+      this.updateStateBanner(this.selectedConversationId, activeStates[this.selectedConversationId]);
+    }
   }
 
   /**
    * Handle conversation state change
-   * @param {Object} state - New state
+   * @param {Object} _state - New state (unused but required by interface)
    */
-  handleConversationStateChange(state) {
+  handleConversationStateChange(_state) {
     this.refreshConversationsDisplay();
   }
 
@@ -1133,6 +1920,12 @@ class AgentsPage {
         component.destroy();
       }
     });
+    
+    // Cleanup scroll listeners
+    const messagesContent = this.container.querySelector('#messages-content');
+    if (messagesContent && this.messagesScrollListener) {
+      messagesContent.removeEventListener('scroll', this.messagesScrollListener);
+    }
     
     // Unsubscribe from state changes
     if (this.unsubscribe) {

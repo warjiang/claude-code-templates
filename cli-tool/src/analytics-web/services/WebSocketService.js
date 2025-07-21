@@ -120,6 +120,9 @@ class WebSocketService {
         case 'data_refresh':
           this.handleDataRefresh(data);
           break;
+        case 'new_message':
+          this.handleNewMessage(data);
+          break;
         case 'system_status':
           this.handleSystemStatus(data);
           break;
@@ -200,6 +203,15 @@ class WebSocketService {
   handleDataRefresh(data) {
     console.log('📊 Data refresh received');
     this.emit('data_refresh', data.data);
+  }
+
+  /**
+   * Handle new message
+   * @param {Object} data - Message data
+   */
+  handleNewMessage(data) {
+    console.log(`📨 New message received for conversation: ${data.data.conversationId}`);
+    this.emit('new_message', data.data);
   }
 
   /**

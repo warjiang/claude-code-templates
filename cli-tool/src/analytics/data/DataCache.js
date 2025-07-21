@@ -119,28 +119,12 @@ class DataCache {
       return cached.messages;
     }
     
-    // Cache miss - parse conversation
+    // Cache miss - parse conversation with tool correlation
     this.metrics.misses++;
     const content = await this.getFileContent(filepath);
+    const lines = content.trim().split('\n').filter(line => line.trim());
     
-    const messages = content.trim().split('\n')
-      .filter(line => line.trim())
-      .map(line => {
-        try {
-          const item = JSON.parse(line);
-          if (item.message && item.message.role) {
-            return {
-              role: item.message.role,
-              timestamp: new Date(item.timestamp),
-              content: item.message.content,
-              model: item.message.model || null,
-              usage: item.message.usage || null,
-            };
-          }
-        } catch {}
-        return null;
-      })
-      .filter(Boolean);
+    const messages = this.parseAndCorrelateToolMessages(lines);
     
     this.caches.parsedConversations.set(filepath, {
       messages,
@@ -148,6 +132,80 @@ class DataCache {
     });
     
     return messages;
+  }
+
+  /**
+   * Parse JSONL lines and correlate tool_use with tool_result
+   * @param {Array} lines - JSONL lines
+   * @returns {Array} Parsed and correlated messages
+   */
+  parseAndCorrelateToolMessages(lines) {
+    const entries = [];
+    const toolUseMap = new Map();
+    
+    // First pass: parse all entries and map tool_use entries
+    for (const line of lines) {
+      try {
+        const item = JSON.parse(line);
+        if (item.message && (item.type === 'assistant' || item.type === 'user')) {
+          entries.push(item);
+          
+          // Track tool_use entries by their ID
+          if (item.type === 'assistant' && item.message.content) {
+            const toolUseBlock = Array.isArray(item.message.content) 
+              ? item.message.content.find(c => c.type === 'tool_use')
+              : (item.message.content.type === 'tool_use' ? item.message.content : null);
+            
+            if (toolUseBlock && toolUseBlock.id) {
+              toolUseMap.set(toolUseBlock.id, item);
+            }
+          }
+        }
+      } catch (error) {
+        // Skip invalid JSONL lines
+      }
+    }
+    
+    // Second pass: correlate tool_result with tool_use and filter out standalone tool_result entries
+    const processedMessages = [];
+    
+    for (const item of entries) {
+      if (item.type === 'user' && item.message.content) {
+        // Check if this is a tool_result entry
+        const toolResultBlock = Array.isArray(item.message.content)
+          ? item.message.content.find(c => c.type === 'tool_result')
+          : (item.message.content.type === 'tool_result' ? item.message.content : null);
+        
+        if (toolResultBlock && toolResultBlock.tool_use_id) {
+          // This is a tool_result - attach it to the corresponding tool_use
+          const toolUseEntry = toolUseMap.get(toolResultBlock.tool_use_id);
+          if (toolUseEntry) {
+            // Attach tool result to the tool use entry
+            if (!toolUseEntry.toolResults) {
+              toolUseEntry.toolResults = [];
+            }
+            toolUseEntry.toolResults.push(toolResultBlock);
+            // Don't add this tool_result as a separate message
+            continue;
+          }
+        }
+      }
+      
+      // Convert to our standard format
+      const parsed = {
+        id: item.message.id || item.uuid || null,
+        role: item.message.role || (item.type === 'assistant' ? 'assistant' : 'user'),
+        timestamp: new Date(item.timestamp),
+        content: item.message.content,
+        model: item.message.model || null,
+        usage: item.message.usage || null,
+        toolResults: item.toolResults || null // Include attached tool results
+      };
+      
+      processedMessages.push(parsed);
+    }
+    
+    return processedMessages;
   }
 
   /**
