@@ -14,6 +14,7 @@ const DataCache = require('./analytics/data/DataCache');
 const WebSocketServer = require('./analytics/notifications/WebSocketServer');
 const NotificationManager = require('./analytics/notifications/NotificationManager');
 const PerformanceMonitor = require('./analytics/utils/PerformanceMonitor');
+const ConsoleBridge = require('./console-bridge');
 
 class ClaudeAnalytics {
   constructor() {
@@ -32,6 +33,7 @@ class ClaudeAnalytics {
     this.webSocketServer = null;
     this.notificationManager = null;
     this.httpServer = null;
+    this.consoleBridge = null;
     this.data = {
       conversations: [],
       summary: {},
@@ -501,7 +503,6 @@ class ClaudeAnalytics {
    */
   async handleConversationChange(conversationId, filePath) {
     try {
-      console.log(chalk.blue(`📨 Handling conversation change: ${conversationId} (${filePath})`));
       
       // Get the latest messages from the file
       const messages = await this.conversationAnalyzer.getParsedConversation(filePath);
@@ -510,22 +511,15 @@ class ClaudeAnalytics {
         // Get the most recent message
         const latestMessage = messages[messages.length - 1];
         
-        console.log(chalk.cyan(`📨 Latest message role: ${latestMessage.role}, timestamp: ${latestMessage.timestamp}`));
         
         // Send WebSocket notification for new message
         if (this.notificationManager) {
-          console.log(chalk.blue(`🔌 Sending WebSocket notification for conversation ${conversationId}`));
           this.notificationManager.notifyNewMessage(conversationId, latestMessage, {
             totalMessages: messages.length,
             timestamp: new Date().toISOString()
           });
-        } else {
-          console.log(chalk.red(`❌ No notification manager available for conversation ${conversationId}`));
         }
         
-        console.log(chalk.green(`✅ Notified new message in conversation ${conversationId}`));
-      } else {
-        console.log(chalk.yellow(`⚠️ No messages found in conversation ${conversationId}`));
       }
     } catch (error) {
       console.error(chalk.red(`Error handling conversation change for ${conversationId}:`), error);
@@ -589,8 +583,7 @@ class ClaudeAnalytics {
         
         // Memory cleanup: limit conversation history to prevent memory buildup
         if (this.data.conversations && this.data.conversations.length > 150) {
-          console.log(chalk.yellow(`🧹 Cleaning up conversation history: ${this.data.conversations.length} -> 150`));
-          this.data.conversations = this.data.conversations
+            this.data.conversations = this.data.conversations
             .sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified))
             .slice(0, 150);
         }
@@ -658,7 +651,6 @@ class ClaudeAnalytics {
 
     // Force refresh endpoint
     this.app.get('/api/refresh', async (req, res) => {
-      console.log(chalk.blue('🔄 Manual refresh requested...'));
       await this.loadInitialData();
       res.json({
         success: true,
@@ -705,7 +697,6 @@ class ClaudeAnalytics {
             activeStates[conversation.id] = state;
             
           } catch (error) {
-            console.error(`Error calculating state for conversation ${conversation.id}:`, error);
             activeStates[conversation.id] = 'unknown';
           }
         }
@@ -969,17 +960,10 @@ class ClaudeAnalytics {
             }
           });
           
-          if (hasChanges) {
-            console.log(chalk.gray(`⚡ State update: ${activeConvs.length} active conversations`));
-            activeConvs.forEach(conv => {
-              console.log(chalk.gray(`  📊 ${conv.project}: ${conv.conversationState}`));
-            });
-          }
         }
         
         // Memory cleanup: limit conversation history to prevent memory buildup
         if (this.data.conversations.length > 100) {
-          console.log(chalk.yellow(`🧹 Cleaning up conversation history: ${this.data.conversations.length} -> 100`));
           this.data.conversations = this.data.conversations
             .sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified))
             .slice(0, 100);
@@ -1098,13 +1082,11 @@ class ClaudeAnalytics {
           this.dataCache.caches.parsedConversations.clear();
           this.dataCache.caches.fileContent.clear();
           this.dataCache.caches.fileStats.clear();
-          console.log(chalk.yellow('🗑️  All caches cleared manually'));
           res.json({ success: true, message: 'All caches cleared' });
         } else if (type === 'conversations') {
           // Clear only conversation-related caches
           this.dataCache.caches.parsedConversations.clear();
           this.dataCache.caches.fileContent.clear();
-          console.log(chalk.yellow('🗑️  Conversation caches cleared manually'));
           res.json({ success: true, message: 'Conversation caches cleared' });
         } else {
           res.status(400).json({ error: 'Invalid cache type. Use "all" or "conversations"' });
@@ -1172,13 +1154,83 @@ class ClaudeAnalytics {
       this.notificationManager = new NotificationManager(this.webSocketServer);
       await this.notificationManager.initialize();
       
+      // Connect notification manager to file watcher for typing detection
+      this.fileWatcher.setNotificationManager(this.notificationManager);
+      
       // Setup notification subscriptions
       this.setupNotificationSubscriptions();
       
-      console.log(chalk.green('✅ WebSocket and notifications initialized'));
+      // Initialize Console Bridge for Claude Code interaction
+      await this.initializeConsoleBridge();
+      
+      console.log(chalk.green('✅ WebSocket, notifications, and console bridge initialized'));
     } catch (error) {
       console.error(chalk.red('❌ Failed to initialize WebSocket:'), error);
     }
+  }
+
+  /**
+   * Initialize Console Bridge for Claude Code interaction
+   */
+  async initializeConsoleBridge() {
+    try {
+      console.log(chalk.blue('🌉 Initializing Console Bridge...'));
+      
+      // Create console bridge on a different port (3334)
+      this.consoleBridge = new ConsoleBridge({
+        port: 3334,
+        debug: false // Set to true for detailed debugging
+      });
+      
+      // Initialize the bridge
+      const success = await this.consoleBridge.initialize();
+      
+      if (success) {
+        console.log(chalk.green('✅ Console Bridge initialized on port 3334'));
+        console.log(chalk.cyan('🔌 Web interface can connect to ws://localhost:3334 for console interactions'));
+        
+        // Bridge console interactions to main WebSocket
+        this.setupConsoleBridgeIntegration();
+      } else {
+        console.warn(chalk.yellow('⚠️ Console Bridge failed to initialize - console interactions disabled'));
+      }
+      
+    } catch (error) {
+      console.warn(chalk.yellow('⚠️ Console Bridge initialization failed:'), error.message);
+      console.log(chalk.gray('Console interactions will not be available, but analytics will continue normally'));
+    }
+  }
+
+  /**
+   * Setup integration between Console Bridge and main WebSocket
+   */
+  setupConsoleBridgeIntegration() {
+    if (!this.consoleBridge || !this.webSocketServer) return;
+    
+    // Forward console interactions from bridge to main WebSocket
+    this.consoleBridge.on('console_interaction', (interactionData) => {
+      console.log(chalk.blue('📡 Forwarding console interaction to web interface'));
+      
+      // Broadcast to main WebSocket clients
+      this.webSocketServer.broadcast({
+        type: 'console_interaction',
+        data: interactionData
+      });
+    });
+    
+    // Listen for responses from main WebSocket and forward to bridge
+    this.webSocketServer.on('console_response', (responseData) => {
+      console.log(chalk.blue('📱 Forwarding console response to Claude Code'));
+      
+      if (this.consoleBridge) {
+        this.consoleBridge.handleWebMessage({
+          type: 'console_response',
+          data: responseData
+        });
+      }
+    });
+    
+    console.log(chalk.green('🔗 Console Bridge integration established'));
   }
   
   /**
@@ -1187,7 +1239,6 @@ class ClaudeAnalytics {
   setupNotificationSubscriptions() {
     // Subscribe to refresh requests from WebSocket clients
     this.notificationManager.subscribe('refresh_requested', async (notification) => {
-      console.log(chalk.blue('🔄 Refresh requested via WebSocket'));
       await this.loadInitialData();
       
       // Notify clients of the refreshed data
@@ -1332,6 +1383,11 @@ class ClaudeAnalytics {
     // Shutdown notification manager
     if (this.notificationManager) {
       this.notificationManager.shutdown();
+    }
+    
+    // Shutdown console bridge
+    if (this.consoleBridge) {
+      this.consoleBridge.shutdown();
     }
     
     if (this.httpServer) {

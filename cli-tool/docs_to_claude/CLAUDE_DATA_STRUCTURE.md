@@ -12,7 +12,7 @@ This document provides comprehensive information about the data structures and f
 │   │   ├── conversation.jsonl   # Main conversation file
 │   │   └── settings.json        # Project settings
 │   └── -Users-user-Project2/
-│       └── conversation.jsonl
+│       └── conversation.jsonlh
 ├── desktop/                     # Claude Desktop app data
 ├── statsig/                     # Analytics and feature flags
 │   ├── logs/

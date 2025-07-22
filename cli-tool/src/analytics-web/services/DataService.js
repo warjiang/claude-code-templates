@@ -195,41 +195,34 @@ class DataService {
    */
   setupWebSocketIntegration() {
     if (!this.webSocketService) {
-      console.log('⚠️ No WebSocket service available - starting polling immediately');
       this.startFallbackPolling();
       return;
     }
     
-    console.log('🔌 Setting up WebSocket integration for DataService');
     
     // Listen for data refresh events
     this.webSocketService.on('data_refresh', (data) => {
-      console.log('📊 Real-time data refresh received');
       this.handleRealTimeDataRefresh(data);
     });
     
     // Listen for conversation state changes
     this.webSocketService.on('conversation_state_change', (data) => {
-      console.log('🔄 Real-time conversation state change');
       this.handleRealTimeStateChange(data);
     });
     
     // Listen for new messages
     this.webSocketService.on('new_message', (data) => {
-      console.log('📨 Real-time new message received:', data);
       this.handleNewMessage(data);
     });
     
     // Listen for connection status
     this.webSocketService.on('connected', () => {
-      console.log('✅ WebSocket connected - enabling real-time updates');
       this.realTimeEnabled = true;
       this.subscribeToChannels();
       this.stopFallbackPolling(); // Stop polling when WebSocket connects
     });
     
     this.webSocketService.on('disconnected', () => {
-      console.log('❌ WebSocket disconnected - falling back to polling');
       this.realTimeEnabled = false;
       this.startFallbackPolling();
     });
@@ -237,7 +230,6 @@ class DataService {
     // Start polling immediately as fallback, stop if WebSocket connects successfully
     setTimeout(() => {
       if (!this.realTimeEnabled) {
-        console.log('⚠️ WebSocket not connected after timeout - starting fallback polling');
         this.startFallbackPolling();
       }
     }, 1000); // Give WebSocket 1 second to connect
@@ -253,7 +245,6 @@ class DataService {
       await this.webSocketService.subscribe('data_updates');
       await this.webSocketService.subscribe('conversation_updates');
       await this.webSocketService.subscribe('system_updates');
-      console.log('📡 Subscribed to real-time channels');
     } catch (error) {
       console.error('Error subscribing to channels:', error);
     }
@@ -289,17 +280,6 @@ class DataService {
    * @param {Object} data - New message data
    */
   handleNewMessage(data) {
-    console.log('📨 DataService: Processing new message for conversation', data.conversationId);
-    console.log('🔧 DataService: Raw message data:', {
-      conversationId: data.conversationId,
-      messageRole: data.message?.role,
-      messageContent: data.message?.content,
-      messageContentType: Array.isArray(data.message?.content) ? 'array' : typeof data.message?.content,
-      contentBlocks: Array.isArray(data.message?.content) ? data.message.content.map(b => ({ type: b.type, hasData: !!b.data })) : 'not array',
-      hasToolResults: !!data.message?.toolResults,
-      toolResultsCount: data.message?.toolResults?.length || 0,
-      metadata: data.metadata
-    });
     
     // Clear relevant cache entries for the affected conversation
     this.clearCacheEntry(`/api/conversations/${data.conversationId}/messages`);
@@ -310,8 +290,6 @@ class DataService {
       message: data.message,
       metadata: data.metadata
     });
-    
-    console.log('📨 DataService: New message processed and listeners notified for conversation', data.conversationId);
   }
   
   /**
@@ -321,7 +299,6 @@ class DataService {
   startPeriodicRefresh(interval = 30000) {
     // Don't start polling if real-time is enabled
     if (this.realTimeEnabled) {
-      console.log('⚡ Real-time updates enabled - skipping periodic refresh');
       return;
     }
     
@@ -329,7 +306,6 @@ class DataService {
       clearInterval(this.refreshInterval);
     }
 
-    console.log('📅 Starting periodic refresh (fallback mode)');
     this.refreshInterval = setInterval(async () => {
       try {
         // Only refresh if real-time is not available
@@ -354,7 +330,6 @@ class DataService {
    */
   startFallbackPolling() {
     if (!this.refreshInterval) {
-      console.log('🔄 Starting fallback polling due to WebSocket disconnect');
       this.startPeriodicRefresh(5000); // Very frequent polling as fallback (5 seconds)
     }
   }
@@ -364,7 +339,6 @@ class DataService {
    */
   stopFallbackPolling() {
     if (this.refreshInterval) {
-      console.log('🛑 Stopping fallback polling - WebSocket reconnected');
       this.stopPeriodicRefresh();
     }
   }
@@ -384,7 +358,6 @@ class DataService {
    */
   async requestRefresh() {
     if (this.webSocketService && this.realTimeEnabled) {
-      console.log('🔄 Requesting refresh via WebSocket');
       try {
         await this.webSocketService.requestRefresh();
         return true;
@@ -394,7 +367,6 @@ class DataService {
     }
     
     // Fallback to cache clearing
-    console.log('🔄 Falling back to cache clear for refresh');
     this.clearCache();
     return false;
   }
@@ -406,7 +378,6 @@ class DataService {
    */
   async clearServerCache(type = 'all') {
     try {
-      console.log(`🗑️ Clearing server cache: ${type}`);
       const response = await fetch('/api/cache/clear', {
         method: 'POST',
         headers: {
@@ -417,17 +388,14 @@ class DataService {
       
       if (response.ok) {
         const result = await response.json();
-        console.log('✅ Server cache cleared:', result.message);
         
         // Also clear local cache
         this.clearCache();
         return true;
       } else {
-        console.error('❌ Failed to clear server cache:', response.statusText);
         return false;
       }
     } catch (error) {
-      console.error('❌ Error clearing server cache:', error);
       return false;
     }
   }

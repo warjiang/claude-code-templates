@@ -281,7 +281,7 @@ class WebSocketServer {
     });
 
     if (sentCount > 0) {
-      console.log(chalk.green(`📢 Broadcasted ${message.type} to ${sentCount} clients${channel ? ` on channel ${channel}` : ''}`));
+      //console.log(chalk.green(`📢 Broadcasted ${message.type} to ${sentCount} clients${channel ? ` on channel ${channel}` : ''}`));
     }
 
     // Queue message if no clients connected

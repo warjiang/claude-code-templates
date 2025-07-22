@@ -11,6 +11,8 @@ class FileWatcher {
     this.watchers = [];
     this.intervals = [];
     this.isActive = false;
+    this.fileActivity = new Map(); // Track file activity for typing detection
+    this.typingTimeout = new Map(); // Track typing timeouts
   }
 
   /**
@@ -48,10 +50,12 @@ class FileWatcher {
     });
 
     conversationWatcher.on('change', async (filePath) => {
-      console.log(chalk.yellow(`🔄 Conversation file changed: ${filePath}`));
       
       // Extract conversation ID from file path
       const conversationId = this.extractConversationId(filePath);
+      
+      // Enhanced file activity detection for typing
+      await this.handleFileActivity(conversationId, filePath);
       
       // Invalidate cache for the changed file
       if (this.dataCache && filePath) {
@@ -60,18 +64,14 @@ class FileWatcher {
       
       // Notify specific conversation change if callback exists
       if (this.conversationChangeCallback && conversationId) {
-        console.log(chalk.blue(`📨 Notifying conversation change: ${conversationId}`));
         await this.conversationChangeCallback(conversationId, filePath);
       }
       
       await this.triggerDataRefresh();
-      console.log(chalk.green('✅ Data updated'));
     });
 
     conversationWatcher.on('add', async () => {
-      console.log(chalk.yellow('📝 New conversation file detected...'));
       await this.triggerDataRefresh();
-      console.log(chalk.green('✅ Data updated'));
     });
 
     this.watchers.push(conversationWatcher);
@@ -88,15 +88,11 @@ class FileWatcher {
     });
 
     projectWatcher.on('addDir', async () => {
-      console.log(chalk.yellow('📁 New project directory detected...'));
       await this.triggerDataRefresh();
-      console.log(chalk.green('✅ Data updated'));
     });
 
     projectWatcher.on('change', async () => {
-      console.log(chalk.yellow('📁 Project directory changed...'));
       await this.triggerDataRefresh();
-      console.log(chalk.green('✅ Data updated'));
     });
 
     this.watchers.push(projectWatcher);
@@ -108,7 +104,6 @@ class FileWatcher {
   setupPeriodicRefresh() {
     // Periodic refresh to catch any missed changes (reduced frequency)
     const dataRefreshInterval = setInterval(async () => {
-      console.log(chalk.blue('⏱️  Periodic data refresh...'));
       await this.triggerDataRefresh();
     }, 120000); // Every 2 minutes (reduced from 30 seconds)
 
@@ -152,6 +147,107 @@ class FileWatcher {
       console.error(chalk.red('Error extracting conversation ID:'), error);
       return null;
     }
+  }
+
+  /**
+   * Handle file activity for typing detection
+   * @param {string} conversationId - Conversation ID
+   * @param {string} filePath - File path that changed
+   */
+  async handleFileActivity(conversationId, filePath) {
+    if (!conversationId) return;
+
+    const fs = require('fs');
+    try {
+      // Get file stats
+      const stats = fs.statSync(filePath);
+      const now = Date.now();
+      const fileSize = stats.size;
+      const mtime = stats.mtime.getTime();
+
+      // Get previous activity
+      const previousActivity = this.fileActivity.get(conversationId) || {
+        lastSize: 0,
+        lastMtime: 0,
+        lastMessageCheck: 0
+      };
+
+      // Check if this is just a file touch/modification without significant content change
+      const sizeChanged = fileSize !== previousActivity.lastSize;
+      const timeChanged = mtime !== previousActivity.lastMtime;
+      const timeSinceLastCheck = now - previousActivity.lastMessageCheck;
+
+      // Update activity tracking
+      this.fileActivity.set(conversationId, {
+        lastSize: fileSize,
+        lastMtime: mtime,
+        lastMessageCheck: now
+      });
+
+      // If file changed but we haven't checked for complete messages recently
+      if ((sizeChanged || timeChanged) && timeSinceLastCheck > 1000) {
+        // Clear any existing typing timeout
+        const existingTimeout = this.typingTimeout.get(conversationId);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
+        }
+
+        // Set a timeout to detect if this is typing activity
+        const typingTimeout = setTimeout(async () => {
+          // After delay, check if a complete message was added
+          await this.checkForTypingActivity(conversationId, filePath);
+        }, 2000); // Wait 2 seconds to see if a complete message appears
+
+        this.typingTimeout.set(conversationId, typingTimeout);
+      }
+    } catch (error) {
+      console.error(chalk.red(`Error handling file activity for ${conversationId}:`), error);
+    }
+  }
+
+  /**
+   * Check if file activity indicates user typing
+   * @param {string} conversationId - Conversation ID
+   * @param {string} filePath - File path to check
+   */
+  async checkForTypingActivity(conversationId, filePath) {
+    try {
+      // Parse the conversation to see if new complete messages were added
+      const ConversationAnalyzer = require('./ConversationAnalyzer');
+      const analyzer = new ConversationAnalyzer();
+      const messages = await analyzer.getParsedConversation(filePath);
+
+      if (messages && messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        const lastMessageTime = new Date(lastMessage.timestamp).getTime();
+        const now = Date.now();
+        const messageAge = now - lastMessageTime;
+
+        // If the last message is very recent (< 5 seconds), it's probably a new complete message
+        // If it's older, the file activity might indicate typing
+        if (messageAge > 5000 && lastMessage.role === 'assistant') {
+          // File activity after assistant message suggests user is typing
+          
+          // Send typing notification if we have access to notification manager
+          if (this.notificationManager) {
+            this.notificationManager.notifyConversationStateChange(conversationId, 'User typing...', {
+              detectionMethod: 'file_activity',
+              timestamp: new Date().toISOString()
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error(chalk.red(`Error checking typing activity for ${conversationId}:`), error);
+    }
+  }
+
+  /**
+   * Set notification manager for state notifications
+   * @param {Object} notificationManager - NotificationManager instance
+   */
+  setNotificationManager(notificationManager) {
+    this.notificationManager = notificationManager;
   }
 
   /**
@@ -314,7 +410,6 @@ class FileWatcher {
    * Force immediate refresh
    */
   async forceRefresh() {
-    console.log(chalk.cyan('🔄 Force refreshing data...'));
     await this.triggerDataRefresh();
     if (this.processRefreshCallback) {
       await this.processRefreshCallback();

@@ -37,6 +37,9 @@ class AgentsPage {
     this.loadedConversations = [];
     this.loadedMessages = new Map(); // Cache messages by conversation ID (now stores paginated data)
     
+    // State transition tracking for enhanced user experience
+    this.lastMessageTime = new Map(); // Track when last message was received per conversation
+    
     // Initialize tool display component
     this.toolDisplay = new ToolDisplay();
     
@@ -48,6 +51,9 @@ class AgentsPage {
       if (type === 'new_message') {
         console.log('🔄 WebSocket: New message received', { conversationId: data.conversationId });
         this.handleNewMessage(data.conversationId, data.message, data.metadata);
+      } else if (type === 'console_interaction') {
+        console.log('🔄 WebSocket: Console interaction request received', data);
+        this.showConsoleInteraction(data);
       }
     });
   }
@@ -117,21 +123,37 @@ class AgentsPage {
    * @param {Object} metadata - Additional metadata
    */
   handleNewMessage(conversationId, message, metadata) {
-    // Debug: Log the structure of the incoming message
-    console.log('🔧 AgentsPage.handleNewMessage - Debug message structure:', {
+    // Log essential message info for debugging
+    console.log('🔄 WebSocket: Processing new message', {
       conversationId,
-      message,
-      messageRole: message?.role,
-      messageContent: message?.content,
-      messageHasContent: Array.isArray(message?.content),
-      contentBlocks: Array.isArray(message?.content) ? message.content.map(b => b.type) : 'not array',
-      hasToolResults: !!message?.toolResults,
-      toolResultsCount: message?.toolResults?.length || 0,
-      metadata
+      role: message?.role,
+      hasTools: Array.isArray(message?.content) ? message.content.some(b => b.type === 'tool_use') : false,
+      hasToolResults: !!message?.toolResults
     });
 
     // Always update the message cache for this conversation
     const existingMessages = this.loadedMessages.get(conversationId) || [];
+    
+    
+    // Track message timing for better state transitions
+    const now = Date.now();
+    this.lastMessageTime.set(conversationId, now);
+    
+    // IMMEDIATE STATE TRANSITION based on message appearance
+    if (this.selectedConversationId === conversationId) {
+      if (message?.role === 'user') {
+        // User message just appeared - Claude immediately starts working
+        console.log('⚡ User message detected - Claude starting work immediately');
+        this.updateStateBanner(conversationId, 'Claude Code working...');
+      } else if (message?.role === 'assistant') {
+        // Assistant message appeared - analyze for specific state
+        const intelligentState = this.analyzeMessageForState(message, existingMessages);
+        console.log(`🤖 Assistant message detected - state: ${intelligentState}`);
+        this.updateStateBanner(conversationId, intelligentState);
+        
+        // No additional timeout needed - state is determined by message content
+      }
+    }
     
     // Check if we already have this message (avoid duplicates)
     const messageExists = existingMessages.some(msg => 
@@ -184,6 +206,378 @@ class AgentsPage {
     } catch (error) {
       console.error('Error updating conversation states:', error);
     }
+  }
+
+  /**
+   * Analyze a message to determine intelligent conversation state
+   * @param {Object} message - The message to analyze
+   * @param {Array} existingMessages - Previous messages in conversation
+   * @returns {string} Intelligent state description
+   */
+  analyzeMessageForState(message, existingMessages = []) {
+    const role = message?.role;
+    const content = message?.content;
+    const hasToolResults = !!message?.toolResults && message.toolResults.length > 0;
+    const messageTime = new Date(message?.timestamp || Date.now());
+    const now = new Date();
+    const messageAge = (now - messageTime) / 1000; // seconds
+    
+    if (role === 'assistant') {
+      // Analyze assistant messages with enhanced logic
+      if (Array.isArray(content)) {
+        const hasToolUse = content.some(block => block.type === 'tool_use');
+        const hasText = content.some(block => block.type === 'text');
+        const textBlocks = content.filter(block => block.type === 'text');
+        const toolUseBlocks = content.filter(block => block.type === 'tool_use');
+        
+        // Enhanced tool execution detection with immediate response
+        if (hasToolUse) {
+          const toolNames = toolUseBlocks.map(tool => tool.name).join(', ');
+          
+          if (!hasToolResults) {
+            // Tool just sent - immediate execution state
+            console.log(`🔧 Tools detected: ${toolNames} - showing execution state`);
+            
+            if (toolNames.includes('bash') || toolNames.includes('edit') || toolNames.includes('write') || toolNames.includes('multiedit')) {
+              return 'Executing tools...';
+            } else if (toolNames.includes('read') || toolNames.includes('grep') || toolNames.includes('glob') || toolNames.includes('task')) {
+              return 'Analyzing code...';
+            } else if (toolNames.includes('webfetch') || toolNames.includes('websearch')) {
+              return 'Fetching data...';
+            }
+            return 'Awaiting tool response...';
+          } else {
+            // Has tool results - Claude is processing them
+            console.log(`📊 Tools completed: ${toolNames} - analyzing results`);
+            return 'Analyzing results...';
+          }
+        }
+        
+        // Enhanced text analysis
+        if (hasText) {
+          const textContent = textBlocks.map(block => block.text).join(' ').toLowerCase();
+          
+          // Working indicators
+          if (textContent.includes('let me') || 
+              textContent.includes('i\'ll') ||
+              textContent.includes('i will') ||
+              textContent.includes('i\'m going to') ||
+              textContent.includes('let\'s') ||
+              textContent.includes('first, i\'ll') ||
+              textContent.includes('now i\'ll')) {
+            return 'Claude Code working...';
+          }
+          
+          // Analysis indicators
+          if (textContent.includes('analyzing') ||
+              textContent.includes('examining') ||
+              textContent.includes('looking at') ||
+              textContent.includes('reviewing')) {
+            return 'Analyzing code...';
+          }
+          
+          // Completion indicators
+          if (textContent.includes('completed') ||
+              textContent.includes('finished') ||
+              textContent.includes('done') ||
+              textContent.includes('successfully')) {
+            return 'Task completed';
+          }
+          
+          // User input needed - enhanced detection
+          if (textContent.endsWith('?') || 
+              textContent.includes('what would you like') ||
+              textContent.includes('how can i help') ||
+              textContent.includes('would you like me to') ||
+              textContent.includes('should i') ||
+              textContent.includes('do you want') ||
+              textContent.includes('let me know') ||
+              textContent.includes('please let me know') ||
+              textContent.includes('what do you think') ||
+              textContent.includes('any questions')) {
+            return 'Waiting for your response';
+          }
+          
+          // Error/problem indicators
+          if (textContent.includes('error') ||
+              textContent.includes('failed') ||
+              textContent.includes('problem') ||
+              textContent.includes('issue')) {
+            return 'Encountered issue';
+          }
+        }
+      }
+      
+      // Recent assistant message suggests waiting for user
+      if (messageAge < 300) { // Extended to 5 minutes
+        return 'Waiting for your response';
+      }
+      
+      // Default for older assistant messages
+      return 'Idle';
+      
+    } else if (role === 'user') {
+      // User just sent a message - Claude should be processing
+      if (messageAge < 10) {
+        return 'Claude Code working...';
+      } else if (messageAge < 60) {
+        return 'Awaiting response...';
+      }
+      
+      // Older user messages suggest Claude might be working on something complex
+      return 'Processing request...';
+    }
+    
+    // Enhanced timing analysis
+    const lastMessage = existingMessages[existingMessages.length - 1];
+    if (lastMessage) {
+      const timeSinceLastMessage = Date.now() - new Date(lastMessage.timestamp).getTime();
+      
+      if (timeSinceLastMessage < 30000) { // Less than 30 seconds
+        return lastMessage.role === 'user' ? 'Claude Code working...' : 'Recently active';
+      } else if (timeSinceLastMessage < 180000) { // Less than 3 minutes
+        return 'Idle';
+      } else if (timeSinceLastMessage < 1800000) { // Less than 30 minutes
+        return 'Waiting for your response';
+      }
+    }
+    
+    return 'Inactive';
+  }
+  
+
+  /**
+   * Show console interaction panel for Yes/No prompts
+   * @param {Object} interactionData - Interaction data from Claude Code
+   */
+  showConsoleInteraction(interactionData) {
+    const panel = this.container.querySelector('#console-interaction-panel');
+    const description = this.container.querySelector('#interaction-description');
+    const prompt = this.container.querySelector('#interaction-prompt');
+    const choices = this.container.querySelector('#interaction-choices');
+    const textInput = this.container.querySelector('#interaction-text-input');
+    
+    // Show the panel
+    panel.style.display = 'block';
+    
+    // Set up the interaction content
+    if (interactionData.description) {
+      description.innerHTML = `
+        <div class="tool-action">
+          <strong>${interactionData.tool || 'Action'}:</strong>
+          <div class="tool-details">${interactionData.description}</div>
+        </div>
+      `;
+    }
+    
+    if (interactionData.prompt) {
+      prompt.textContent = interactionData.prompt;
+    }
+    
+    // Handle different interaction types
+    if (interactionData.type === 'choice' && interactionData.options) {
+      // Show multiple choice options
+      choices.style.display = 'block';
+      textInput.style.display = 'none';
+      
+      const choicesHtml = interactionData.options.map((option, index) => `
+        <label class="interaction-choice">
+          <input type="radio" name="console-choice" value="${index}" ${index === 0 ? 'checked' : ''}>
+          <span class="choice-number">${index + 1}.</span>
+          <span class="choice-text">${option}</span>
+        </label>
+      `).join('');
+      
+      choices.innerHTML = choicesHtml;
+      
+    } else if (interactionData.type === 'text') {
+      // Show text input
+      choices.style.display = 'none';
+      textInput.style.display = 'block';
+      
+      const textarea = this.container.querySelector('#console-text-input');
+      textarea.focus();
+    }
+    
+    // Store interaction data for submission
+    this.currentInteraction = interactionData;
+    
+    // Bind event listeners
+    this.bindInteractionEvents();
+  }
+
+  /**
+   * Hide console interaction panel
+   */
+  hideConsoleInteraction() {
+    const panel = this.container.querySelector('#console-interaction-panel');
+    panel.style.display = 'none';
+    this.currentInteraction = null;
+  }
+
+  /**
+   * Bind event listeners for console interaction
+   */
+  bindInteractionEvents() {
+    const submitBtn = this.container.querySelector('#interaction-submit');
+    const cancelBtn = this.container.querySelector('#interaction-cancel');
+    
+    // Remove existing listeners
+    submitBtn.replaceWith(submitBtn.cloneNode(true));
+    cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+    
+    // Get fresh references
+    const newSubmitBtn = this.container.querySelector('#interaction-submit');
+    const newCancelBtn = this.container.querySelector('#interaction-cancel');
+    
+    newSubmitBtn.addEventListener('click', () => this.handleInteractionSubmit());
+    newCancelBtn.addEventListener('click', () => this.handleInteractionCancel());
+    
+    // Handle Enter key for text input
+    const textarea = this.container.querySelector('#console-text-input');
+    if (textarea) {
+      textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.ctrlKey) {
+          this.handleInteractionSubmit();
+        }
+      });
+    }
+  }
+
+  /**
+   * Handle interaction submission
+   */
+  async handleInteractionSubmit() {
+    if (!this.currentInteraction) return;
+    
+    let response;
+    
+    if (this.currentInteraction.type === 'choice') {
+      const selectedChoice = this.container.querySelector('input[name="console-choice"]:checked');
+      if (selectedChoice) {
+        response = {
+          type: 'choice',
+          value: parseInt(selectedChoice.value),
+          text: this.currentInteraction.options[selectedChoice.value]
+        };
+      }
+    } else if (this.currentInteraction.type === 'text') {
+      const textarea = this.container.querySelector('#console-text-input');
+      response = {
+        type: 'text',
+        value: textarea.value.trim()
+      };
+    }
+    
+    if (response) {
+      // Send response via WebSocket
+      try {
+        await this.sendConsoleResponse(this.currentInteraction.id, response);
+        console.log('🔄 WebSocket: Console interaction response sent', { id: this.currentInteraction.id, response });
+        this.hideConsoleInteraction();
+      } catch (error) {
+        console.error('Error sending console response:', error);
+        // Show error in UI
+        this.showInteractionError('Failed to send response. Please try again.');
+      }
+    }
+  }
+
+  /**
+   * Handle interaction cancellation
+   */
+  async handleInteractionCancel() {
+    if (!this.currentInteraction) return;
+    
+    try {
+      await this.sendConsoleResponse(this.currentInteraction.id, { type: 'cancel' });
+      console.log('🔄 WebSocket: Console interaction cancelled', { id: this.currentInteraction.id });
+      this.hideConsoleInteraction();
+    } catch (error) {
+      console.error('Error cancelling console interaction:', error);
+      this.hideConsoleInteraction(); // Hide anyway on cancel
+    }
+  }
+
+  /**
+   * Send console response via WebSocket
+   * @param {string} interactionId - Interaction ID
+   * @param {Object} response - Response data
+   */
+  async sendConsoleResponse(interactionId, response) {
+    // Send through DataService which will route to WebSocket
+    if (this.dataService && this.dataService.webSocketService) {
+      this.dataService.webSocketService.send({
+        type: 'console_response',
+        data: {
+          interactionId,
+          response
+        }
+      });
+    } else {
+      throw new Error('WebSocket service not available');
+    }
+  }
+
+  /**
+   * Show error in interaction panel
+   * @param {string} message - Error message
+   */
+  showInteractionError(message) {
+    const panel = this.container.querySelector('#console-interaction-panel');
+    const existingError = panel.querySelector('.interaction-error');
+    
+    if (existingError) {
+      existingError.remove();
+    }
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'interaction-error';
+    errorDiv.textContent = message;
+    
+    const content = panel.querySelector('.interaction-content');
+    content.insertBefore(errorDiv, content.querySelector('.interaction-actions'));
+    
+    // Remove error after 5 seconds
+    setTimeout(() => {
+      if (errorDiv.parentNode) {
+        errorDiv.remove();
+      }
+    }, 5000);
+  }
+
+  /**
+   * Test console interaction functionality (for development)
+   */
+  testConsoleInteraction() {
+    // Test choice-based interaction (like your example)
+    const testChoiceInteraction = {
+      id: 'test-choice-' + Date.now(),
+      type: 'choice',
+      tool: 'Search',
+      description: 'Search(pattern: "(?:Yes|No|yes|no)(?:,\\s*and\\s*don\'t\\s*ask\\s*again)?", path: "../../../../../../../.claude/projects/-Users-danipower-Proyectos-Github-claude-code-templates", include: "*.jsonl")',
+      prompt: 'Do you want to proceed?',
+      options: [
+        'Yes',
+        'Yes, and add /Users/danipower/.claude/projects/-Users-danipower-Proyectos-Github-claude-code-templates as a working directory for this session',
+        'No, and tell Claude what to do differently'
+      ]
+    };
+
+    // Test text input interaction
+    const testTextInteraction = {
+      id: 'test-text-' + Date.now(),
+      type: 'text',
+      tool: 'Console Input',
+      description: 'Claude Code is requesting text input from the console.',
+      prompt: 'Please provide your input:'
+    };
+
+    // Randomly choose which type to test, or ask user
+    const testType = Math.random() > 0.5 ? testChoiceInteraction : testTextInteraction;
+    
+    console.log('🧪 Testing console interaction:', testType);
+    this.showConsoleInteraction(testType);
   }
   
   /**
@@ -284,6 +678,43 @@ class AgentsPage {
           </div>
         </div>
 
+        <!-- Console Interaction Panel (Hidden by default) -->
+        <div id="console-interaction-panel" class="console-interaction-panel" style="display: none;">
+          <div class="interaction-header">
+            <div class="interaction-title">
+              <span class="interaction-icon">⚡</span>
+              <span class="interaction-text">Claude Code needs your input</span>
+            </div>
+            <button class="interaction-close" onclick="this.hideConsoleInteraction()">&times;</button>
+          </div>
+          
+          <div class="interaction-content">
+            <div id="interaction-description" class="interaction-description">
+              <!-- Tool description will be inserted here -->
+            </div>
+            
+            <div id="interaction-prompt" class="interaction-prompt">
+              Do you want to proceed?
+            </div>
+            
+            <!-- Multi-choice options -->
+            <div id="interaction-choices" class="interaction-choices" style="display: none;">
+              <!-- Radio button choices will be inserted here -->
+            </div>
+            
+            <!-- Text input area -->
+            <div id="interaction-text-input" class="interaction-text-input" style="display: none;">
+              <label for="console-text-input">Your response:</label>
+              <textarea id="console-text-input" placeholder="Type your response here..." rows="4"></textarea>
+            </div>
+            
+            <div class="interaction-actions">
+              <button id="interaction-submit" class="interaction-btn primary">Submit</button>
+              <button id="interaction-cancel" class="interaction-btn secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Two Column Layout -->
         <div class="conversations-layout">
           <!-- Left Sidebar: Conversations List -->
@@ -311,6 +742,7 @@ class AgentsPage {
                 <div class="selected-conversation-meta" id="selected-conversation-meta"></div>
               </div>
               <div class="messages-actions">
+                <button class="action-btn-small" id="test-console-interaction" title="Test console interaction">🧪 Test Console</button>
                 <button class="action-btn-small" id="export-conversation" title="Export conversation">
                   <span class="btn-icon-small">📁</span>
                   Export
@@ -407,6 +839,12 @@ class AgentsPage {
     if (clearFiltersBtn) {
       clearFiltersBtn.addEventListener('click', () => this.clearAllFilters());
     }
+
+    // Test console interaction
+    const testConsoleBtn = this.container.querySelector('#test-console-interaction');
+    if (testConsoleBtn) {
+      testConsoleBtn.addEventListener('click', () => this.testConsoleInteraction());
+    }
   }
   
   /**
@@ -494,6 +932,7 @@ class AgentsPage {
       // Update pagination info
       this.pagination.hasMore = conversationsData.pagination.hasMore;
       this.pagination.currentPage = conversationsData.pagination.page + 1;
+      this.pagination.totalCount = conversationsData.pagination.totalCount;
       
       // Get only NEW conversations for this page
       const newConversations = conversationsData.conversations;
@@ -537,12 +976,23 @@ class AgentsPage {
     const listContainer = this.container.querySelector('#conversations-list');
     const filteredConversations = this.filterConversations(conversations, states);
     
-    // For accurate counter, filter ALL loaded conversations, not just the current page
-    const conversationsToCount = this.loadedConversations && this.loadedConversations.length > 0 
-      ? this.loadedConversations 
-      : conversations;
-    const allFilteredConversations = this.filterConversations(conversationsToCount, states);
-    this.updateResultsCount(allFilteredConversations.length);
+    // Calculate count based on filters
+    let countToShow;
+    const hasActiveFilters = this.hasActiveFilters();
+    
+    if (!hasActiveFilters && this.pagination && this.pagination.totalCount) {
+      // No filters active, show total count from server
+      countToShow = this.pagination.totalCount;
+    } else {
+      // Filters active, count filtered loaded conversations  
+      const conversationsToCount = this.loadedConversations && this.loadedConversations.length > 0 
+        ? this.loadedConversations 
+        : conversations;
+      const allFilteredConversations = this.filterConversations(conversationsToCount, states);
+      countToShow = allFilteredConversations.length;
+    }
+    
+    this.updateResultsCount(countToShow, hasActiveFilters);
     this.updateClearFiltersButton();
     
     if (filteredConversations.length === 0 && !append) {
@@ -745,57 +1195,139 @@ class AgentsPage {
       return;
     }
     
-    // Map states to user-friendly messages
+    // Map states to user-friendly messages with enhanced descriptions
     const stateMessages = {
       'Claude Code working...': {
-        text: 'Claude Code is working...',
-        class: 'status-working'
+        text: '🤖 Claude is thinking and working...',
+        description: 'Claude is processing your request',
+        class: 'status-working',
+        icon: '🧠'
+      },
+      'Awaiting tool response...': {
+        text: '⚡ Waiting for tool execution...',
+        description: 'Claude is waiting for tool results',
+        class: 'status-tool-pending',
+        icon: '🔧'
+      },
+      'Executing tools...': {
+        text: '🔧 Executing tools...',
+        description: 'Claude is running system tools',
+        class: 'status-tool-executing',
+        icon: '⚡'
+      },
+      'Analyzing results...': {
+        text: '📊 Analyzing tool results...',
+        description: 'Claude is processing tool outputs',
+        class: 'status-analyzing',
+        icon: '🔍'
+      },
+      'Analyzing code...': {
+        text: '🔍 Analyzing code...',
+        description: 'Claude is examining code or files',
+        class: 'status-analyzing',
+        icon: '📝'
+      },
+      'Fetching data...': {
+        text: '🌐 Fetching data...',
+        description: 'Claude is retrieving web content or external data',
+        class: 'status-fetching',
+        icon: '📶'
+      },
+      'Task completed': {
+        text: '✅ Task completed',
+        description: 'Claude has finished the requested task',
+        class: 'status-completed',
+        icon: '✨'
+      },
+      'Processing request...': {
+        text: '⚙️ Processing request...',
+        description: 'Claude is working on a complex request',
+        class: 'status-processing',
+        icon: '🔄'
+      },
+      'Encountered issue': {
+        text: '⚠️ Encountered issue',
+        description: 'Claude found an error or problem',
+        class: 'status-error',
+        icon: '🚟'
       },
       'Awaiting user input...': {
-        text: 'Waiting for your response',
-        class: 'status-waiting'
+        text: '💬 Awaiting your input',
+        description: 'Claude needs your response to continue',
+        class: 'status-waiting',
+        icon: '💭'
       },
-      'User typing...': {
-        text: 'User typing...',
-        class: 'status-typing'
+      'Waiting for your response': {
+        text: '💬 Waiting for your response',
+        description: 'Claude is ready for your next message',
+        class: 'status-waiting-response',
+        icon: '📝'
       },
       'Awaiting response...': {
-        text: 'Awaiting Claude response',
-        class: 'status-waiting'
+        text: '⏳ Awaiting Claude response',
+        description: 'Waiting for Claude to respond',
+        class: 'status-waiting',
+        icon: '🤔'
       },
       'Recently active': {
-        text: 'Recently active',
-        class: 'status-active'
+        text: '🟢 Recently active',
+        description: 'Conversation was active recently',
+        class: 'status-active',
+        icon: '✨'
       },
       'Idle': {
-        text: 'Idle',
-        class: 'status-idle'
+        text: '😴 Conversation idle',
+        description: 'No recent activity',
+        class: 'status-idle',
+        icon: '💤'
       },
       'Inactive': {
-        text: 'Inactive',
-        class: 'status-idle'
+        text: '⚪ Inactive',
+        description: 'Conversation has been inactive',
+        class: 'status-idle',
+        icon: '⏸️'
       },
       'Old': {
-        text: 'No recent activity',
-        class: 'status-idle'
+        text: '📚 Archived conversation',
+        description: 'No recent activity in this conversation',
+        class: 'status-idle',
+        icon: '📁'
       },
       'unknown': {
-        text: 'Loading conversation state...',
-        class: 'status-idle'
+        text: '🔄 Loading conversation state...',
+        description: 'Determining conversation status',
+        class: 'status-loading',
+        icon: '⏳'
       }
     };
     
     const stateInfo = stateMessages[state] || stateMessages['unknown'];
     
-    // Update dot class
+    // Update dot class with enhanced styling
     stateDot.className = `state-dot ${stateInfo.class}`;
     
-    // Update text
-    stateText.textContent = stateInfo.text;
+    // Update text with icon and description
+    stateText.innerHTML = `
+      <span class="state-text-main">${stateInfo.text}</span>
+      <span class="state-text-description">${stateInfo.description}</span>
+    `;
     
-    // Update timestamp
+    // Add tooltip for additional context
+    stateText.title = stateInfo.description;
+    
+    // Update timestamp with more context
     const now = new Date();
-    stateTimestamp.textContent = `Updated ${now.toLocaleTimeString()}`;
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    stateTimestamp.innerHTML = `
+      <span class="timestamp-label">Last updated:</span>
+      <span class="timestamp-value">${timeString}</span>
+    `;
+    
+    // Add pulsing animation for active states
+    if (stateInfo.class.includes('working') || stateInfo.class.includes('executing') || stateInfo.class.includes('analyzing')) {
+      stateDot.classList.add('pulse-animation');
+      setTimeout(() => stateDot.classList.remove('pulse-animation'), 3000);
+    }
     
   }
 
@@ -1133,41 +1665,19 @@ class AgentsPage {
    * @returns {string} Formatted HTML
    */
   formatMessageContent(content, message = null) {
-    console.log('🔧 formatMessageContent called:', {
-      contentIsArray: Array.isArray(content),
-      contentLength: Array.isArray(content) ? content.length : 'not array',
-      messageHasToolResults: !!message?.toolResults,
-      toolResultsLength: message?.toolResults?.length || 0
-    });
-
     let result = '';
     
     // Handle different content formats
     if (Array.isArray(content)) {
       // Assistant messages with content blocks
       content.forEach((block, index) => {
-        console.log(`🔧 Processing content block ${index}:`, {
-          type: block.type,
-          hasText: !!block.text,
-          hasName: !!block.name,
-          hasId: !!block.id
-        });
-        
         if (block.type === 'text') {
           result += this.formatTextContent(block.text);
         } else if (block.type === 'tool_use') {
-          console.log('🔧 Rendering tool_use block:', {
-            toolName: block.name,
-            toolId: block.id,
-            hasInput: !!block.input,
-            messageToolResults: message?.toolResults?.length || 0
-          });
+          // Log only tool rendering for debugging
+          console.log('🔧 WebSocket: Rendering tool', { name: block.name, hasResults: !!message?.toolResults });
           result += this.toolDisplay.renderToolUse(block, message?.toolResults);
         } else if (block.type === 'tool_result') {
-          console.log('🔧 Rendering tool_result block:', {
-            toolUseId: block.tool_use_id,
-            hasContent: !!block.content
-          });
           result += this.toolDisplay.renderToolResult(block);
         }
       });
@@ -1779,14 +2289,41 @@ class AgentsPage {
   }
 
   /**
+   * Check if there are active filters
+   * @returns {boolean} True if filters are active
+   */
+  hasActiveFilters() {
+    const searchInput = this.container.querySelector('#conversation-search');
+    const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    
+    // Check if search filter is active
+    if (searchTerm) {
+      return true;
+    }
+    
+    // Check if state filters are active
+    const filterButtons = this.container.querySelectorAll('.filter-btn');
+    const activeFilters = Array.from(filterButtons).filter(btn => 
+      btn.classList.contains('active') && btn.getAttribute('data-state') !== 'all'
+    );
+    
+    return activeFilters.length > 0;
+  }
+
+  /**
    * Update results count
    * @param {number} count - Number of results
+   * @param {boolean} hasActiveFilters - Whether filters are active
    */
-  updateResultsCount(count) {
+  updateResultsCount(count, hasActiveFilters = false) {
     // Update main results count
     const resultsCount = this.container.querySelector('#results-count');
     if (resultsCount) {
-      resultsCount.textContent = `${count} conversation${count !== 1 ? 's' : ''} found`;
+      let countText = `${count} conversation${count !== 1 ? 's' : ''} found`;
+      if (hasActiveFilters && this.pagination && this.pagination.totalCount && count < this.pagination.totalCount) {
+        countText += ` (filtered from ${this.pagination.totalCount})`;
+      }
+      resultsCount.textContent = countText;
     }
     
     // Update sidebar count
