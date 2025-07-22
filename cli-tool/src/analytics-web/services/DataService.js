@@ -95,7 +95,6 @@ class DataService {
       
       // Return cached data if available, even if stale
       if (this.cache.has(cacheKey)) {
-        console.log('Using cached data from previous request');
         return this.cache.get(cacheKey).data;
       }
       
@@ -175,7 +174,6 @@ class DataService {
    */
   clearCache() {
     this.cache.clear();
-    console.log('DataService cache cleared');
   }
 
   /**
@@ -291,7 +289,17 @@ class DataService {
    * @param {Object} data - New message data
    */
   handleNewMessage(data) {
-    console.log('📨 DataService: Processing new message for conversation', data.conversationId, 'message:', data.message);
+    console.log('📨 DataService: Processing new message for conversation', data.conversationId);
+    console.log('🔧 DataService: Raw message data:', {
+      conversationId: data.conversationId,
+      messageRole: data.message?.role,
+      messageContent: data.message?.content,
+      messageContentType: Array.isArray(data.message?.content) ? 'array' : typeof data.message?.content,
+      contentBlocks: Array.isArray(data.message?.content) ? data.message.content.map(b => ({ type: b.type, hasData: !!b.data })) : 'not array',
+      hasToolResults: !!data.message?.toolResults,
+      toolResultsCount: data.message?.toolResults?.length || 0,
+      metadata: data.metadata
+    });
     
     // Clear relevant cache entries for the affected conversation
     this.clearCacheEntry(`/api/conversations/${data.conversationId}/messages`);

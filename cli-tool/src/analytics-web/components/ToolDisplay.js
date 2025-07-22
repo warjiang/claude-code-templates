@@ -216,7 +216,6 @@ class ToolDisplay {
       
       // For multi-line content, show first few lines with continuation
       const lines = content.split('\n');
-      console.log(`ToolDisplay: Processing content with ${lines.length} lines`);
       if (lines.length > 5) {
         const preview = lines.slice(0, 5).join('\n');
         const remaining = lines.length - 5;
@@ -226,7 +225,6 @@ class ToolDisplay {
         if (typeof window !== 'undefined') {
           window.storedContent = window.storedContent || {};
           window.storedContent[contentId] = content;
-          console.log(`ToolDisplay: Stored content with ID ${contentId}, ${remaining} remaining lines`);
         }
         
         return `<pre class="text-output">${this.escapeHtml(preview)}\n<span class="continuation">… +${remaining} lines hidden <button class="show-results-btn text-expand-btn" data-content-id="${contentId}">Show +${remaining} lines</button></span></pre>`;
@@ -388,41 +386,24 @@ class ToolDisplay {
    * @returns {string|null} Tool result content if found
    */
   findToolResultInGlobalMessages(toolUseId) {
-    console.log('🔍 Searching for tool result for ID:', toolUseId);
-    
     // Try to find tool result in cached messages
     try {
       if (typeof window !== 'undefined' && window.currentMessages) {
-        console.log('📋 Available messages:', window.currentMessages.length);
         
         // First pass: Look for direct tool_result matches in any message
         for (let i = 0; i < window.currentMessages.length; i++) {
           const message = window.currentMessages[i];
-          console.log(`📨 Message ${i}:`, {
-            role: message.role,
-            contentType: Array.isArray(message.content) ? 'array' : typeof message.content,
-            contentLength: Array.isArray(message.content) ? message.content.length : 1
-          });
           
           if (Array.isArray(message.content)) {
             for (let j = 0; j < message.content.length; j++) {
               const block = message.content[j];
-              console.log(`  📦 Block ${j}:`, {
-                type: block.type,
-                id: block.id || block.tool_use_id || 'none',
-                hasContent: !!block.content
-              });
               
               if (block.type === 'tool_result' && block.tool_use_id === toolUseId) {
-                console.log('✅ Found tool result for', toolUseId, 'in message', i, 'block', j);
-                console.log('📄 Content preview:', block.content ? block.content.substring(0, 100) + '...' : 'empty');
                 return block.content;
               }
             }
           }
         }
-        
-        console.log('❌ No direct tool result found, trying sequential search...');
         
         // Second pass: Sequential search - look for tool_use then find matching tool_result
         let foundToolUse = false;
@@ -436,7 +417,6 @@ class ToolDisplay {
               if (block.type === 'tool_use' && block.id === toolUseId) {
                 foundToolUse = true;
                 toolUseIndex = i;
-                console.log('🎯 Found tool_use at message index', i);
                 break;
               }
             }
@@ -449,8 +429,6 @@ class ToolDisplay {
               if (Array.isArray(laterMessage.content)) {
                 for (const laterBlock of laterMessage.content) {
                   if (laterBlock.type === 'tool_result' && laterBlock.tool_use_id === toolUseId) {
-                    console.log('✅ Found matching tool result in message', j);
-                    console.log('📄 Content preview:', laterBlock.content ? laterBlock.content.substring(0, 100) + '...' : 'empty');
                     return laterBlock.content;
                   }
                 }
@@ -459,13 +437,9 @@ class ToolDisplay {
             break; // Stop after finding tool_use and searching subsequent messages
           }
         }
-        
-        console.log('❌ No tool result found for', toolUseId, 'after thorough search');
-      } else {
-        console.log('⚠️ No currentMessages available in window object');
       }
     } catch (error) {
-      console.error('💥 Error searching for tool result:', error);
+      // Silently handle errors in tool result search
     }
     
     return null;
@@ -546,9 +520,6 @@ class ToolDisplay {
       default:
         content += `Tool-specific details not available for ${toolName}\n`;
     }
-    
-    // Tool results are now displayed inline with messages and not duplicated in the modal
-    content += `\nNote: Tool results are shown inline with the conversation and are not included in this detail view.`;
     
     return content;
   }

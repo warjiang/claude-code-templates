@@ -42,6 +42,14 @@ class AgentsPage {
     
     // Subscribe to state changes
     this.unsubscribe = this.stateService.subscribe(this.handleStateChange.bind(this));
+    
+    // Subscribe to DataService events for real-time updates
+    this.dataService.addEventListener((type, data) => {
+      if (type === 'new_message') {
+        console.log('🔄 WebSocket: New message received', { conversationId: data.conversationId });
+        this.handleNewMessage(data.conversationId, data.message, data.metadata);
+      }
+    });
   }
 
   /**
@@ -73,14 +81,9 @@ class AgentsPage {
     switch (action) {
       case 'update_conversations':
         // Don't replace loaded conversations, just update states
-        console.log('🔄 WebSocket: Conversation list updated');
         break;
       case 'update_conversation_states':
-        console.log(`🔄 WebSocket update_conversation_states:`, {
-          conversationStates: state.conversationStates,
-          type: typeof state.conversationStates,
-          keys: state.conversationStates ? Object.keys(state.conversationStates) : 'none'
-        });
+        console.log('🔄 WebSocket: Conversation states updated', { count: Object.keys(state.conversationStates?.activeStates || state.conversationStates || {}).length });
         
         // Handle both direct states object and nested structure
         const activeStates = state.conversationStates?.activeStates || state.conversationStates || {};
@@ -98,12 +101,10 @@ class AgentsPage {
         break;
       case 'data_refresh':
         // On real-time data refresh, update conversation states but keep pagination
-        console.log('🔄 WebSocket: Real-time data refresh');
         this.updateConversationStatesOnly();
         break;
       case 'new_message':
         // Handle new message in real-time
-        console.log('📨 WebSocket: New message received', state);
         this.handleNewMessage(state.conversationId, state.message, state.metadata);
         break;
     }
@@ -116,8 +117,19 @@ class AgentsPage {
    * @param {Object} metadata - Additional metadata
    */
   handleNewMessage(conversationId, message, metadata) {
-    console.log(`📨 Handling new message for conversation ${conversationId}:`, { message, metadata });
-    
+    // Debug: Log the structure of the incoming message
+    console.log('🔧 AgentsPage.handleNewMessage - Debug message structure:', {
+      conversationId,
+      message,
+      messageRole: message?.role,
+      messageContent: message?.content,
+      messageHasContent: Array.isArray(message?.content),
+      contentBlocks: Array.isArray(message?.content) ? message.content.map(b => b.type) : 'not array',
+      hasToolResults: !!message?.toolResults,
+      toolResultsCount: message?.toolResults?.length || 0,
+      metadata
+    });
+
     // Always update the message cache for this conversation
     const existingMessages = this.loadedMessages.get(conversationId) || [];
     
@@ -132,8 +144,9 @@ class AgentsPage {
       const updatedMessages = [...existingMessages, message];
       this.loadedMessages.set(conversationId, updatedMessages);
       
-      // Refresh the conversation list to show updated status/timestamp
-      this.loadConversationsData();
+      // Refresh only the conversation states to show updated status/timestamp
+      // Don't do full reload as it can interfere with message cache
+      this.updateConversationStatesOnly();
       
       // If this conversation is currently selected, update the messages view
       if (this.selectedConversationId === conversationId) {
@@ -146,10 +159,6 @@ class AgentsPage {
       
       // Show notification
       this.showNewMessageNotification(message, metadata);
-      
-      console.log(`✅ Added new message to conversation ${conversationId}`);
-    } else {
-      console.log(`📨 Message already exists in conversation ${conversationId} - skipping`);
     }
   }
 
@@ -169,7 +178,6 @@ class AgentsPage {
       
       // Update banner if we have a selected conversation
       if (this.selectedConversationId && activeStates[this.selectedConversationId]) {
-        console.log(`🔄 Updating banner for ${this.selectedConversationId}: ${activeStates[this.selectedConversationId]}`);
         this.updateStateBanner(this.selectedConversationId, activeStates[this.selectedConversationId]);
       }
       
@@ -299,7 +307,7 @@ class AgentsPage {
           <div class="messages-panel">
             <div class="messages-header" id="messages-header">
               <div class="selected-conversation-info">
-                <h3 id="selected-conversation-title">Select a conversation</h3>
+                <h3 id="selected-conversation-title">Select a chat</h3>
                 <div class="selected-conversation-meta" id="selected-conversation-meta"></div>
               </div>
               <div class="messages-actions">
@@ -434,7 +442,6 @@ class AgentsPage {
    */
   async loadConversationsData() {
     try {
-      console.log('🔄 Starting paginated conversation loading...');
       
       // Reset pagination state
       this.pagination = {
@@ -458,7 +465,6 @@ class AgentsPage {
       // Load first page and states
       await this.loadMoreConversations();
       
-      console.log(`✅ Initial load complete. Loaded ${this.loadedConversations.length} conversations`);
       
     } catch (error) {
       console.error('Error loading conversations data:', error);
@@ -484,11 +490,6 @@ class AgentsPage {
         this.dataService.getConversationStates()
       ]);
       
-      console.log(`🔍 loadMoreConversations - States data:`, {
-        statesData,
-        activeStates: statesData?.activeStates,
-        statesCount: statesData?.activeStates ? Object.keys(statesData.activeStates).length : 0
-      });
       
       // Update pagination info
       this.pagination.hasMore = conversationsData.pagination.hasMore;
@@ -500,9 +501,6 @@ class AgentsPage {
       // Add new conversations to loaded list
       this.loadedConversations.push(...newConversations);
       
-      // Log summary for monitoring
-      console.log(`📊 Loaded page ${conversationsData.pagination.page} with ${newConversations.length} conversations`);
-      console.log(`🔄 Total conversations: ${this.loadedConversations.length}/${conversationsData.pagination.totalCount}`);
       
       // Extract activeStates from the response structure
       const activeStates = statesData?.activeStates || {};
@@ -511,11 +509,6 @@ class AgentsPage {
       this.stateService.updateConversations(this.loadedConversations);
       this.stateService.updateConversationStates(activeStates);
       
-      console.log(`🔍 Updated StateService with:`, {
-        conversationsCount: this.loadedConversations.length,
-        activeStatesCount: Object.keys(activeStates).length,
-        firstFewStates: Object.keys(activeStates).slice(0, 3)
-      });
       
       // For initial load (page 0), replace content. For subsequent loads, append
       const isInitialLoad = conversationsData.pagination.page === 0;
@@ -549,7 +542,6 @@ class AgentsPage {
       ? this.loadedConversations 
       : conversations;
     const allFilteredConversations = this.filterConversations(conversationsToCount, states);
-    console.log(`📊 Conversation count: ${allFilteredConversations.length} filtered of ${conversationsToCount.length} total`);
     this.updateResultsCount(allFilteredConversations.length);
     this.updateClearFiltersButton();
     
@@ -662,7 +654,7 @@ class AgentsPage {
       const metaElement = this.container.querySelector('#selected-conversation-meta');
       
       if (titleElement) {
-        titleElement.textContent = conversation.title || `Conversation ${conversation.id.slice(-8)}`;
+        titleElement.textContent = conversation.title || `Chat ${conversation.id.slice(-8)}`;
       }
       
       if (metaElement) {
@@ -725,14 +717,6 @@ class AgentsPage {
     const conversationStates = this.stateService.getStateProperty('conversationStates') || {};
     const currentState = conversationStates[conversationId] || 'unknown';
     
-    console.log(`🔍 Debug banner state for ${conversationId}:`, {
-      conversationId,
-      currentState,
-      availableStates: Object.keys(conversationStates),
-      stateValue: conversationStates[conversationId],
-      totalStates: Object.keys(conversationStates).length,
-      allStates: conversationStates
-    });
     
     // If we don't have the state yet, try to fetch it after a short delay
     if (currentState === 'unknown') {
@@ -756,15 +740,8 @@ class AgentsPage {
     const stateText = this.container.querySelector('#state-text');
     const stateTimestamp = this.container.querySelector('#state-timestamp');
     
-    console.log(`🎯 updateStateBanner called:`, {
-      conversationId,
-      state,
-      bannerExists: !!banner,
-      elementsExist: { stateDot: !!stateDot, stateText: !!stateText, stateTimestamp: !!stateTimestamp }
-    });
     
     if (!banner || !stateDot || !stateText || !stateTimestamp) {
-      console.warn('❌ Banner elements not found');
       return;
     }
     
@@ -820,7 +797,6 @@ class AgentsPage {
     const now = new Date();
     stateTimestamp.textContent = `Updated ${now.toLocaleTimeString()}`;
     
-    console.log(`🔄 State banner updated: ${conversationId} -> ${state}`);
   }
 
   /**
@@ -829,12 +805,10 @@ class AgentsPage {
    */
   async fetchConversationState(conversationId) {
     try {
-      console.log(`🔄 Fetching state for conversation: ${conversationId}`);
       const stateData = await this.dataService.getConversationStates();
       
       if (stateData && stateData.activeStates && stateData.activeStates[conversationId]) {
         const state = stateData.activeStates[conversationId];
-        console.log(`✅ Found state for ${conversationId}: ${state}`);
         
         // Update the StateService with the new data
         this.stateService.updateConversationStates(stateData.activeStates);
@@ -842,7 +816,6 @@ class AgentsPage {
         // Update the banner with the real state
         this.updateStateBanner(conversationId, state);
       } else {
-        console.log(`⚠️ No state found for conversation ${conversationId}`);
         // Keep showing unknown for now
       }
     } catch (error) {
@@ -889,7 +862,6 @@ class AgentsPage {
     }
     
     // Could add visual indicator for new message (pulse, notification badge, etc.)
-    console.log(`🔔 New message notification: ${message.role} message in conversation`);
   }
 
   /**
@@ -1011,8 +983,13 @@ class AgentsPage {
    * @param {boolean} prepend - Whether to prepend messages (for infinite scroll)
    */
   renderCachedMessages(messages, prepend = false) {
+    
+    
     const messagesContent = this.container.querySelector('#messages-content');
-    if (!messagesContent) return;
+    if (!messagesContent) {
+      console.warn(`⚠️ messages-content element not found!`);
+      return;
+    }
     
     // Store messages globally for tool result lookup
     if (typeof window !== 'undefined') {
@@ -1107,8 +1084,6 @@ class AgentsPage {
     // Compact summaries should be displayed as assistant messages even if marked as 'user'
     const isUser = message.role === 'user' && !message.isCompactSummary;
     
-    // Detect message content types
-    const messageType = this.getMessageType(message);
     
     // Detect if message contains tools
     const hasTools = Array.isArray(message.content) && 
@@ -1141,7 +1116,6 @@ class AgentsPage {
               ` : ''}
               ${hasTools ? `<span class="tool-count">[${toolCount}t]</span>` : ''}
               ${message.model ? `<span class="model">[${message.model.replace('claude-', '').replace('-20250514', '')}]</span>` : ''}
-              <div class="message-type-indicator ${messageType.class}" title="${messageType.label}"></div>
             </div>
           </div>
           <div class="message-body">
@@ -1152,64 +1126,6 @@ class AgentsPage {
     `;
   }
 
-  /**
-   * Get message type based on content
-   * @param {Object} message - Message object
-   * @returns {Object} Message type info
-   */
-  getMessageType(message) {
-    // Compact summaries should be treated as assistant messages even if marked as 'user'
-    const isUser = message.role === 'user' && !message.isCompactSummary;
-    
-    if (isUser) {
-      // User message types
-      if (typeof message.content === 'string') {
-        if (message.content.includes('Tool Result')) {
-          return { label: 'TOOL_RESULT', class: 'type-tool-result' };
-        }
-        return { label: 'INPUT', class: 'type-user-input' };
-      }
-      return { label: 'INPUT', class: 'type-user-input' };
-    } else {
-      // Claude message types
-      
-      // Special case for compact summaries
-      if (message.isCompactSummary) {
-        return { label: 'SUMMARY', class: 'type-compact-summary' };
-      }
-      
-      if (Array.isArray(message.content)) {
-        const hasText = message.content.some(block => block.type === 'text');
-        const hasTools = message.content.some(block => block.type === 'tool_use');
-        
-        if (hasTools && hasText) {
-          return { label: 'RESPONSE+TOOLS', class: 'type-response-tools' };
-        } else if (hasTools) {
-          return { label: 'TOOLS', class: 'type-tools-only' };
-        } else if (hasText) {
-          return { label: 'RESPONSE', class: 'type-response' };
-        }
-      }
-      return { label: 'RESPONSE', class: 'type-response' };
-    }
-  }
-
-  /**
-   * Get icon for message type
-   * @param {Object} messageType - Message type object
-   * @returns {string} Unicode icon
-   */
-  getMessageTypeIcon(messageType) {
-    const icons = {
-      'INPUT': '◆',
-      'TOOL_RESULT': '◇',
-      'RESPONSE': '■',
-      'TOOLS': '▲',
-      'RESPONSE+TOOLS': '●',
-      'SUMMARY': '📋'
-    };
-    return icons[messageType.label] || '□';
-  }
   
   /**
    * Format message content with support for text and tool calls
@@ -1217,17 +1133,41 @@ class AgentsPage {
    * @returns {string} Formatted HTML
    */
   formatMessageContent(content, message = null) {
+    console.log('🔧 formatMessageContent called:', {
+      contentIsArray: Array.isArray(content),
+      contentLength: Array.isArray(content) ? content.length : 'not array',
+      messageHasToolResults: !!message?.toolResults,
+      toolResultsLength: message?.toolResults?.length || 0
+    });
+
     let result = '';
     
     // Handle different content formats
     if (Array.isArray(content)) {
       // Assistant messages with content blocks
-      content.forEach(block => {
+      content.forEach((block, index) => {
+        console.log(`🔧 Processing content block ${index}:`, {
+          type: block.type,
+          hasText: !!block.text,
+          hasName: !!block.name,
+          hasId: !!block.id
+        });
+        
         if (block.type === 'text') {
           result += this.formatTextContent(block.text);
         } else if (block.type === 'tool_use') {
+          console.log('🔧 Rendering tool_use block:', {
+            toolName: block.name,
+            toolId: block.id,
+            hasInput: !!block.input,
+            messageToolResults: message?.toolResults?.length || 0
+          });
           result += this.toolDisplay.renderToolUse(block, message?.toolResults);
         } else if (block.type === 'tool_result') {
+          console.log('🔧 Rendering tool_result block:', {
+            toolUseId: block.tool_use_id,
+            hasContent: !!block.content
+          });
           result += this.toolDisplay.renderToolResult(block);
         }
       });
@@ -1349,7 +1289,7 @@ class AgentsPage {
     
     // Check if text is too long and needs truncation
     const lines = text.split('\n');
-    const maxVisibleLines = 5;
+    const maxVisibleLines = 20; // Increased from 5 to 20 for better visibility
     
     if (lines.length > maxVisibleLines) {
       const visibleLines = lines.slice(0, maxVisibleLines);
@@ -1825,7 +1765,6 @@ class AgentsPage {
 
     try {
       // Clear both server and client cache to force fresh data
-      console.log('🔄 Refreshing conversations with full cache clear...');
       await this.dataService.clearServerCache('conversations');
       await this.loadConversationsData();
     } catch (error) {
@@ -1913,7 +1852,6 @@ class AgentsPage {
    */
   viewConversation(conversationId) {
     // This would open a detailed conversation view
-    console.log('Viewing conversation:', conversationId);
     // Implementation would show conversation details modal or navigate to detail page
   }
 
@@ -1982,18 +1920,12 @@ class AgentsPage {
   updateConversationStates(activeStates) {
     const conversations = this.stateService.getStateProperty('conversations') || [];
     
-    console.log(`🔄 updateConversationStates called with:`, {
-      activeStatesCount: Object.keys(activeStates || {}).length,
-      selectedConversation: this.selectedConversationId,
-      selectedState: activeStates?.[this.selectedConversationId]
-    });
     
     // Re-render conversation list with new states
     this.renderConversationsList(conversations, activeStates || {});
     
     // Update banner if we have a selected conversation
     if (this.selectedConversationId && activeStates && activeStates[this.selectedConversationId]) {
-      console.log(`🔄 Updating banner from updateConversationStates: ${this.selectedConversationId} -> ${activeStates[this.selectedConversationId]}`);
       this.updateStateBanner(this.selectedConversationId, activeStates[this.selectedConversationId]);
     }
   }
