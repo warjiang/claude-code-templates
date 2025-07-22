@@ -45,6 +45,7 @@ program
   .option('--hook-stats, --hooks-stats', 'analyze existing automation hooks and offer optimization')
   .option('--mcp-stats, --mcps-stats', 'analyze existing MCP server configurations and offer optimization')
   .option('--analytics', 'launch real-time Claude Code analytics dashboard')
+  .option('--chats, --agents', 'launch Claude Code chats/agents dashboard (opens directly to conversations)')
   .option('--health-check, --health, --check, --verify', 'run comprehensive health check to verify Claude Code setup')
   .action(async (options) => {
     try {

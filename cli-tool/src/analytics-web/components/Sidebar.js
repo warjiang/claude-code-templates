@@ -30,7 +30,7 @@ class Sidebar {
         <div class="sidebar-header">
           <div class="logo">
             <div class="logo-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/>
               </svg>
             </div>
@@ -43,21 +43,21 @@ class Sidebar {
             <li class="nav-item ${this.currentPage === 'dashboard' ? 'active' : ''}" data-page="dashboard" title="Dashboard">
               <a href="#" class="nav-link">
                 <div class="nav-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/>
                   </svg>
                 </div>
                 <span class="nav-text">Dashboard</span>
               </a>
             </li>
-            <li class="nav-item ${this.currentPage === 'agents' ? 'active' : ''}" data-page="agents" title="Agent Conversations">
+            <li class="nav-item ${this.currentPage === 'agents' ? 'active' : ''}" data-page="agents" title="Agent Chats">
               <a href="#" class="nav-link">
                 <div class="nav-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
                   </svg>
                 </div>
-                <span class="nav-text">Conversations</span>
+                <span class="nav-text">Chats</span>
               </a>
             </li>
           </ul>

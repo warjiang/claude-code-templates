@@ -118,13 +118,7 @@ class AgentsPage {
   handleNewMessage(conversationId, message, metadata) {
     console.log(`📨 Handling new message for conversation ${conversationId}:`, { message, metadata });
     
-    // Only process if this conversation is currently selected
-    if (this.selectedConversationId !== conversationId) {
-      console.log(`📨 Message for ${conversationId} but ${this.selectedConversationId} is selected - ignoring`);
-      return;
-    }
-    
-    // Get current messages for this conversation
+    // Always update the message cache for this conversation
     const existingMessages = this.loadedMessages.get(conversationId) || [];
     
     // Check if we already have this message (avoid duplicates)
@@ -138,11 +132,17 @@ class AgentsPage {
       const updatedMessages = [...existingMessages, message];
       this.loadedMessages.set(conversationId, updatedMessages);
       
-      // Re-render messages with new message
-      this.renderCachedMessages(updatedMessages, false);
+      // Refresh the conversation list to show updated status/timestamp
+      this.loadConversationsData();
       
-      // Auto-scroll to new message
-      this.scrollToBottom();
+      // If this conversation is currently selected, update the messages view
+      if (this.selectedConversationId === conversationId) {
+        // Re-render messages with new message
+        this.renderCachedMessages(updatedMessages, false);
+        
+        // Auto-scroll to new message
+        this.scrollToBottom();
+      }
       
       // Show notification
       this.showNewMessageNotification(message, metadata);
@@ -544,7 +544,13 @@ class AgentsPage {
     const listContainer = this.container.querySelector('#conversations-list');
     const filteredConversations = this.filterConversations(conversations, states);
     
-    this.updateResultsCount(filteredConversations.length);
+    // For accurate counter, filter ALL loaded conversations, not just the current page
+    const conversationsToCount = this.loadedConversations && this.loadedConversations.length > 0 
+      ? this.loadedConversations 
+      : conversations;
+    const allFilteredConversations = this.filterConversations(conversationsToCount, states);
+    console.log(`📊 Conversation count: ${allFilteredConversations.length} filtered of ${conversationsToCount.length} total`);
+    this.updateResultsCount(allFilteredConversations.length);
     this.updateClearFiltersButton();
     
     if (filteredConversations.length === 0 && !append) {
@@ -1008,6 +1014,11 @@ class AgentsPage {
     const messagesContent = this.container.querySelector('#messages-content');
     if (!messagesContent) return;
     
+    // Store messages globally for tool result lookup
+    if (typeof window !== 'undefined') {
+      window.currentMessages = messages;
+    }
+    
     const messageHTML = `
       <div class="messages-loading-indicator" style="display: none;">
         <div class="loading-spinner small"></div>
@@ -1093,7 +1104,8 @@ class AgentsPage {
   renderMessage(message) {
     const timestamp = this.formatRelativeTime(new Date(message.timestamp));
     const fullTimestamp = new Date(message.timestamp).toLocaleString();
-    const isUser = message.role === 'user';
+    // Compact summaries should be displayed as assistant messages even if marked as 'user'
+    const isUser = message.role === 'user' && !message.isCompactSummary;
     
     // Detect message content types
     const messageType = this.getMessageType(message);
@@ -1146,7 +1158,8 @@ class AgentsPage {
    * @returns {Object} Message type info
    */
   getMessageType(message) {
-    const isUser = message.role === 'user';
+    // Compact summaries should be treated as assistant messages even if marked as 'user'
+    const isUser = message.role === 'user' && !message.isCompactSummary;
     
     if (isUser) {
       // User message types
@@ -1159,6 +1172,12 @@ class AgentsPage {
       return { label: 'INPUT', class: 'type-user-input' };
     } else {
       // Claude message types
+      
+      // Special case for compact summaries
+      if (message.isCompactSummary) {
+        return { label: 'SUMMARY', class: 'type-compact-summary' };
+      }
+      
       if (Array.isArray(message.content)) {
         const hasText = message.content.some(block => block.type === 'text');
         const hasTools = message.content.some(block => block.type === 'tool_use');
@@ -1186,7 +1205,8 @@ class AgentsPage {
       'TOOL_RESULT': '◇',
       'RESPONSE': '■',
       'TOOLS': '▲',
-      'RESPONSE+TOOLS': '●'
+      'RESPONSE+TOOLS': '●',
+      'SUMMARY': '📋'
     };
     return icons[messageType.label] || '□';
   }
@@ -1206,7 +1226,7 @@ class AgentsPage {
         if (block.type === 'text') {
           result += this.formatTextContent(block.text);
         } else if (block.type === 'tool_use') {
-          result += this.toolDisplay.renderToolUse(block);
+          result += this.toolDisplay.renderToolUse(block, message?.toolResults);
         } else if (block.type === 'tool_result') {
           result += this.toolDisplay.renderToolResult(block);
         }
@@ -1230,10 +1250,93 @@ class AgentsPage {
   }
   
   /**
-   * Format regular text content
+   * Format regular text content with enhanced Markdown support
    * @param {string} text - Text content
    * @returns {string} Formatted HTML
    */
+  /**
+   * Apply markdown formatting to HTML-escaped text
+   * @param {string} escapedText - HTML-escaped text to format
+   * @returns {string} Formatted text with markdown styling
+   */
+  applyMarkdownFormatting(escapedText) {
+    let formattedText = escapedText;
+    
+    // 1. Code blocks (must be first to avoid conflicts)
+    formattedText = formattedText
+      .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="code-block" data-language="$1"><code>$2</code></pre>');
+    
+    // 2. Headers (h1-h6)
+    formattedText = formattedText
+      .replace(/^### (.*$)/gm, '<h3 class="markdown-h3">$1</h3>')
+      .replace(/^## (.*$)/gm, '<h2 class="markdown-h2">$1</h2>')
+      .replace(/^# (.*$)/gm, '<h1 class="markdown-h1">$1</h1>')
+      .replace(/^#### (.*$)/gm, '<h4 class="markdown-h4">$1</h4>')
+      .replace(/^##### (.*$)/gm, '<h5 class="markdown-h5">$1</h5>')
+      .replace(/^###### (.*$)/gm, '<h6 class="markdown-h6">$1</h6>');
+    
+    // 3. Bold and italic text
+    formattedText = formattedText
+      .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em class="markdown-bold-italic">$1</em></strong>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="markdown-bold">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="markdown-italic">$1</em>')
+      .replace(/\_\_\_(.*?)\_\_\_/g, '<strong><em class="markdown-bold-italic">$1</em></strong>')
+      .replace(/\_\_(.*?)\_\_/g, '<strong class="markdown-bold">$1</strong>')
+      .replace(/\_(.*?)\_/g, '<em class="markdown-italic">$1</em>');
+    
+    // 4. Strikethrough
+    formattedText = formattedText
+      .replace(/~~(.*?)~~/g, '<del class="markdown-strikethrough">$1</del>');
+    
+    // 5. Links
+    formattedText = formattedText
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="markdown-link" target="_blank" rel="noopener noreferrer">$1</a>');
+    
+    // 6. Inline code (after other formatting to avoid conflicts)
+    formattedText = formattedText
+      .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+    
+    // 7. Lists (unordered)
+    formattedText = formattedText
+      .replace(/^[\s]*[\*\-\+][\s]+(.*)$/gm, '<li class="markdown-list-item">$1</li>');
+    
+    // 8. Lists (ordered)
+    formattedText = formattedText
+      .replace(/^[\s]*\d+\.[\s]+(.*)$/gm, '<li class="markdown-ordered-item">$1</li>');
+    
+    // 9. Wrap consecutive list items in ul/ol tags
+    formattedText = formattedText
+      .replace(/(<li class="markdown-list-item">.*<\/li>)/gs, (match) => {
+        return '<ul class="markdown-list">' + match + '</ul>';
+      })
+      .replace(/(<li class="markdown-ordered-item">.*<\/li>)/gs, (match) => {
+        return '<ol class="markdown-ordered-list">' + match + '</ol>';
+      });
+    
+    // 10. Blockquotes
+    formattedText = formattedText
+      .replace(/^&gt;[\s]*(.*)$/gm, '<blockquote class="markdown-blockquote">$1</blockquote>');
+    
+    // 11. Horizontal rules
+    formattedText = formattedText
+      .replace(/^[\s]*---[\s]*$/gm, '<hr class="markdown-hr">')
+      .replace(/^[\s]*\*\*\*[\s]*$/gm, '<hr class="markdown-hr">');
+    
+    // 12. Line breaks (last to avoid conflicts)
+    formattedText = formattedText
+      .replace(/\n\n/g, '</p><p class="markdown-paragraph">')
+      .replace(/\n/g, '<br>');
+    
+    // 13. Wrap in paragraph if not already wrapped
+    if (!formattedText.includes('<p') && !formattedText.includes('<h') && 
+        !formattedText.includes('<ul') && !formattedText.includes('<ol') && 
+        !formattedText.includes('<blockquote')) {
+      formattedText = '<p class="markdown-paragraph">' + formattedText + '</p>';
+    }
+    
+    return formattedText;
+  }
+
   formatTextContent(text) {
     if (!text || text.trim() === '') return '';
     
@@ -1244,13 +1347,35 @@ class AgentsPage {
       return div.innerHTML;
     };
     
-    const escapedText = escapeHtml(text);
+    // Check if text is too long and needs truncation
+    const lines = text.split('\n');
+    const maxVisibleLines = 5;
     
-    // Basic markdown-like formatting (applied after escaping)
-    return escapedText
-      .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="code-block"><code>$2</code></pre>')
-      .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
-      .replace(/\n/g, '<br>');
+    if (lines.length > maxVisibleLines) {
+      const visibleLines = lines.slice(0, maxVisibleLines);
+      const hiddenLinesCount = lines.length - maxVisibleLines;
+      const contentId = 'text_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
+      // Store full content for modal
+      if (typeof window !== 'undefined') {
+        window.storedContent = window.storedContent || {};
+        window.storedContent[contentId] = text;
+      }
+      
+      const previewText = escapeHtml(visibleLines.join('\n'));
+      const showMoreButton = `<button class="show-results-btn text-expand-btn" data-content-id="${contentId}">Show +${hiddenLinesCount} lines</button>`;
+      
+      // Apply markdown formatting to preview
+      let formattedPreview = this.applyMarkdownFormatting(previewText);
+      
+      return `<div class="text-content-preview">${formattedPreview}<div class="text-expand-section"><span class="continuation">… +${hiddenLinesCount} lines hidden</span> ${showMoreButton}</div></div>`;
+    }
+    
+    // For non-truncated content, apply full formatting
+    let formattedText = escapeHtml(text);
+    formattedText = this.applyMarkdownFormatting(formattedText);
+    
+    return formattedText;
   }
 
   /**

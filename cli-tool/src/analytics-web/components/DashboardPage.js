@@ -26,11 +26,12 @@ class DashboardPage {
     console.log('📊 Initializing DashboardPage...');
     
     try {
-      this.stateService.setLoading(true);
-      
       console.log('📊 Step 1: Rendering dashboard...');
       await this.render();
       console.log('✅ Dashboard rendered');
+      
+      // Now that DOM is ready, we can show loading
+      this.stateService.setLoading(true);
       
       console.log('📊 Step 2: Loading initial data...');
       await this.loadInitialData();
@@ -1430,14 +1431,20 @@ class DashboardPage {
    * @param {boolean} isLoading - Loading state
    */
   updateLoadingState(isLoading) {
+    console.log(`🔄 Updating loading state to: ${isLoading}`);
     const loadingState = this.container.querySelector('#dashboard-loading');
     if (loadingState) {
       loadingState.style.display = isLoading ? 'flex' : 'none';
+      console.log(`✅ Loading state updated successfully to: ${isLoading ? 'visible' : 'hidden'}`);
     } else {
+      console.warn('⚠️ Loading element #dashboard-loading not found');
       // Fallback: show/hide global loading instead
       const globalLoading = document.querySelector('#global-loading');
       if (globalLoading) {
         globalLoading.style.display = isLoading ? 'flex' : 'none';
+        console.log(`✅ Global loading fallback updated to: ${isLoading ? 'visible' : 'hidden'}`);
+      } else {
+        console.warn('⚠️ Global loading element #global-loading also not found');
       }
     }
   }

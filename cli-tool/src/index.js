@@ -29,6 +29,11 @@ async function showMainMenu() {
         short: 'Analytics Dashboard'
       },
       {
+        name: '💬 Chats Dashboard - View and analyze your Claude conversations',
+        value: 'chats',
+        short: 'Chats Dashboard'
+      },
+      {
         name: '🔍 Health Check - Verify your Claude Code setup and configuration',
         value: 'health',
         short: 'Health Check'
@@ -45,6 +50,12 @@ async function showMainMenu() {
   if (initialChoice.action === 'analytics') {
     console.log(chalk.blue('📊 Launching Claude Code Analytics Dashboard...'));
     await runAnalytics({});
+    return;
+  }
+  
+  if (initialChoice.action === 'chats') {
+    console.log(chalk.blue('💬 Launching Claude Code Chats Dashboard...'));
+    await runAnalytics({ openTo: 'agents' });
     return;
   }
   
@@ -90,6 +101,12 @@ async function createClaudeConfig(options = {}) {
   // Handle analytics dashboard
   if (options.analytics) {
     await runAnalytics(options);
+    return;
+  }
+  
+  // Handle chats/agents dashboard
+  if (options.chats || options.agents) {
+    await runAnalytics({ ...options, openTo: 'agents' });
     return;
   }
   

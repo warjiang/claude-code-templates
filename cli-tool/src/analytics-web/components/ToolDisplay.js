@@ -11,44 +11,114 @@ class ToolDisplay {
   /**
    * Render a tool use block
    * @param {Object} toolBlock - Tool use block
+   * @param {Array} toolResults - Associated tool results (optional)
    * @returns {string} Safe HTML string
    */
-  renderToolUse(toolBlock) {
+  renderToolUse(toolBlock, toolResults = null) {
     const toolName = this.escapeHtml(toolBlock.name || 'Unknown');
     const toolId = toolBlock.id ? toolBlock.id.slice(-8) : 'unknown';
     
     // Generate compact command representation
     const commandSummary = this.generateCompactCommand(toolName, toolBlock.input);
     
-    return `
+    // For ALL tools, ALWAYS add a "Show details" button
+    const contentId = toolName.toLowerCase() + '_' + toolId + '_' + Date.now();
+    
+    // Try to find corresponding tool result in toolResults first
+    let matchingResult = null;
+    if (toolResults && Array.isArray(toolResults)) {
+      matchingResult = toolResults.find(result => result.tool_use_id === toolBlock.id);
+    }
+    
+    // Prepare comprehensive modal content for all tools (without tool results, as they're shown inline now)
+    let modalContent = this.generateComprehensiveToolContent(toolName, toolBlock, null);
+    
+    // Store the tool content for modal display
+    if (typeof window !== 'undefined') {
+      window.storedContent = window.storedContent || {};
+      window.storedContent[contentId] = modalContent;
+    }
+    
+    // Always show "Show details" for ALL tools
+    const buttonClass = toolName === 'Bash' ? 'bash-cmd-btn' : 'tool-detail-btn';
+    let showResultsButton = ` <button class="show-results-btn ${buttonClass}" data-content-id="${contentId}">Show details</button>`;
+    
+    let toolUseHtml = `
       <div class="terminal-tool tool-use compact">
-        <span class="tool-command">⏺ ${commandSummary}</span>
+        <span class="tool-command">${commandSummary}${showResultsButton}</span>
+      </div>
+    `;
+    
+    // Render associated tool results if they exist, with proper truncation
+    if (matchingResult) {
+      toolUseHtml += this.renderToolResultWithTruncation(matchingResult);
+    }
+    
+    return toolUseHtml;
+  }
+
+  /**
+   * Render a tool result block with truncation support
+   * @param {Object} toolResultBlock - Tool result block
+   * @returns {string} Safe HTML string
+   */
+  renderToolResultWithTruncation(toolResultBlock) {
+    const toolId = toolResultBlock.tool_use_id ? toolResultBlock.tool_use_id.slice(-8) : 'unknown';
+    const isError = toolResultBlock.is_error || false;
+    
+    // Generate enhanced result content with metadata
+    const resultContent = this.generateEnhancedResultContent(toolResultBlock);
+    const compactOutput = this.generateCompactOutput(resultContent, isError);
+    
+    return `
+      <div class="terminal-tool tool-result compact ${isError ? 'error' : 'success'}" data-tool-use-id="${toolResultBlock.tool_use_id}">
+        <span class="tool-prompt">⎿</span>
+        <span class="tool-output-compact">${compactOutput}</span>
       </div>
     `;
   }
 
   /**
-   * Render a tool result block
+   * Render a tool result block (legacy method, kept for compatibility)
    * @param {Object} toolResultBlock - Tool result block
    * @returns {string} Safe HTML string
    */
   renderToolResult(toolResultBlock) {
-    const toolId = toolResultBlock.tool_use_id ? toolResultBlock.tool_use_id.slice(-8) : 'unknown';
-    const isError = toolResultBlock.is_error || false;
+    return this.renderToolResultWithTruncation(toolResultBlock);
+  }
+
+  /**
+   * Generate enhanced result content including metadata
+   * @param {Object} toolResultBlock - Tool result block
+   * @returns {string} Enhanced result content
+   */
+  generateEnhancedResultContent(toolResultBlock) {
+    let content = '';
     
-    const preview = this.generateResultPreview(toolResultBlock.content);
-    const status = isError ? 'ERROR' : 'OK';
+    // Add return code interpretation if available
+    if (toolResultBlock.returnCodeInterpretation && toolResultBlock.returnCodeInterpretation !== 'none') {
+      content += `${toolResultBlock.returnCodeInterpretation}\n`;
+    }
     
-    // For compact terminal display, show simple output with tree symbol
-    const content = toolResultBlock.content || '';
-    const compactOutput = this.generateCompactOutput(content, isError);
+    // Add main content
+    if (toolResultBlock.content) {
+      if (content) content += '\n';
+      content += toolResultBlock.content;
+    }
     
-    return `
-      <div class="terminal-tool tool-result compact ${isError ? 'error' : 'success'}">
-        <span class="tool-prompt">⎿</span>
-        <span class="tool-output-compact">${compactOutput}</span>
-      </div>
-    `;
+    // Add stdout if different from content
+    if (toolResultBlock.stdout && toolResultBlock.stdout !== toolResultBlock.content) {
+      if (content) content += '\n';
+      content += toolResultBlock.stdout;
+    }
+    
+    // Add stderr if present
+    if (toolResultBlock.stderr && toolResultBlock.stderr.trim()) {
+      if (content) content += '\n';
+      content += `stderr: ${toolResultBlock.stderr}`;
+    }
+    
+    return content || '[Empty result]';
   }
 
   /**
@@ -66,46 +136,46 @@ class ToolDisplay {
       case 'Bash':
         if (input.command) {
           const command = this.escapeHtml(input.command);
-          return `<span class="tool-name-bold">Bash</span>(${command})`;
+          return `<span class="tool-name-bold">Bash </span>(${command})`;
         }
         break;
         
       case 'Read':
         if (input.file_path) {
           const fileName = input.file_path.split('/').pop();
-          return `<span class="tool-name-bold">Read</span>(${this.escapeHtml(fileName)})`;
+          return `<span class="tool-name-bold">Read </span>(${this.escapeHtml(fileName)})`;
         }
         break;
         
       case 'Edit':
         if (input.file_path) {
           const fileName = input.file_path.split('/').pop();
-          return `<span class="tool-name-bold">Edit</span>(${this.escapeHtml(fileName)})`;
+          return `<span class="tool-name-bold">Edit </span>(${this.escapeHtml(fileName)})`;
         }
         break;
         
       case 'Write':
         if (input.file_path) {
           const fileName = input.file_path.split('/').pop();
-          return `<span class="tool-name-bold">Write</span>(${this.escapeHtml(fileName)})`;
+          return `<span class="tool-name-bold">Write </span>(${this.escapeHtml(fileName)})`;
         }
         break;
         
       case 'Glob':
         if (input.pattern) {
-          return `<span class="tool-name-bold">Glob</span>("${this.escapeHtml(input.pattern)}")`;
+          return `<span class="tool-name-bold">Glob </span>("${this.escapeHtml(input.pattern)}")`;
         }
         break;
         
       case 'Grep':
         if (input.pattern) {
-          return `<span class="tool-name-bold">Grep</span>("${this.escapeHtml(input.pattern)}")`;
+          return `<span class="tool-name-bold">Grep </span>("${this.escapeHtml(input.pattern)}")`;
         }
         break;
         
       case 'TodoWrite':
         const todoCount = Array.isArray(input.todos) ? input.todos.length : 0;
-        return `<span class="tool-name-bold">TodoWrite</span>(${todoCount} todos)`;
+        return `<span class="tool-name-bold">TodoWrite </span>(${todoCount} todos)`;
     }
     
     return `${toolName}()`;
@@ -124,7 +194,21 @@ class ToolDisplay {
         try {
           const parsed = JSON.parse(content);
           const formatted = JSON.stringify(parsed, null, 2);
-          return `<pre class="json-output">${this.escapeHtml(formatted)}</pre>`;
+          const lines = formatted.split('\n');
+          if (lines.length > 5) {
+            const preview = lines.slice(0, 5).join('\n');
+            const remaining = lines.length - 5;
+            const contentId = 'json_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+            
+            if (typeof window !== 'undefined') {
+              window.storedContent = window.storedContent || {};
+              window.storedContent[contentId] = formatted;
+            }
+            
+            return `<pre class="json-output">${this.escapeHtml(preview)}\n<span class="continuation">… +${remaining} lines hidden <button class="show-results-btn text-expand-btn" data-content-id="${contentId}">Show +${remaining} lines</button></span></pre>`;
+          } else {
+            return `<pre class="json-output">${this.escapeHtml(formatted)}</pre>`;
+          }
         } catch (e) {
           // Fall through to regular text handling
         }
@@ -132,10 +216,20 @@ class ToolDisplay {
       
       // For multi-line content, show first few lines with continuation
       const lines = content.split('\n');
-      if (lines.length > 3) {
-        const preview = lines.slice(0, 3).join('\n');
-        const remaining = lines.length - 3;
-        return `<pre class="text-output">${this.escapeHtml(preview)}\n<span class="continuation">… +${remaining} lines</span></pre>`;
+      console.log(`ToolDisplay: Processing content with ${lines.length} lines`);
+      if (lines.length > 5) {
+        const preview = lines.slice(0, 5).join('\n');
+        const remaining = lines.length - 5;
+        const contentId = 'content_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+        
+        // Store content in global storage without inline scripts
+        if (typeof window !== 'undefined') {
+          window.storedContent = window.storedContent || {};
+          window.storedContent[contentId] = content;
+          console.log(`ToolDisplay: Stored content with ID ${contentId}, ${remaining} remaining lines`);
+        }
+        
+        return `<pre class="text-output">${this.escapeHtml(preview)}\n<span class="continuation">… +${remaining} lines hidden <button class="show-results-btn text-expand-btn" data-content-id="${contentId}">Show +${remaining} lines</button></span></pre>`;
       } else {
         return `<pre class="text-output">${this.escapeHtml(content)}</pre>`;
       }
@@ -286,6 +380,177 @@ class ToolDisplay {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  /**
+   * Find tool result in globally stored messages
+   * @param {string} toolUseId - Tool use ID to find result for
+   * @returns {string|null} Tool result content if found
+   */
+  findToolResultInGlobalMessages(toolUseId) {
+    console.log('🔍 Searching for tool result for ID:', toolUseId);
+    
+    // Try to find tool result in cached messages
+    try {
+      if (typeof window !== 'undefined' && window.currentMessages) {
+        console.log('📋 Available messages:', window.currentMessages.length);
+        
+        // First pass: Look for direct tool_result matches in any message
+        for (let i = 0; i < window.currentMessages.length; i++) {
+          const message = window.currentMessages[i];
+          console.log(`📨 Message ${i}:`, {
+            role: message.role,
+            contentType: Array.isArray(message.content) ? 'array' : typeof message.content,
+            contentLength: Array.isArray(message.content) ? message.content.length : 1
+          });
+          
+          if (Array.isArray(message.content)) {
+            for (let j = 0; j < message.content.length; j++) {
+              const block = message.content[j];
+              console.log(`  📦 Block ${j}:`, {
+                type: block.type,
+                id: block.id || block.tool_use_id || 'none',
+                hasContent: !!block.content
+              });
+              
+              if (block.type === 'tool_result' && block.tool_use_id === toolUseId) {
+                console.log('✅ Found tool result for', toolUseId, 'in message', i, 'block', j);
+                console.log('📄 Content preview:', block.content ? block.content.substring(0, 100) + '...' : 'empty');
+                return block.content;
+              }
+            }
+          }
+        }
+        
+        console.log('❌ No direct tool result found, trying sequential search...');
+        
+        // Second pass: Sequential search - look for tool_use then find matching tool_result
+        let foundToolUse = false;
+        let toolUseIndex = -1;
+        
+        for (let i = 0; i < window.currentMessages.length; i++) {
+          const message = window.currentMessages[i];
+          
+          if (Array.isArray(message.content)) {
+            for (const block of message.content) {
+              if (block.type === 'tool_use' && block.id === toolUseId) {
+                foundToolUse = true;
+                toolUseIndex = i;
+                console.log('🎯 Found tool_use at message index', i);
+                break;
+              }
+            }
+          }
+          
+          // If we found the tool_use, look for the result in subsequent messages
+          if (foundToolUse) {
+            for (let j = toolUseIndex; j < window.currentMessages.length; j++) {
+              const laterMessage = window.currentMessages[j];
+              if (Array.isArray(laterMessage.content)) {
+                for (const laterBlock of laterMessage.content) {
+                  if (laterBlock.type === 'tool_result' && laterBlock.tool_use_id === toolUseId) {
+                    console.log('✅ Found matching tool result in message', j);
+                    console.log('📄 Content preview:', laterBlock.content ? laterBlock.content.substring(0, 100) + '...' : 'empty');
+                    return laterBlock.content;
+                  }
+                }
+              }
+            }
+            break; // Stop after finding tool_use and searching subsequent messages
+          }
+        }
+        
+        console.log('❌ No tool result found for', toolUseId, 'after thorough search');
+      } else {
+        console.log('⚠️ No currentMessages available in window object');
+      }
+    } catch (error) {
+      console.error('💥 Error searching for tool result:', error);
+    }
+    
+    return null;
+  }
+
+  /**
+   * Generate comprehensive tool content for modal display
+   * @param {string} toolName - Name of the tool
+   * @param {Object} toolBlock - Tool use block with input parameters
+   * @param {string|null} resultContent - Tool result content if available
+   * @returns {string} Comprehensive tool information for modal
+   */
+  generateComprehensiveToolContent(toolName, toolBlock, resultContent) {
+    let content = `=== TOOL: ${toolName} ===\n\n`;
+    
+    // Tool ID and basic info
+    content += `Tool ID: ${toolBlock.id || 'Unknown'}\n`;
+    content += `Short ID: ${toolBlock.id ? toolBlock.id.slice(-8) : 'Unknown'}\n\n`;
+    
+    // Tool Input Parameters
+    content += `--- INPUT PARAMETERS ---\n`;
+    if (toolBlock.input && typeof toolBlock.input === 'object') {
+      Object.entries(toolBlock.input).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+          // For long strings, show preview + length
+          if (value.length > 200) {
+            content += `${key}: "${value.substring(0, 200)}..." [${value.length} characters total]\n`;
+          } else {
+            content += `${key}: "${value}"\n`;
+          }
+        } else {
+          content += `${key}: ${JSON.stringify(value, null, 2)}\n`;
+        }
+      });
+    } else {
+      content += `No input parameters provided.\n`;
+    }
+    
+    // Tool-specific details
+    content += `\n--- TOOL DETAILS ---\n`;
+    switch (toolName) {
+      case 'Bash':
+        content += `Command executed: ${toolBlock.input?.command || 'Unknown'}\n`;
+        content += `Description: ${toolBlock.input?.description || 'No description provided'}\n`;
+        content += `Timeout: ${toolBlock.input?.timeout || 'Default (120s)'}\n`;
+        break;
+      case 'Read':
+        content += `File path: ${toolBlock.input?.file_path || 'Unknown'}\n`;
+        content += `Offset: ${toolBlock.input?.offset || 'Start of file'}\n`;
+        content += `Limit: ${toolBlock.input?.limit || 'Entire file'}\n`;
+        break;
+      case 'Write':
+        content += `File path: ${toolBlock.input?.file_path || 'Unknown'}\n`;
+        const contentLength = toolBlock.input?.content ? toolBlock.input.content.length : 0;
+        content += `Content length: ${contentLength} characters\n`;
+        break;
+      case 'Edit':
+        content += `File path: ${toolBlock.input?.file_path || 'Unknown'}\n`;
+        content += `Replace all: ${toolBlock.input?.replace_all ? 'Yes' : 'No'}\n`;
+        const oldLength = toolBlock.input?.old_string ? toolBlock.input.old_string.length : 0;
+        const newLength = toolBlock.input?.new_string ? toolBlock.input.new_string.length : 0;
+        content += `Old string length: ${oldLength} characters\n`;
+        content += `New string length: ${newLength} characters\n`;
+        break;
+      case 'Glob':
+        content += `Pattern: ${toolBlock.input?.pattern || 'Unknown'}\n`;
+        content += `Search path: ${toolBlock.input?.path || 'Current directory'}\n`;
+        break;
+      case 'Grep':
+        content += `Pattern: ${toolBlock.input?.pattern || 'Unknown'}\n`;
+        content += `Include filter: ${toolBlock.input?.include || 'All files'}\n`;
+        content += `Search path: ${toolBlock.input?.path || 'Current directory'}\n`;
+        break;
+      case 'TodoWrite':
+        const todoCount = Array.isArray(toolBlock.input?.todos) ? toolBlock.input.todos.length : 0;
+        content += `Number of todos: ${todoCount}\n`;
+        break;
+      default:
+        content += `Tool-specific details not available for ${toolName}\n`;
+    }
+    
+    // Tool results are now displayed inline with messages and not duplicated in the modal
+    content += `\nNote: Tool results are shown inline with the conversation and are not included in this detail view.`;
+    
+    return content;
   }
 
   /**

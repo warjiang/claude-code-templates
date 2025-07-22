@@ -8,7 +8,7 @@ class WebSocketService {
     this.url = null;
     this.isConnected = false;
     this.reconnectAttempts = 0;
-    this.maxReconnectAttempts = 1; // Reduce attempts to minimize console noise
+    this.maxReconnectAttempts = 5; // Increase attempts for better reliability
     this.reconnectDelay = 1000;
     this.maxReconnectDelay = 30000;
     this.heartbeatInterval = null;
@@ -17,7 +17,7 @@ class WebSocketService {
     this.eventListeners = new Map();
     this.subscriptions = new Set();
     this.messageQueue = [];
-    this.autoReconnect = false; // Disable auto-reconnect to reduce console spam
+    this.autoReconnect = true; // Enable auto-reconnect for real-time updates
     
     // Message ID tracking for responses
     this.messageId = 0;

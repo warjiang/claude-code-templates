@@ -6,7 +6,14 @@
     <title>Claude Code Analytics - Terminal</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     
+    <!-- Service Scripts (loaded first as dependencies) -->
+    <script src="services/WebSocketService.js"></script>
+    <script src="services/DataService.js"></script>
+    <script src="services/StateService.js"></script>
+    
     <!-- Component Scripts -->
+    <script src="components/Charts.js"></script>
+    <!-- Dashboard.js removed - deprecated architecture -->
     <script src="components/SessionTimer.js"></script>
     <script src="components/ConversationTable.js"></script>
     <script src="components/ToolDisplay.js"></script>
@@ -15,10 +22,7 @@
     <script src="components/AgentsPage.js"></script>
     <script src="components/App.js"></script>
     
-    <!-- Service Scripts -->
-    <script src="services/DataService.js"></script>
-    <script src="services/StateService.js"></script>
-    <script src="services/WebSocketService.js"></script>
+    <!-- main.js removed - deprecated architecture -->
     <style>
         :root {
             /* Dark theme colors (default) */
@@ -1737,6 +1741,7 @@
             font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 0.85rem;
             line-height: 1.3;
+            min-width: 0;
         }
 
         .terminal-message.user {
@@ -1755,6 +1760,9 @@
             padding: 10px 12px;
             position: relative;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            min-width: 0;
         }
 
         .terminal-message.user .message-container {
@@ -1846,6 +1854,208 @@
             border: 1px solid rgba(213, 116, 85, 0.4);
         }
 
+        .type-compact-summary {
+            background: rgba(165, 214, 255, 0.2);
+            color: var(--text-info);
+            border: 1px solid rgba(165, 214, 255, 0.4);
+        }
+
+        /* Show Results Button */
+        .show-results-btn {
+            background: var(--text-accent);
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            margin-left: 8px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .show-results-btn:hover {
+            background: #c65d47;
+        }
+
+        .bash-cmd-btn {
+            background: #0ea5e9;
+            font-size: 0.65rem;
+            padding: 1px 4px;
+        }
+
+        .bash-cmd-btn:hover {
+            background: #0284c7;
+        }
+
+        .tool-detail-btn {
+            background: #059669;
+            font-size: 0.65rem;
+            padding: 1px 4px;
+        }
+
+        .tool-detail-btn:hover {
+            background: #047857;
+        }
+
+        /* Text expansion styling */
+        .text-content-preview {
+            display: block;
+        }
+
+        .text-expand-section {
+            margin-top: 8px;
+            padding-top: 4px;
+            border-top: 1px solid var(--border-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .text-expand-btn {
+            background: linear-gradient(135deg, #374151, #4b5563);
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border: none;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .text-expand-btn:hover {
+            background: linear-gradient(135deg, #4b5563, #6b7280);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .text-expand-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .continuation {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Results Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-primary);
+            background: var(--bg-tertiary);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-header h3 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .copy-btn, .close-btn {
+            background: var(--text-accent);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .copy-btn:hover, .close-btn:hover {
+            background: #c65d47;
+        }
+
+        .close-btn {
+            background: var(--text-secondary);
+            font-size: 1.2rem;
+            padding: 4px 8px;
+        }
+
+        .close-btn:hover {
+            background: #9ca3af;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .modal-results-content {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            max-height: 70vh;
+            overflow: auto;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            padding: 16px;
+            margin: 0;
+            border: none;
+            resize: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Scrollbar styling for modal content */
+        .modal-results-content::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .modal-results-content::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .modal-results-content::-webkit-scrollbar-thumb {
+            background: var(--border-primary);
+            border-radius: 4px;
+        }
+
+        .modal-results-content::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
         .prompt-char {
             color: var(--text-accent);
             font-weight: bold;
@@ -1912,6 +2122,11 @@
             color: var(--text-primary);
             padding: 4px 0 0 0;
             font-size: 0.85rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.4;
+            max-width: 100%;
         }
 
         .terminal-message.user .message-body {
@@ -2110,18 +2325,6 @@
             color: #f85149;
         }
 
-        /* Terminal console window effect */
-        .terminal-tool.compact::before {
-            content: '';
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 8px;
-            height: 8px;
-            background: #30363d;
-            border-radius: 50%;
-            box-shadow: -12px 0 #30363d, -24px 0 #30363d;
-        }
 
         .json-output, .text-output {
             margin: 0;
@@ -2161,6 +2364,9 @@
             margin: 4px 0;
             font-size: 0.75rem;
             overflow-x: auto;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            max-width: 100%;
         }
 
         .message-body .inline-code {
@@ -2169,12 +2375,178 @@
             border-radius: 2px;
             padding: 1px 4px;
             font-size: 0.8em;
+            word-break: break-all;
+            overflow-wrap: break-word;
         }
 
         .empty-content {
             color: var(--text-secondary);
             font-style: italic;
             font-size: 0.8rem;
+        }
+
+        /* Additional overflow handling for message content */
+        .message-body * {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Handle long URLs and paths */
+        .message-body {
+            word-break: break-word;
+        }
+
+        /* Ensure no content can expand beyond container */
+        .message-body pre,
+        .message-body code,
+        .message-body .code-block,
+        .message-body .inline-code {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Handle very long single words or tokens */
+        .message-body {
+            overflow-wrap: anywhere;
+        }
+
+        /* Enhanced Markdown Styles */
+        
+        /* Headers */
+        .message-body .markdown-h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 16px 0 12px 0;
+            line-height: 1.3;
+            border-bottom: 2px solid var(--border-primary);
+            padding-bottom: 6px;
+        }
+
+        .message-body .markdown-h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 14px 0 10px 0;
+            line-height: 1.3;
+            border-bottom: 1px solid var(--border-primary);
+            padding-bottom: 4px;
+        }
+
+        .message-body .markdown-h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 12px 0 8px 0;
+            line-height: 1.3;
+        }
+
+        .message-body .markdown-h4,
+        .message-body .markdown-h5,
+        .message-body .markdown-h6 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 10px 0 6px 0;
+            line-height: 1.3;
+        }
+
+        /* Text formatting */
+        .message-body .markdown-bold {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .message-body .markdown-italic {
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .message-body .markdown-bold-italic {
+            font-weight: 600;
+            font-style: italic;
+            color: var(--text-primary);
+        }
+
+        .message-body .markdown-strikethrough {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        /* Links */
+        .message-body .markdown-link {
+            color: var(--text-accent);
+            text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+
+        .message-body .markdown-link:hover {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        /* Lists */
+        .message-body .markdown-list,
+        .message-body .markdown-ordered-list {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-body .markdown-list-item,
+        .message-body .markdown-ordered-item {
+            margin: 4px 0;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+
+        .message-body .markdown-list {
+            list-style-type: disc;
+        }
+
+        .message-body .markdown-ordered-list {
+            list-style-type: decimal;
+        }
+
+        /* Blockquotes */
+        .message-body .markdown-blockquote {
+            margin: 12px 0;
+            padding: 8px 16px;
+            background: rgba(213, 116, 85, 0.1);
+            border-left: 4px solid var(--text-accent);
+            border-radius: 0 4px 4px 0;
+            color: var(--text-primary);
+            font-style: italic;
+        }
+
+        /* Horizontal rules */
+        .message-body .markdown-hr {
+            margin: 16px 0;
+            border: none;
+            height: 1px;
+            background: var(--border-primary);
+        }
+
+        /* Paragraphs */
+        .message-body .markdown-paragraph {
+            margin: 6px 0;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+
+        /* Code blocks with language support */
+        .message-body .code-block[data-language]::before {
+            content: attr(data-language);
+            position: absolute;
+            top: 4px;
+            right: 8px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .message-body .code-block {
+            position: relative;
         }
         
         .back-btn {
@@ -2284,7 +2656,7 @@
         
         /* Minimalist Console Sidebar */
         .sidebar {
-            width: 60px;
+            width: 56px;
             height: 100vh;
             background: var(--bg-primary);
             border-right: 1px solid var(--border-primary);
@@ -2384,23 +2756,25 @@
         }
         
         .nav-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 12px;
+            display: block;
             color: var(--text-secondary);
             text-decoration: none;
             transition: all 0.3s ease;
             border-radius: 8px;
             position: relative;
-            height: 44px;
-            min-width: 44px;
+            height: 40px;
+            width: 40px;
+            margin: 6px auto;
         }
         
         .sidebar.hover-expanded .nav-link {
+            display: flex;
+            align-items: center;
             justify-content: flex-start;
-            padding: 12px 16px;
+            gap: 12px;
+            padding: 8px 16px;
+            width: auto;
+            margin: 4px 8px;
         }
         
         .nav-link:hover {
@@ -2419,10 +2793,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
+            width: 100%;
+            height: 100%;
             flex-shrink: 0;
-            color: var(--text-secondary);
+            color: var(--text-primary);  /* Changed from text-secondary to text-primary for better visibility */
+            position: absolute;
+            top: 0;
+            left: 0;
         }
         
         .nav-item.active .nav-icon {
@@ -2431,12 +2808,16 @@
         
         .sidebar.hover-expanded .nav-icon {
             color: inherit;
+            width: 24px;
+            height: 24px;
+            position: static;
         }
         
         .nav-icon svg {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             fill: currentColor;
+            display: block;
         }
         
         .nav-text {
@@ -3677,6 +4058,33 @@
             max-width: 1400px;
             margin: 0 auto;
         }
+
+        /* App Layout Styles (App.js + Sidebar.js) */
+        .app {
+            display: flex;
+            min-height: 100vh;
+            background: var(--bg-primary);
+        }
+
+        .app-sidebar {
+            width: 60px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            transition: width 0.3s ease;
+        }
+
+        .app-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .app-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
         
         /* Metrics Section */
         .metrics-section {
@@ -3859,7 +4267,7 @@
     </style>
 </head>
 <body>
-    <div id="app-container">
+    <div id="app">
         <!-- App will be initialized here -->
     </div>
     
@@ -3877,13 +4285,13 @@
     </div>
     
     <script>
-        // Initialize the modular application
+        // Initialize the App.js based application (with Sidebar layout)
         document.addEventListener('DOMContentLoaded', async function() {
-            const appContainer = document.getElementById('app-container');
+            const appContainer = document.getElementById('app');
             
             try {
                 // Initialize services in correct order
-                console.log('🚀 Initializing Claude Analytics App...');
+                console.log('🚀 Initializing Claude Analytics App with Sidebar...');
                 
                 // 1. Initialize WebSocket service first
                 const websocketService = new WebSocketService();
@@ -3891,7 +4299,7 @@
                 // 2. Initialize DataService with WebSocket service
                 const dataService = new DataService();
                 dataService.setWebSocketService(websocketService);
-                dataService.baseURL = 'http://localhost:3333'; // Set base URL
+                dataService.baseURL = window.location.origin; // Use current host
                 
                 // 3. Initialize StateService
                 const stateService = new StateService();
@@ -3905,64 +4313,20 @@
                 
                 // 5. Initialize WebSocket connection (with fallback for server not running)
                 try {
-                    // Try WebSocket connection with shorter timeout
-                    const connectPromise = websocketService.connect('ws://localhost:3333');
-                    const timeoutPromise = new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error('WebSocket connection timeout')), 2000)
-                    );
-                    
-                    await Promise.race([connectPromise, timeoutPromise]);
+                    await websocketService.connect();
                     console.log('✅ WebSocket connected');
                 } catch (error) {
                     console.warn('⚠️ WebSocket connection failed - using fallback mode:', error.message);
-                    // Ensure DataService starts polling immediately
-                    services.data.startFallbackPolling();
                 }
                 
-                // Start loading data immediately regardless of WebSocket status
-                console.log('📊 Pre-loading dashboard data...');
-                try {
-                    await services.data.getConversations();
-                    console.log('✅ Initial data loaded successfully');
-                } catch (error) {
-                    console.warn('⚠️ Could not pre-load data, will use fallback:', error.message);
-                }
-                
-                // 6. Initialize main app with timeout
-                console.log('🔧 Initializing main App component...');
+                // 6. Initialize main App component (which uses Sidebar + navigation)
+                console.log('🔧 Initializing main App component with Sidebar...');
                 const app = new App(appContainer, services);
-                
-                // Set a maximum timeout for app initialization
-                const initPromise = app.init();
-                const timeoutPromise = new Promise((resolve) => {
-                    setTimeout(() => {
-                        console.warn('⚠️ App initialization taking longer than expected, continuing anyway...');
-                        resolve();
-                    }, 10000); // 10 second timeout
-                });
-                
-                await Promise.race([initPromise, timeoutPromise]);
-                
-                // Force clear any remaining loading states
-                setTimeout(() => {
-                    const globalLoading = document.querySelector('#global-loading');
-                    if (globalLoading && globalLoading.style.display !== 'none') {
-                        console.log('🔧 Force clearing global loading state...');
-                        globalLoading.style.display = 'none';
-                    }
-                }, 5000);
                 
                 // 7. Store app instance globally for debugging
                 window.claudeAnalyticsApp = app;
                 
-                // 8. Add debugging helpers
-                window.navigateToPage = (page) => {
-                    console.log(`🧪 Manual navigation to: ${page}`);
-                    app.navigateToPage(page);
-                };
-                
-                console.log('🎉 Claude Analytics App initialized successfully!');
-                console.log('💡 You can use window.navigateToPage("dashboard") or window.navigateToPage("agents") for debugging');
+                console.log('🎉 Claude Analytics App with Sidebar initialized successfully!');
                 
             } catch (error) {
                 console.error('❌ Failed to initialize Claude Analytics App:', error);
@@ -4022,6 +4386,97 @@
         
         // Initialize theme immediately
         initializeTheme();
+        
+        // Results Modal Management
+        window.showResultsModal = function(contentId) {
+            console.log('showResultsModal called with contentId:', contentId);
+            console.log('Available stored content:', Object.keys(window.storedContent || {}));
+            
+            const content = window.storedContent && window.storedContent[contentId];
+            if (!content) {
+                console.error('Content not found for ID:', contentId);
+                alert('Content not found for ID: ' + contentId);
+                return;
+            }
+            
+            const modal = document.getElementById('results-modal');
+            const modalContent = document.getElementById('modal-results-content');
+            const modalTitle = document.getElementById('modal-results-title');
+            
+            // Set title with content info
+            const lines = content.split('\n');
+            modalTitle.textContent = `Details (${lines.length} lines, ${content.length} characters)`;
+            
+            // Set content with proper formatting
+            modalContent.textContent = content;
+            
+            // Show modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+        
+        window.closeResultsModal = function() {
+            const modal = document.getElementById('results-modal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+        
+        // Copy content to clipboard
+        window.copyResultsContent = function() {
+            const content = document.getElementById('modal-results-content').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                const button = document.querySelector('.copy-btn');
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        };
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('results-modal');
+                if (modal && modal.style.display === 'flex') {
+                    closeResultsModal();
+                }
+            }
+        });
+        
+        // Close modal when clicking outside content
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('results-modal');
+            if (event.target === modal) {
+                closeResultsModal();
+            }
+        });
+        
+        // Handle Show results button clicks
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('show-results-btn')) {
+                const contentId = event.target.getAttribute('data-content-id');
+                if (contentId) {
+                    window.showResultsModal(contentId);
+                }
+            }
+        });
     </script>
+    
+    <!-- Results Modal -->
+    <div id="results-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-results-title">Tool Details</h3>
+                <div class="modal-actions">
+                    <button class="copy-btn" onclick="copyResultsContent()">Copy</button>
+                    <button class="close-btn" onclick="closeResultsModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <pre id="modal-results-content" class="modal-results-content"></pre>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

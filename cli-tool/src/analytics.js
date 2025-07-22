@@ -501,7 +501,7 @@ class ClaudeAnalytics {
    */
   async handleConversationChange(conversationId, filePath) {
     try {
-      console.log(chalk.blue(`📨 Handling conversation change: ${conversationId}`));
+      console.log(chalk.blue(`📨 Handling conversation change: ${conversationId} (${filePath})`));
       
       // Get the latest messages from the file
       const messages = await this.conversationAnalyzer.getParsedConversation(filePath);
@@ -510,15 +510,22 @@ class ClaudeAnalytics {
         // Get the most recent message
         const latestMessage = messages[messages.length - 1];
         
+        console.log(chalk.cyan(`📨 Latest message role: ${latestMessage.role}, timestamp: ${latestMessage.timestamp}`));
+        
         // Send WebSocket notification for new message
         if (this.notificationManager) {
+          console.log(chalk.blue(`🔌 Sending WebSocket notification for conversation ${conversationId}`));
           this.notificationManager.notifyNewMessage(conversationId, latestMessage, {
             totalMessages: messages.length,
             timestamp: new Date().toISOString()
           });
+        } else {
+          console.log(chalk.red(`❌ No notification manager available for conversation ${conversationId}`));
         }
         
         console.log(chalk.green(`✅ Notified new message in conversation ${conversationId}`));
+      } else {
+        console.log(chalk.yellow(`⚠️ No messages found in conversation ${conversationId}`));
       }
     } catch (error) {
       console.error(chalk.red(`Error handling conversation change for ${conversationId}:`), error);
@@ -1129,13 +1136,23 @@ class ClaudeAnalytics {
     });
   }
 
-  async openBrowser() {
+  async openBrowser(openTo = null) {
+    const baseUrl = `http://localhost:${this.port}`;
+    let fullUrl = baseUrl;
+    
+    // Add fragment/hash for specific page
+    if (openTo === 'agents') {
+      fullUrl = `${baseUrl}/#agents`;
+      console.log(chalk.blue('🌐 Opening browser to Claude Code Chats...'));
+    } else {
+      console.log(chalk.blue('🌐 Opening browser to Claude Code Analytics...'));
+    }
+    
     try {
-      await open(`http://localhost:${this.port}`);
-      console.log(chalk.blue('🌐 Opening browser...'));
+      await open(fullUrl);
     } catch (error) {
       console.log(chalk.yellow('Could not open browser automatically. Please visit:'));
-      console.log(chalk.cyan(`http://localhost:${this.port}`));
+      console.log(chalk.cyan(fullUrl));
     }
   }
 
@@ -1334,7 +1351,14 @@ class ClaudeAnalytics {
 }
 
 async function runAnalytics(options = {}) {
-  console.log(chalk.blue('📊 Starting Claude Code Analytics Dashboard...'));
+  // Determine if we're opening to a specific page
+  const openTo = options.openTo;
+  
+  if (openTo === 'agents') {
+    console.log(chalk.blue('💬 Starting Claude Code Chats Dashboard...'));
+  } else {
+    console.log(chalk.blue('📊 Starting Claude Code Analytics Dashboard...'));
+  }
 
   const analytics = new ClaudeAnalytics();
 
@@ -1345,9 +1369,15 @@ async function runAnalytics(options = {}) {
     // Web dashboard files are now static in analytics-web directory
 
     await analytics.startServer();
-    await analytics.openBrowser();
+    await analytics.openBrowser(openTo);
 
-    console.log(chalk.green('✅ Analytics dashboard is running!'));
+    if (openTo === 'agents') {
+      console.log(chalk.green('✅ Claude Code Chats dashboard is running!'));
+      console.log(chalk.cyan(`📱 Access at: http://localhost:${analytics.port}/#agents`));
+    } else {
+      console.log(chalk.green('✅ Analytics dashboard is running!'));
+      console.log(chalk.cyan(`📱 Access at: http://localhost:${analytics.port}`));
+    }
     console.log(chalk.gray('Press Ctrl+C to stop the server'));
 
     // Handle graceful shutdown

@@ -218,7 +218,7 @@ class DataService {
     
     // Listen for new messages
     this.webSocketService.on('new_message', (data) => {
-      console.log('📨 Real-time new message received');
+      console.log('📨 Real-time new message received:', data);
       this.handleNewMessage(data);
     });
     
@@ -291,6 +291,8 @@ class DataService {
    * @param {Object} data - New message data
    */
   handleNewMessage(data) {
+    console.log('📨 DataService: Processing new message for conversation', data.conversationId, 'message:', data.message);
+    
     // Clear relevant cache entries for the affected conversation
     this.clearCacheEntry(`/api/conversations/${data.conversationId}/messages`);
     
@@ -301,7 +303,7 @@ class DataService {
       metadata: data.metadata
     });
     
-    console.log('📨 DataService: New message processed for conversation', data.conversationId);
+    console.log('📨 DataService: New message processed and listeners notified for conversation', data.conversationId);
   }
   
   /**

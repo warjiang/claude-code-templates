@@ -24,8 +24,8 @@ class Dashboard {
     if (this.isInitialized) return;
     
     try {
-      this.stateService.setLoading(true);
       await this.render();
+      this.stateService.setLoading(true);
       await this.initializeComponents();
       await this.loadInitialData();
       this.startPeriodicRefresh();
@@ -419,7 +419,18 @@ class Dashboard {
    */
   updateLoadingState(isLoading) {
     const loadingOverlay = this.container.querySelector('#loading-overlay');
-    loadingOverlay.style.display = isLoading ? 'flex' : 'none';
+    if (loadingOverlay) {
+      loadingOverlay.style.display = isLoading ? 'flex' : 'none';
+    } else {
+      // If the DOM isn't ready yet, show a temporary loading state
+      if (isLoading && this.container) {
+        this.container.style.opacity = '0.5';
+        this.container.style.pointerEvents = 'none';
+      } else if (this.container) {
+        this.container.style.opacity = '1';
+        this.container.style.pointerEvents = 'auto';
+      }
+    }
   }
 
   /**
@@ -430,11 +441,16 @@ class Dashboard {
     const errorBanner = this.container.querySelector('#error-banner');
     const errorText = this.container.querySelector('.error-text');
     
-    if (error) {
-      errorText.textContent = error.message || error;
-      errorBanner.style.display = 'flex';
-    } else {
-      errorBanner.style.display = 'none';
+    if (errorBanner && errorText) {
+      if (error) {
+        errorText.textContent = error.message || error;
+        errorBanner.style.display = 'flex';
+      } else {
+        errorBanner.style.display = 'none';
+      }
+    } else if (error) {
+      // If DOM isn't ready, log error for now
+      console.error('Dashboard error (DOM not ready):', error.message || error);
     }
   }
 

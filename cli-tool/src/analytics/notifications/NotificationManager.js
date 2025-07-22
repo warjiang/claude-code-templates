@@ -123,7 +123,7 @@ class NotificationManager {
     // Don't throttle new message notifications - they should be immediate
     this.addToHistory(notification);
 
-    // Send via WebSocket
+    // Send via WebSocket to conversation_updates channel
     if (this.webSocketServer) {
       this.webSocketServer.broadcast({
         type: 'new_message',
@@ -132,7 +132,7 @@ class NotificationManager {
           message,
           metadata
         }
-      });
+      }, 'conversation_updates');
     }
 
     // Send to local subscribers

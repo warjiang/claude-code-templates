@@ -76,6 +76,10 @@ npx claude-code-templates
 ```bash
 # Launch real-time analytics dashboard
 npx claude-code-templates --analytics
+
+# Launch chats/conversations dashboard (opens directly to conversations)
+npx claude-code-templates --chats
+npx claude-code-templates --agents
 ```
 
 ### Health Check
@@ -128,6 +132,8 @@ npx create-claude-config     # Create-style command
 | `-y, --yes` | Skip prompts and use defaults | `--yes` |
 | `--dry-run` | Show what would be installed | `--dry-run` |
 | `--analytics` | Launch real-time analytics dashboard | `--analytics` |
+| `--chats` | Launch chats/conversations dashboard | `--chats` |
+| `--agents` | Launch agents dashboard (alias for chats) | `--agents` |
 | `--health-check` | Run comprehensive system validation | `--health-check` |
 | `--health` | Run system health check (alias) | `--health` |
 | `--check` | Run system validation (alias) | `--check` |

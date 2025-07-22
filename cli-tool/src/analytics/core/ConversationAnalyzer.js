@@ -93,7 +93,7 @@ class ConversationAnalyzer {
       };
 
       const jsonlFiles = await findJsonlFiles(this.claudeDir);
-      console.log(chalk.blue(`Found ${jsonlFiles.length} conversation files`));
+      // Loading conversation files quietly for better UX
 
       for (const filePath of jsonlFiles) {
         const stats = await this.getFileStats(filePath);
@@ -267,20 +267,28 @@ class ConversationAnalyzer {
         
         if (toolResultBlock && toolResultBlock.tool_use_id) {
           // This is a tool_result - attach it to the corresponding tool_use
+          // console.log(`🔍 ConversationAnalyzer: Found tool_result for ${toolResultBlock.tool_use_id}, content: "${toolResultBlock.content}"`);
           const toolUseEntry = toolUseMap.get(toolResultBlock.tool_use_id);
+          // console.log(`🔍 ConversationAnalyzer: toolUseEntry found: ${!!toolUseEntry}`);
           if (toolUseEntry) {
             // Attach tool result to the tool use entry
             if (!toolUseEntry.toolResults) {
               toolUseEntry.toolResults = [];
             }
             toolUseEntry.toolResults.push(toolResultBlock);
+            // console.log(`✅ ConversationAnalyzer: Attached tool result to ${toolResultBlock.tool_use_id}, content length: ${toolResultBlock.content?.length || 0}`);
             // Don't add this tool_result as a separate message
             continue;
+          } else {
+            // console.log(`❌ ConversationAnalyzer: No tool_use found for ${toolResultBlock.tool_use_id}`);
           }
         }
       }
       
       // Convert to our standard format
+      if (item.toolResults) {
+        // console.log(`ConversationAnalyzer: Processing item with ${item.toolResults.length} tool results`);
+      }
       const parsed = {
         id: item.message.id || item.uuid || null,
         role: item.message.role || (item.type === 'assistant' ? 'assistant' : 'user'),
@@ -288,7 +296,10 @@ class ConversationAnalyzer {
         content: item.message.content,
         model: item.message.model || null,
         usage: item.message.usage || null,
-        toolResults: item.toolResults || null // Include attached tool results
+        toolResults: item.toolResults || null, // Include attached tool results
+        isCompactSummary: item.isCompactSummary || false, // Preserve compact summary flag
+        uuid: item.uuid || null, // Include UUID for message identification
+        type: item.type || null // Include type field
       };
       
       processedMessages.push(parsed);
