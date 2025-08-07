@@ -379,6 +379,9 @@ class IndexPageManager {
         if (componentPath.endsWith('.md')) {
             componentPath = componentPath.replace(/\.md$/, '');
         }
+        if (componentPath.endsWith('.json')) {
+            componentPath = componentPath.replace(/\.json$/, '');
+        }
         const installCommand = `npx claude-code-templates@latest --${component.type}=${componentPath} --yes`;
         
         const typeConfig = {
@@ -409,7 +412,10 @@ class IndexPageManager {
                             <span class="component-icon">${config.icon}</span>
                         </div>
                         <h3 class="template-title">${this.formatComponentName(component.name)}</h3>
-                        ${component.type !== 'mcp' ? `<p class="template-description">${this.getComponentDescription(component)}</p>` : ''}
+                        ${component.type === 'mcp' ? 
+                            `<p class="template-description">${this.truncateDescription(component.description || 'MCP integration for enhanced development workflow', 80)}</p>` : 
+                            `<p class="template-description">${this.getComponentDescription(component)}</p>`
+                        }
                     </div>
                     <div class="card-back">
                         <div class="command-display">
@@ -466,6 +472,12 @@ class IndexPageManager {
 
     formatComponentName(name) {
         return name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    }
+
+    truncateDescription(description, maxLength = 80) {
+        if (!description) return '';
+        if (description.length <= maxLength) return description;
+        return description.substring(0, maxLength).trim() + '...';
     }
 
     getComponentDescription(component) {

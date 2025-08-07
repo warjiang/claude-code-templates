@@ -42,6 +42,9 @@ function createComponentModalHTML(component) {
     if (componentPath.endsWith('.md')) {
         componentPath = componentPath.replace(/\.md$/, '');
     }
+    if (componentPath.endsWith('.json')) {
+        componentPath = componentPath.replace(/\.json$/, '');
+    }
     const installCommand = `npx claude-code-templates@latest --${component.type}=${componentPath} --yes`;
     
     const description = getComponentDescription(component, 120); // Short description - 2 lines max
@@ -56,18 +59,18 @@ function createComponentModalHTML(component) {
 
     return `
         <div class="modal-overlay" onclick="closeComponentModal()">
-            <div class="modal-content component-modal" onclick="event.stopPropagation()">
+            <div class="modal-content" onclick="event.stopPropagation()">
                 <div class="modal-header">
                     <div class="component-modal-title">
                         <span class="component-icon">${config.icon}</span>
-                        <h3>${formatComponentName(component.name)}</h3>
+                        <h3 style="color: var(--text-primary);">${formatComponentName(component.name)}</h3>
                     </div>
                     <div class="component-type-badge" style="background-color: ${config.color};">${config.badge}</div>
                     <button class="modal-close" onclick="closeComponentModal()">×</button>
                 </div>
                 <div class="modal-body">
                     <div class="component-details">
-                        ${component.type !== 'mcp' ? `<div class="component-description">${description}</div>` : ''}
+                        <div class="component-description">${component.type === 'mcp' ? (component.description || description) : description}</div>
                         
                         <div class="installation-section">
                             <h4>📦 Installation</h4>
